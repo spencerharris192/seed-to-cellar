@@ -1,0 +1,45 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "seedtocellar:block/millstone_base_side",
+    "base_side": "seedtocellar:block/millstone_base_side",
+    "base_top": "seedtocellar:block/millstone_base_top",
+    "runner_side": "seedtocellar:block/millstone_runner_side",
+    "runner_top": "seedtocellar:block/millstone_runner_top",
+    "handle": "seedtocellar:block/millstone_handle"
+  },
+  "elements": [
+    {
+      "from": [1, 0, 1], "to": [15, 6, 15],
+      "faces": {
+        "north": {"uv": [1, 10, 15, 16], "texture": "#base_side"},
+        "south": {"uv": [1, 10, 15, 16], "texture": "#base_side"},
+        "east": {"uv": [1, 10, 15, 16], "texture": "#base_side"},
+        "west": {"uv": [1, 10, 15, 16], "texture": "#base_side"},
+        "up": {"uv": [1, 1, 15, 15], "texture": "#base_top"},
+        "down": {"uv": [1, 1, 15, 15], "texture": "#base_top"}
+      }
+    },
+    {
+      "from": [2, 6, 2], "to": [14, 10, 14],
+      "faces": {
+        "north": {"uv": [2, 0, 14, 4], "texture": "#runner_side"},
+        "south": {"uv": [2, 0, 14, 4], "texture": "#runner_side"},
+        "east": {"uv": [2, 0, 14, 4], "texture": "#runner_side"},
+        "west": {"uv": [2, 0, 14, 4], "texture": "#runner_side"},
+        "up": {"uv": [2, 2, 14, 14], "texture": "#runner_top"},
+        "down": {"uv": [2, 2, 14, 14], "texture": "#runner_top"}
+      }
+    },
+    {
+      "from": [11, 10, 7], "to": [13, 15, 9],
+      "faces": {
+        "north": {"uv": [0, 0, 2, 5], "texture": "#handle"},
+        "south": {"uv": [2, 0, 4, 5], "texture": "#handle"},
+        "east": {"uv": [4, 0, 6, 5], "texture": "#handle"},
+        "west": {"uv": [6, 0, 8, 5], "texture": "#handle"},
+        "up": {"uv": [0, 0, 2, 2], "texture": "#handle"}
+      }
+    }
+  ]
+}

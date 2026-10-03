@@ -1,0 +1,192 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            4.0,
+            1.0
+          ]
+        },
+        "east": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            4.0
+          ]
+        },
+        "north": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            4.0,
+            4.0
+          ]
+        },
+        "up": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            4.0,
+            1.0
+          ]
+        },
+        "west": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            4.0
+          ]
+        }
+      },
+      "from": [
+        6,
+        6,
+        -1
+      ],
+      "to": [
+        10,
+        10,
+        0
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "east": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        },
+        "north": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "west": {
+          "texture": "#glass",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        }
+      },
+      "from": [
+        7,
+        7,
+        -2.5
+      ],
+      "to": [
+        9,
+        9,
+        -1
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#foil",
+          "tintindex": 0,
+          "uv": [
+            0.0,
+            0.0,
+            2.5,
+            1.5
+          ]
+        },
+        "east": {
+          "texture": "#foil",
+          "tintindex": 0,
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.5
+          ]
+        },
+        "north": {
+          "texture": "#foil",
+          "tintindex": 0,
+          "uv": [
+            0.0,
+            0.0,
+            2.5,
+            2.5
+          ]
+        },
+        "up": {
+          "texture": "#foil",
+          "tintindex": 0,
+          "uv": [
+            0.0,
+            0.0,
+            2.5,
+            1.5
+          ]
+        },
+        "west": {
+          "texture": "#foil",
+          "tintindex": 0,
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.5
+          ]
+        }
+      },
+      "from": [
+        6.75,
+        6.75,
+        -4
+      ],
+      "to": [
+        9.25,
+        9.25,
+        -2.5
+      ]
+    }
+  ],
+  "textures": {
+    "foil": "seedtocellar:block/wine_rack_foil",
+    "glass": "seedtocellar:block/wine_rack_bottle",
+    "particle": "seedtocellar:block/wine_rack_bottle"
+  }
+}

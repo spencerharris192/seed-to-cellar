@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=east,wall=false": {
+      "model": "seedtocellar:block/chili_string",
+      "y": 90
+    },
+    "facing=east,wall=true": {
+      "model": "seedtocellar:block/chili_string_wall",
+      "y": 90
+    },
+    "facing=north,wall=false": {
+      "model": "seedtocellar:block/chili_string"
+    },
+    "facing=north,wall=true": {
+      "model": "seedtocellar:block/chili_string_wall"
+    },
+    "facing=south,wall=false": {
+      "model": "seedtocellar:block/chili_string",
+      "y": 180
+    },
+    "facing=south,wall=true": {
+      "model": "seedtocellar:block/chili_string_wall",
+      "y": 180
+    },
+    "facing=west,wall=false": {
+      "model": "seedtocellar:block/chili_string",
+      "y": 270
+    },
+    "facing=west,wall=true": {
+      "model": "seedtocellar:block/chili_string_wall",
+      "y": 270
+    }
+  }
+}

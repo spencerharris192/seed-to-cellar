@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "ingredients": [
+          {
+            "tag": "forge:fruits/olive"
+          },
+          {
+            "tag": "forge:fruits/olive"
+          },
+          {
+            "tag": "forge:fruits/olive"
+          },
+          {
+            "tag": "forge:fruits/olive"
+          }
+        ],
+        "results": [
+          {
+            "amount": 250,
+            "fluid": "seedtocellar:olive_oil"
+          },
+          {
+            "item": "seedtocellar:olive_pomace"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "category": "seedtocellar:basics",
+  "icon": "seedtocellar:hydrometer",
+  "name": "The Hydrometer",
+  "pages": [
+    {
+      "type": "patchouli:spotlight",
+      "item": "seedtocellar:hydrometer",
+      "text": "Right-click a station, cask, jar or crop with it for a read-out: progress, temperature, the stars a drink will get, its age and wood; for a crop, its growth, climate and soil."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:hydrometer",
+      "text": "Jade and The One Probe show the same at a glance."
+    }
+  ],
+  "sortnum": 3
+}

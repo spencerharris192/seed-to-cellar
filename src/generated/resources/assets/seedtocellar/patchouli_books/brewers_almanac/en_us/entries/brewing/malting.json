@@ -1,0 +1,44 @@
+{
+  "category": "seedtocellar:brewing",
+  "icon": "seedtocellar:malting_tub",
+  "name": "Malting",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Fill a $(item)Malting Tub$() with water and barley (or wheat). The grain steeps, the water drains, and it sprouts into $(item)green malt$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Roast green malt in the $(item)Kiln$(): Light gives $(item)pale malt$(), Medium $(item)amber$(), Dark $(item)black$(). The kiln burns its own fuel. It also dries hops (Light) and roasts coffee and agave (Medium)."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "seedtocellar:kiln[facing=south,lit=true]",
+          "M": "seedtocellar:millstone",
+          "T": "seedtocellar:malting_tub[contents=done]"
+        },
+        "pattern": [
+          [
+            "T",
+            "0",
+            "M"
+          ]
+        ]
+      },
+      "name": "Grain to Grist",
+      "text": "Steep and sprout in the Malting Tub, roast in the Kiln, grind on the Millstone."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:malting_tub"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:kiln"
+    }
+  ],
+  "sortnum": 0
+}

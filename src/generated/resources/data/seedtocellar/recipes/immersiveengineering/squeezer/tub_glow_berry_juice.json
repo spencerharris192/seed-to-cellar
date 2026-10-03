@@ -1,0 +1,24 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:squeezer",
+        "energy": 6400,
+        "fluid": {
+          "amount": 75,
+          "fluid": "seedtocellar:glow_berry_juice"
+        },
+        "input": {
+          "item": "minecraft:glow_berries"
+        }
+      }
+    }
+  ]
+}

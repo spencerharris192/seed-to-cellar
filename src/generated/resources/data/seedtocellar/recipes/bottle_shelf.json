@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": {
+      "tag": "minecraft:wooden_slabs"
+    },
+    "T": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    "SSS",
+    "T T",
+    "SSS"
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:bottle_shelf"
+  },
+  "show_notification": true
+}

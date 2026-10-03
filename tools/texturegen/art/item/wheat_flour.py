@@ -1,0 +1,29 @@
+"""Wheat flour: a small burlap sack, open at the top, with a heap of flour showing.
+
+Lit from the top-left: the left of the sack and the left of the flour heap are brightest.
+"""
+from texturegen.palettes import CLOTH, FLOUR
+
+# A-F: CLOTH dark -> light; 0-5: FLOUR dark -> light
+LEGEND = {**dict(zip("ABCDEF", CLOTH)), **{str(i): FLOUR[i] for i in range(6)}}
+
+GRID = """
+................
+......555.......
+....5554443.....
+...554444332....
+..FFEEEEEDDDCB..
+..EDDDDDDCCCBA..
+...CDEEEDDCCB...
+...DEEEDDDDCB...
+..DEEEDDDDCCBA..
+..DEEDDDDDCCBA..
+..DEEDDDDCCCBA..
+..CDEDDDDCCBBA..
+..CDDDDDCCCBBA..
+...CCDCCCBBAA...
+....ABBBBBAA....
+................
+"""
+
+COMPARE = ["item/sugar", "item/bread", "item/bone_meal"]

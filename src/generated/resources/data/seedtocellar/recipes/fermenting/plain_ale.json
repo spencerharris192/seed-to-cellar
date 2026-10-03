@@ -1,0 +1,14 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": true,
+  "input": "seedtocellar:sweet_wort",
+  "malt_max": {},
+  "malt_min": {},
+  "max_strength": "strong",
+  "min_strength": "normal",
+  "priority": 20,
+  "result": "seedtocellar:plain_ale",
+  "temperature": "mild",
+  "time": 24000,
+  "yeast": "ale"
+}

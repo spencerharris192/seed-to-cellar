@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": true,
+  "input": "seedtocellar:agave_juice",
+  "priority": 0,
+  "result": "seedtocellar:agave_wash",
+  "temperature": [
+    "mild",
+    "warm"
+  ],
+  "time": 24000,
+  "yeast": "ale"
+}

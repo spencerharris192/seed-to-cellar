@@ -1,0 +1,47 @@
+{
+  "category": "seedtocellar:basics",
+  "icon": "seedtocellar:barley",
+  "name": "Welcome",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "One farm feeds a web of foods and drinks. Grow grain, malt it, brew it, then distil it and age it in a cask. Every step can be done well or badly, and each drink keeps a record of it in its $(l:basics/stars)stars$(/l)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Hover over any of our items: it says what it is and what to do next. The $(l:basics/hydrometer)Hydrometer$(/l), Jade or The One Probe shows what a station is doing.$(br2)These chapters follow the advancements, from a wild crop to a cellar of aged spirits."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:campfire[lit=true]",
+          "K": "seedtocellar:brew_kettle",
+          "b": "seedtocellar:barley_crop[age=7]",
+          "c": "seedtocellar:oak_cask[facing=south,tap=true]",
+          "f": "minecraft:farmland[moisture=7]"
+        },
+        "pattern": [
+          [
+            "b",
+            " ",
+            "K",
+            " ",
+            " "
+          ],
+          [
+            "f",
+            " ",
+            "0",
+            " ",
+            "c"
+          ]
+        ]
+      },
+      "name": "Seed to Cellar",
+      "text": "Barley in the field, a kettle over a fire, a cask to age it in: the whole story."
+    }
+  ],
+  "sortnum": 0
+}

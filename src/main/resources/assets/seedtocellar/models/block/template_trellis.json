@@ -1,0 +1,21 @@
+{
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "#trellis"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 7.5],
+      "to": [16, 16, 8.5],
+      "faces": {
+        "north": {"uv": [0, 0, 16, 16], "texture": "#trellis"},
+        "south": {"uv": [0, 0, 16, 16], "texture": "#trellis"},
+        "east": {"uv": [14, 0, 15, 16], "texture": "#trellis"},
+        "west": {"uv": [1, 0, 2, 16], "texture": "#trellis"},
+        "up": {"uv": [0, 7.5, 16, 8.5], "texture": "#trellis"},
+        "down": {"uv": [0, 7.5, 16, 8.5], "texture": "#trellis"}
+      }
+    }
+  ]
+}

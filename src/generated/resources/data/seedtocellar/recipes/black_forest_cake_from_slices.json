@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    },
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    },
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    },
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    },
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    },
+    {
+      "item": "seedtocellar:black_forest_cake_slice"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:black_forest_cake"
+  }
+}

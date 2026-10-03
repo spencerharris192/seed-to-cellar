@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/cabbage",
+  "config_toggle": "wild_cabbage",
+  "features": "seedtocellar:wild_cabbage",
+  "step": "vegetal_decoration"
+}

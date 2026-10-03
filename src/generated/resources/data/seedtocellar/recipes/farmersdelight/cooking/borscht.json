@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "farmersdelight"
+        }
+      ],
+      "recipe": {
+        "type": "farmersdelight:cooking",
+        "container": {
+          "item": "minecraft:bowl"
+        },
+        "cookingtime": 240,
+        "experience": 1.0,
+        "ingredients": [
+          {
+            "tag": "forge:crops/beetroot"
+          },
+          {
+            "tag": "forge:crops/cabbage"
+          },
+          {
+            "tag": "forge:crops/onion"
+          }
+        ],
+        "recipe_book_tab": "meals",
+        "result": {
+          "item": "seedtocellar:borscht"
+        }
+      }
+    }
+  ]
+}

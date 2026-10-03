@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:flour/wheat"
+    },
+    {
+      "tag": "forge:flour/wheat"
+    },
+    {
+      "tag": "seedtocellar:ales"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:beer_bread_dough"
+  }
+}

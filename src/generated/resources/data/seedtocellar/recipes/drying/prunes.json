@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/plum"
+  },
+  "result": {
+    "item": "seedtocellar:prunes"
+  },
+  "time": 18000
+}

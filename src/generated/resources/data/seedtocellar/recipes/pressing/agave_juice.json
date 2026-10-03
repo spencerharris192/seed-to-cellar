@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:pressing",
+  "byproduct": {
+    "item": "seedtocellar:agave_fiber"
+  },
+  "count": 4,
+  "cranks": 6,
+  "ingredient": {
+    "item": "seedtocellar:roasted_agave"
+  },
+  "result": {
+    "amount": 500,
+    "fluid": "seedtocellar:agave_juice"
+  }
+}

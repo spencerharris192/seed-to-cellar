@@ -1,0 +1,34 @@
+{
+  "parent": "seedtocellar:block/preserving_jar",
+  "ambientocclusion": false,
+  "render_type": "minecraft:translucent",
+  "textures": {
+    "lid": "seedtocellar:block/preserving_jar_lid"
+  },
+  "elements": [
+    {
+      "name": "body",
+      "from": [4, 0, 4], "to": [12, 9, 12],
+      "faces": {
+        "north": {"uv": [0, 0, 8, 9], "texture": "#glass"},
+        "south": {"uv": [0, 0, 8, 9], "texture": "#glass"},
+        "east": {"uv": [0, 0, 8, 9], "texture": "#glass"},
+        "west": {"uv": [0, 0, 8, 9], "texture": "#glass"},
+        "up": {"uv": [8, 0, 16, 8], "texture": "#glass"},
+        "down": {"uv": [8, 0, 16, 8], "texture": "#glass", "cullface": "down"}
+      }
+    },
+    {
+      "name": "cover",
+      "from": [4, 9, 4], "to": [12, 12, 12],
+      "faces": {
+        "north": {"uv": [0, 8, 8, 11], "texture": "#lid"},
+        "south": {"uv": [0, 8, 8, 11], "texture": "#lid"},
+        "east": {"uv": [0, 8, 8, 11], "texture": "#lid"},
+        "west": {"uv": [0, 8, 8, 11], "texture": "#lid"},
+        "up": {"uv": [0, 0, 8, 8], "texture": "#lid"},
+        "down": {"uv": [0, 0, 8, 8], "texture": "#lid"}
+      }
+    }
+  ]
+}

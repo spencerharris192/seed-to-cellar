@@ -1,0 +1,30 @@
+{
+  "parent": "seedtocellar:distilling/double_distilled",
+  "criteria": {
+    "pour": {
+      "conditions": {},
+      "trigger": "seedtocellar:angels_share"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancements.seedtocellar.angels_share.description"
+    },
+    "frame": "goal",
+    "hidden": false,
+    "icon": {
+      "item": "seedtocellar:dark_oak_cask"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancements.seedtocellar.angels_share.title"
+    }
+  },
+  "requirements": [
+    [
+      "pour"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

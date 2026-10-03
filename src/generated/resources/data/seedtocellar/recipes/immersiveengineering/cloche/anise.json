@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:anise_seeds"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:anise_crop"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:anise"
+          },
+          {
+            "item": "seedtocellar:anise_seeds"
+          }
+        ],
+        "soil": {
+          "tag": "minecraft:dirt"
+        },
+        "time": 800
+      }
+    }
+  ]
+}

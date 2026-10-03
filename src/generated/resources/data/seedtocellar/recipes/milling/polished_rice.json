@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:milling",
+  "byproduct": {
+    "item": "seedtocellar:rice_bran"
+  },
+  "cranks": 1,
+  "ingredient": {
+    "tag": "forge:crops/rice"
+  },
+  "result": {
+    "item": "seedtocellar:polished_rice"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "contents=done": {
+      "model": "seedtocellar:block/malting_tub_done"
+    },
+    "contents=empty": {
+      "model": "seedtocellar:block/malting_tub"
+    },
+    "contents=grain": {
+      "model": "seedtocellar:block/malting_tub_grain"
+    },
+    "contents=sprouting": {
+      "model": "seedtocellar:block/malting_tub_sprouting"
+    },
+    "contents=steeping": {
+      "model": "seedtocellar:block/malting_tub_steeping"
+    },
+    "contents=water": {
+      "model": "seedtocellar:block/malting_tub_water"
+    }
+  }
+}

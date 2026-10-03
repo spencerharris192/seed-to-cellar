@@ -1,0 +1,45 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botanypots"
+        }
+      ],
+      "recipe": {
+        "type": "botanypots:crop",
+        "categories": [
+          "sand"
+        ],
+        "display": {
+          "type": "botanypots:aging",
+          "block": "seedtocellar:agave"
+        },
+        "drops": [
+          {
+            "chance": 1.0,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:agave_heart"
+            }
+          },
+          {
+            "chance": 0.05,
+            "maxRolls": 1,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:agave_pup"
+            }
+          }
+        ],
+        "growthTicks": 2400,
+        "seed": {
+          "item": "seedtocellar:agave_pup"
+        }
+      }
+    }
+  ]
+}

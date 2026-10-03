@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cornmeal": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "forge:flour/corn"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "seedtocellar:cornbread_batter"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_cornmeal",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:cornbread_batter"
+    ]
+  },
+  "sends_telemetry_event": false
+}

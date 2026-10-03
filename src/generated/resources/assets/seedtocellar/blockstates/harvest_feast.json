@@ -1,0 +1,109 @@
+{
+  "variants": {
+    "facing=east,servings=0": {
+      "model": "seedtocellar:block/harvest_feast_leftovers",
+      "y": 90
+    },
+    "facing=east,servings=1": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 90
+    },
+    "facing=east,servings=2": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 90
+    },
+    "facing=east,servings=3": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 90
+    },
+    "facing=east,servings=4": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 90
+    },
+    "facing=east,servings=5": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 90
+    },
+    "facing=east,servings=6": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 90
+    },
+    "facing=north,servings=0": {
+      "model": "seedtocellar:block/harvest_feast_leftovers"
+    },
+    "facing=north,servings=1": {
+      "model": "seedtocellar:block/harvest_feast_half"
+    },
+    "facing=north,servings=2": {
+      "model": "seedtocellar:block/harvest_feast_half"
+    },
+    "facing=north,servings=3": {
+      "model": "seedtocellar:block/harvest_feast_half"
+    },
+    "facing=north,servings=4": {
+      "model": "seedtocellar:block/harvest_feast"
+    },
+    "facing=north,servings=5": {
+      "model": "seedtocellar:block/harvest_feast"
+    },
+    "facing=north,servings=6": {
+      "model": "seedtocellar:block/harvest_feast"
+    },
+    "facing=south,servings=0": {
+      "model": "seedtocellar:block/harvest_feast_leftovers",
+      "y": 180
+    },
+    "facing=south,servings=1": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 180
+    },
+    "facing=south,servings=2": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 180
+    },
+    "facing=south,servings=3": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 180
+    },
+    "facing=south,servings=4": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 180
+    },
+    "facing=south,servings=5": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 180
+    },
+    "facing=south,servings=6": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 180
+    },
+    "facing=west,servings=0": {
+      "model": "seedtocellar:block/harvest_feast_leftovers",
+      "y": 270
+    },
+    "facing=west,servings=1": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 270
+    },
+    "facing=west,servings=2": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 270
+    },
+    "facing=west,servings=3": {
+      "model": "seedtocellar:block/harvest_feast_half",
+      "y": 270
+    },
+    "facing=west,servings=4": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 270
+    },
+    "facing=west,servings=5": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 270
+    },
+    "facing=west,servings=6": {
+      "model": "seedtocellar:block/harvest_feast",
+      "y": 270
+    }
+  }
+}

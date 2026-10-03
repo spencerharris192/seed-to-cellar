@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "seedtocellar:item/beef_and_ale_stew"
+  }
+}

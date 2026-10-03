@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/onion",
+  "config_toggle": "wild_onion",
+  "features": "seedtocellar:wild_onion",
+  "step": "vegetal_decoration"
+}

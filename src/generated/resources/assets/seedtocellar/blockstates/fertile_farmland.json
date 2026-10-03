@@ -1,0 +1,76 @@
+{
+  "variants": {
+    "fertility=1,moisture=0": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=1": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=2": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=3": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=4": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=5": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=6": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=1,moisture=7": {
+      "model": "seedtocellar:block/fertile_farmland_moist"
+    },
+    "fertility=2,moisture=0": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=1": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=2": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=3": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=4": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=5": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=6": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=2,moisture=7": {
+      "model": "seedtocellar:block/fertile_farmland_moist"
+    },
+    "fertility=3,moisture=0": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=1": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=2": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=3": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=4": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=5": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=6": {
+      "model": "seedtocellar:block/fertile_farmland"
+    },
+    "fertility=3,moisture=7": {
+      "model": "seedtocellar:block/fertile_farmland_moist"
+    }
+  }
+}

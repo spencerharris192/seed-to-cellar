@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/tomato",
+  "config_toggle": "wild_tomato",
+  "features": "seedtocellar:wild_tomato",
+  "step": "vegetal_decoration"
+}

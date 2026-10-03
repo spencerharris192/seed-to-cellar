@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:fruits/orange"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:orange_peel"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/rice",
+  "config_toggle": "wild_rice",
+  "features": "seedtocellar:wild_rice",
+  "step": "vegetal_decoration"
+}

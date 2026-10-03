@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pale_malt": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "seedtocellar:pale_malt"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "seedtocellar:pale_malt_sack"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_pale_malt",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:pale_malt_sack"
+    ]
+  },
+  "sends_telemetry_event": false
+}

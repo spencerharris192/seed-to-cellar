@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:distilling",
+  "filter": true,
+  "input": {
+    "tag": "seedtocellar:vodka_sources"
+  },
+  "priority": 10,
+  "result": "seedtocellar:vodka"
+}

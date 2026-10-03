@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "open=false": {
+      "model": "seedtocellar:block/preserving_jar_closed"
+    },
+    "open=true": {
+      "model": "seedtocellar:block/preserving_jar"
+    }
+  }
+}

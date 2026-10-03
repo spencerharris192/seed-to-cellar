@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": {
+    "tag": "forge:crops/coffee"
+  },
+  "result": {
+    "item": "seedtocellar:roasted_coffee"
+  },
+  "roast": "medium",
+  "time": 800
+}

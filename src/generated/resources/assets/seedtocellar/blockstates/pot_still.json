@@ -1,0 +1,244 @@
+{
+  "variants": {
+    "basket=false,facing=east,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 90
+    },
+    "basket=false,facing=east,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 90
+    },
+    "basket=false,facing=east,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 90
+    },
+    "basket=false,facing=east,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 90
+    },
+    "basket=false,facing=east,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_exposed",
+      "y": 90
+    },
+    "basket=false,facing=east,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_oxidized",
+      "y": 90
+    },
+    "basket=false,facing=east,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper",
+      "y": 90
+    },
+    "basket=false,facing=east,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_weathered",
+      "y": 90
+    },
+    "basket=false,facing=north,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed"
+    },
+    "basket=false,facing=north,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized"
+    },
+    "basket=false,facing=north,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower"
+    },
+    "basket=false,facing=north,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered"
+    },
+    "basket=false,facing=north,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_exposed"
+    },
+    "basket=false,facing=north,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_oxidized"
+    },
+    "basket=false,facing=north,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper"
+    },
+    "basket=false,facing=north,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_weathered"
+    },
+    "basket=false,facing=south,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 180
+    },
+    "basket=false,facing=south,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 180
+    },
+    "basket=false,facing=south,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 180
+    },
+    "basket=false,facing=south,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 180
+    },
+    "basket=false,facing=south,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_exposed",
+      "y": 180
+    },
+    "basket=false,facing=south,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_oxidized",
+      "y": 180
+    },
+    "basket=false,facing=south,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper",
+      "y": 180
+    },
+    "basket=false,facing=south,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_weathered",
+      "y": 180
+    },
+    "basket=false,facing=west,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 270
+    },
+    "basket=false,facing=west,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 270
+    },
+    "basket=false,facing=west,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 270
+    },
+    "basket=false,facing=west,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 270
+    },
+    "basket=false,facing=west,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_exposed",
+      "y": 270
+    },
+    "basket=false,facing=west,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_oxidized",
+      "y": 270
+    },
+    "basket=false,facing=west,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper",
+      "y": 270
+    },
+    "basket=false,facing=west,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_weathered",
+      "y": 270
+    },
+    "basket=true,facing=east,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 90
+    },
+    "basket=true,facing=east,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 90
+    },
+    "basket=true,facing=east,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 90
+    },
+    "basket=true,facing=east,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 90
+    },
+    "basket=true,facing=east,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_basket_exposed",
+      "y": 90
+    },
+    "basket=true,facing=east,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_basket_oxidized",
+      "y": 90
+    },
+    "basket=true,facing=east,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper_basket",
+      "y": 90
+    },
+    "basket=true,facing=east,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_basket_weathered",
+      "y": 90
+    },
+    "basket=true,facing=north,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed"
+    },
+    "basket=true,facing=north,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized"
+    },
+    "basket=true,facing=north,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower"
+    },
+    "basket=true,facing=north,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered"
+    },
+    "basket=true,facing=north,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_basket_exposed"
+    },
+    "basket=true,facing=north,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_basket_oxidized"
+    },
+    "basket=true,facing=north,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper_basket"
+    },
+    "basket=true,facing=north,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_basket_weathered"
+    },
+    "basket=true,facing=south,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 180
+    },
+    "basket=true,facing=south,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 180
+    },
+    "basket=true,facing=south,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 180
+    },
+    "basket=true,facing=south,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 180
+    },
+    "basket=true,facing=south,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_basket_exposed",
+      "y": 180
+    },
+    "basket=true,facing=south,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_basket_oxidized",
+      "y": 180
+    },
+    "basket=true,facing=south,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper_basket",
+      "y": 180
+    },
+    "basket=true,facing=south,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_basket_weathered",
+      "y": 180
+    },
+    "basket=true,facing=west,half=lower,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_lower_exposed",
+      "y": 270
+    },
+    "basket=true,facing=west,half=lower,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_lower_oxidized",
+      "y": 270
+    },
+    "basket=true,facing=west,half=lower,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_lower",
+      "y": 270
+    },
+    "basket=true,facing=west,half=lower,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_lower_weathered",
+      "y": 270
+    },
+    "basket=true,facing=west,half=upper,weathering=exposed": {
+      "model": "seedtocellar:block/pot_still_upper_basket_exposed",
+      "y": 270
+    },
+    "basket=true,facing=west,half=upper,weathering=oxidized": {
+      "model": "seedtocellar:block/pot_still_upper_basket_oxidized",
+      "y": 270
+    },
+    "basket=true,facing=west,half=upper,weathering=unaffected": {
+      "model": "seedtocellar:block/pot_still_upper_basket",
+      "y": 270
+    },
+    "basket=true,facing=west,half=upper,weathering=weathered": {
+      "model": "seedtocellar:block/pot_still_upper_basket_weathered",
+      "y": 270
+    }
+  }
+}

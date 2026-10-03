@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/coriander",
+  "config_toggle": "wild_coriander",
+  "features": "seedtocellar:wild_coriander",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "age=0,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage0"
+    },
+    "age=0,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage0"
+    },
+    "age=1,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage0"
+    },
+    "age=1,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage0"
+    },
+    "age=2,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage1"
+    },
+    "age=2,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage1"
+    },
+    "age=3,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage1"
+    },
+    "age=3,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage1"
+    },
+    "age=4,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage2"
+    },
+    "age=4,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage2"
+    },
+    "age=5,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage2"
+    },
+    "age=5,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage2"
+    },
+    "age=6,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage3"
+    },
+    "age=6,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage3"
+    },
+    "age=7,waterlogged=false": {
+      "model": "seedtocellar:block/rice_stage3"
+    },
+    "age=7,waterlogged=true": {
+      "model": "seedtocellar:block/rice_stage3"
+    }
+  }
+}

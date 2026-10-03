@@ -1,0 +1,42 @@
+{
+  "category": "seedtocellar:winemaking",
+  "icon": "seedtocellar:crushing_tub",
+  "name": "Stomping and Pressing",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Drop fruit into a $(item)Crushing Tub$() and jump on it: red grapes give $(item)must$(), skins and all, for red wine; other fruit gives juice."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The $(item)Fruit Press$() squeezes clear juice out of fruit (crank it, or pulse it with redstone), leaving pomace. It also presses sugar cane, sorghum, olives and roasted agave."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "seedtocellar:fruit_press[facing=south]",
+          "T": "seedtocellar:crushing_tub"
+        },
+        "pattern": [
+          [
+            "T",
+            "0"
+          ]
+        ]
+      },
+      "name": "The Winery",
+      "text": "A Crushing Tub to stomp in, and a Fruit Press beside it."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:crushing_tub"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:fruit_press"
+    }
+  ],
+  "sortnum": 0
+}

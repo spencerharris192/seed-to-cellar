@@ -1,0 +1,32 @@
+{
+  "type": "seedtocellar:grass_seeds",
+  "chance": 0.05,
+  "cold_biomes_only": true,
+  "conditions": [
+    {
+      "condition": "minecraft:any_of",
+      "terms": [
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/grass"
+        },
+        {
+          "condition": "forge:loot_table_id",
+          "loot_table_id": "minecraft:blocks/tall_grass"
+        }
+      ]
+    },
+    {
+      "condition": "minecraft:inverted",
+      "term": {
+        "condition": "minecraft:match_tool",
+        "predicate": {
+          "items": [
+            "minecraft:shears"
+          ]
+        }
+      }
+    }
+  ],
+  "item": "seedtocellar:rye_seeds"
+}

@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/red_grape"
+  },
+  "result": {
+    "amount": 125,
+    "fluid": "seedtocellar:red_grape_must"
+  },
+  "stomps": 2
+}

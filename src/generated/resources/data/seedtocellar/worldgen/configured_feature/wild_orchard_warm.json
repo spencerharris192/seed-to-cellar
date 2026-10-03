@@ -1,0 +1,95 @@
+{
+  "type": "minecraft:random_patch",
+  "config": {
+    "feature": {
+      "feature": {
+        "type": "minecraft:random_selector",
+        "config": {
+          "default": {
+            "feature": "seedtocellar:olive_tree",
+            "placement": [
+              {
+                "type": "minecraft:block_predicate_filter",
+                "predicate": {
+                  "type": "minecraft:would_survive",
+                  "state": {
+                    "Name": "seedtocellar:olive_sapling",
+                    "Properties": {
+                      "stage": "0"
+                    }
+                  }
+                }
+              }
+            ]
+          },
+          "features": [
+            {
+              "chance": 0.25,
+              "feature": {
+                "feature": "seedtocellar:peach_tree",
+                "placement": [
+                  {
+                    "type": "minecraft:block_predicate_filter",
+                    "predicate": {
+                      "type": "minecraft:would_survive",
+                      "state": {
+                        "Name": "seedtocellar:peach_sapling",
+                        "Properties": {
+                          "stage": "0"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "chance": 0.25,
+              "feature": {
+                "feature": "seedtocellar:lemon_tree",
+                "placement": [
+                  {
+                    "type": "minecraft:block_predicate_filter",
+                    "predicate": {
+                      "type": "minecraft:would_survive",
+                      "state": {
+                        "Name": "seedtocellar:lemon_sapling",
+                        "Properties": {
+                          "stage": "0"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              "chance": 0.25,
+              "feature": {
+                "feature": "seedtocellar:orange_tree",
+                "placement": [
+                  {
+                    "type": "minecraft:block_predicate_filter",
+                    "predicate": {
+                      "type": "minecraft:would_survive",
+                      "state": {
+                        "Name": "seedtocellar:orange_sapling",
+                        "Properties": {
+                          "stage": "0"
+                        }
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "placement": []
+    },
+    "tries": 10,
+    "xz_spread": 6,
+    "y_spread": 2
+  }
+}

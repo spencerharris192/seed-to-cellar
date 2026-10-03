@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "ingredients": [
+          {
+            "tag": "forge:fruits/cherry"
+          },
+          {
+            "tag": "forge:fruits/cherry"
+          },
+          {
+            "tag": "forge:fruits/cherry"
+          },
+          {
+            "tag": "forge:fruits/cherry"
+          }
+        ],
+        "results": [
+          {
+            "amount": 500,
+            "fluid": "seedtocellar:cherry_juice"
+          },
+          {
+            "item": "seedtocellar:fruit_pomace"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/vanilla",
+  "config_toggle": "wild_vanilla",
+  "features": "seedtocellar:wild_vanilla",
+  "step": "vegetal_decoration"
+}

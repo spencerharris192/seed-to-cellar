@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:cherry_wine"
+  },
+  "result": "seedtocellar:kirsch"
+}

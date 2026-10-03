@@ -1,0 +1,10 @@
+{
+  "values": [
+    "minecraft:wheat",
+    "seedtocellar:barley_crop",
+    "seedtocellar:rye_crop",
+    "seedtocellar:oat_crop",
+    "seedtocellar:sorghum_crop",
+    "seedtocellar:rice_crop"
+  ]
+}

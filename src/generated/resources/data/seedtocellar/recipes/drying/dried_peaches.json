@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/peach"
+  },
+  "result": {
+    "item": "seedtocellar:dried_peaches"
+  },
+  "time": 18000
+}

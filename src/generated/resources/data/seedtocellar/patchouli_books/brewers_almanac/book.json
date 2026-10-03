@@ -1,0 +1,13 @@
+{
+  "book_texture": "patchouli:textures/gui/book_brown.png",
+  "creative_tab": "seedtocellar:main",
+  "filler_texture": "seedtocellar:textures/gui/almanac_filler.png",
+  "i18n": false,
+  "landing_text": "Everything a farm can become: grains and fruit, breads and pies, beer, wine and spirits, and the cellar that makes them better with age.$(br2)Every chapter follows an advancement branch. Hover over any of our items for a hint about what it is and what to do next.",
+  "model": "patchouli:book_brown",
+  "name": "The Brewer's Almanac",
+  "show_progress": false,
+  "subtitle": "Seed to Cellar",
+  "use_resource_pack": true,
+  "version": 1
+}

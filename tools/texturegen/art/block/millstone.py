@@ -1,0 +1,111 @@
+"""Millstone: a stone quern. Base stone (fixed) and runner stone (turns, drawn by a renderer),
+with an oak handle. The runner's top shows radial dressing grooves and the feed hole.
+"""
+from texturegen.palettes import STONE, WOOD_OAK
+
+LEGEND = {**{str(i): STONE[i] for i in range(6)}, **dict(zip("abcdef", WOOD_OAK))}
+
+BASE_SIDE = """
+4444444444444444
+3434343434343434
+3333333333333333
+3333233333323333
+3323333332333333
+3333333333333333
+2222222222222222
+4444444444444444
+3434343434343434
+3333333333333333
+3323333333332333
+3333332333333333
+3333333333333333
+2323332333233323
+2222222222222222
+1111111111111111
+"""
+
+BASE_TOP = """
+4444444444444444
+4555555555555554
+4533333333333324
+4532222222222124
+4532111111110124
+4532110000010124
+4532100000010124
+4532100000010124
+4532100000010124
+4532100000010124
+4532110000010124
+4532111111110124
+4532222222222124
+4533333333333324
+4422222222222224
+3333333333333333
+"""
+
+RUNNER_SIDE = """
+5555555555555555
+4454444544445444
+4444444444444444
+3433343334333433
+3333333333333333
+2222222222222222
+1111111111111111
+4444444444444444
+4454444544445444
+4444444444444444
+3433343334333433
+3333333333333333
+3333333333333333
+2222222222222222
+2222222222222222
+1111111111111111
+"""
+
+RUNNER_TOP = """
+................
+................
+..544444444443..
+..545444444343..
+..454544443433..
+..445454434333..
+..444545343333..
+..4444501033333.
+..444440003333..
+..444330102333..
+..443434322333..
+..434333232233..
+..343333322323..
+..333333333232..
+................
+................
+"""
+
+HANDLE = """
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcecbcecbcecbcec
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcdcacdcbcdcacdc
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcecbcecbcecbcec
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+bcdcacdcbcdcacdc
+bcdcbcdcbcdcbcdc
+bcdcbcdcbcdcbcdc
+"""
+
+TEXTURES = {
+    "millstone_base_side": BASE_SIDE,
+    "millstone_base_top": BASE_TOP,
+    "millstone_runner_side": RUNNER_SIDE,
+    "millstone_runner_top": RUNNER_TOP,
+    "millstone_handle": HANDLE,
+}
+
+COMPARE = ["block/grindstone_side", "block/smooth_stone", "block/stonecutter_top"]

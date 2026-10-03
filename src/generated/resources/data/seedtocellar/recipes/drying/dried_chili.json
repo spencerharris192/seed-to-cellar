@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:crops/chili"
+  },
+  "result": {
+    "item": "seedtocellar:dried_chili"
+  },
+  "time": 18000
+}

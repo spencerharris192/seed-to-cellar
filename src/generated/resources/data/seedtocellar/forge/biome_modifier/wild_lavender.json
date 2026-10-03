@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/lavender",
+  "config_toggle": "wild_lavender",
+  "features": "seedtocellar:wild_lavender",
+  "step": "vegetal_decoration"
+}

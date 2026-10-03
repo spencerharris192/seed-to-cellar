@@ -1,0 +1,33 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cooked_rice": {
+      "conditions": {
+        "items": [
+          {
+            "tag": "seedtocellar:cooked_rice"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "seedtocellar:rice_ball"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_cooked_rice",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:rice_ball"
+    ]
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": {
+      "item": "seedtocellar:orange"
+    },
+    "C": {
+      "tag": "minecraft:wooden_slabs"
+    }
+  },
+  "pattern": [
+    "###",
+    "#C#",
+    "###"
+  ],
+  "result": {
+    "item": "seedtocellar:orange_crate"
+  },
+  "show_notification": true
+}

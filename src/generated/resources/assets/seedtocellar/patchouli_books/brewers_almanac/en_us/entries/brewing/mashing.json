@@ -1,0 +1,36 @@
+{
+  "category": "seedtocellar:brewing",
+  "icon": "seedtocellar:pale_grist",
+  "name": "Mash and Boil",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Over heat, fill the $(item)Brew Kettle$() with water and add grist: 2 a bucket make a normal wort, 4 a strong one. It mashes into $(item)sweet wort$(), leaving $(item)spent grain$() (compost or bread)."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Add 1 $(item)dried hops$() a bucket and it boils into $(item)hopped wort$(). The mix of malts you used (the malt bill) rides along and decides the $(l:brewing/styles)beer's style$(/l). Unhopped sweet wort ferments into Plain Ale."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:campfire[lit=true]",
+          "K": "seedtocellar:brew_kettle"
+        },
+        "pattern": [
+          [
+            "K"
+          ],
+          [
+            "0"
+          ]
+        ]
+      },
+      "name": "Over the Fire",
+      "text": "A Brew Kettle on a lit campfire: fire, lava or magma under it work too."
+    }
+  ],
+  "sortnum": 2
+}

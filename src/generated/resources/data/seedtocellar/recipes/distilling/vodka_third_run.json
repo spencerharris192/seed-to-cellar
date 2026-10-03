@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "tag": "seedtocellar:grain_spirits"
+  },
+  "min_runs": 2,
+  "priority": 5,
+  "result": "seedtocellar:vodka"
+}

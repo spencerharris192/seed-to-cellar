@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "ingredients": [
+          {
+            "tag": "forge:fruits/blueberry"
+          },
+          {
+            "tag": "forge:fruits/blueberry"
+          },
+          {
+            "tag": "forge:fruits/blueberry"
+          },
+          {
+            "tag": "forge:fruits/blueberry"
+          }
+        ],
+        "results": [
+          {
+            "amount": 500,
+            "fluid": "seedtocellar:blueberry_juice"
+          },
+          {
+            "item": "seedtocellar:fruit_pomace"
+          }
+        ]
+      }
+    }
+  ]
+}

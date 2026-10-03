@@ -1,0 +1,17 @@
+{
+  "category": "seedtocellar:farming",
+  "icon": "seedtocellar:iron_sickle",
+  "name": "Harvesting",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Right-click a ripe crop to harvest it and replant it. A $(item)Sickle$() harvests every ripe crop in a 3x3 at once, leaves unripe ones alone, takes Fortune, and gives $(item)straw$() from grain."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:iron_sickle",
+      "text": "Wood, stone, iron, gold, diamond or netherite."
+    }
+  ],
+  "sortnum": 0
+}

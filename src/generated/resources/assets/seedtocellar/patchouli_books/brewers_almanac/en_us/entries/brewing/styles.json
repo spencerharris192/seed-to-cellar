@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:brewing",
+  "icon": "seedtocellar:stout",
+  "name": "Beer Styles",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(item)Pale Ale$(): pale malt. $(item)Amber Ale$(): a quarter amber or more. $(item)Stout$(): a quarter black. $(item)Old Ale$(): strong, with amber; it ages. $(item)Wheat Beer$(): half wheat malt."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "$(item)Lager$(): pale, fermented Cold with Lager Yeast. $(item)Plain Ale$(): no hops. Anything else is $(item)Table Beer$(), so nothing is ever wasted."
+    }
+  ],
+  "sortnum": 5
+}

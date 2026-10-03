@@ -1,0 +1,25 @@
+{
+  "affected_entity": {
+    "effects": {
+      "seedtocellar:warmth": {}
+    },
+    "entities": [
+      "minecraft:player"
+    ]
+  },
+  "affects_self": true,
+  "entity": {
+    "effects": {
+      "seedtocellar:warmth": {}
+    },
+    "entities": [
+      "minecraft:player"
+    ]
+  },
+  "range": 1,
+  "required_mods": [
+    "cold_sweat"
+  ],
+  "temperature": 20,
+  "units": "f"
+}

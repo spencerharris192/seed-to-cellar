@@ -1,0 +1,52 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botanypots"
+        }
+      ],
+      "recipe": {
+        "type": "botanypots:crop",
+        "categories": [
+          "dirt"
+        ],
+        "display": {
+          "block": "seedtocellar:lemon_sapling"
+        },
+        "drops": [
+          {
+            "chance": 1.0,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:lemon"
+            }
+          },
+          {
+            "chance": 0.05,
+            "maxRolls": 1,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:lemon_sapling"
+            }
+          },
+          {
+            "chance": 0.1,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "minecraft:stick"
+            }
+          }
+        ],
+        "growthTicks": 2400,
+        "seed": {
+          "item": "seedtocellar:lemon_sapling"
+        }
+      }
+    }
+  ]
+}

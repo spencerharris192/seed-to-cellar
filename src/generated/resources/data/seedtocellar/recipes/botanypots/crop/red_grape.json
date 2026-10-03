@@ -1,0 +1,46 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botanypots"
+        }
+      ],
+      "recipe": {
+        "type": "botanypots:crop",
+        "categories": [
+          "dirt",
+          "farmland"
+        ],
+        "display": {
+          "type": "botanypots:aging",
+          "block": "seedtocellar:red_grape_vine"
+        },
+        "drops": [
+          {
+            "chance": 1.0,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:red_grapes"
+            }
+          },
+          {
+            "chance": 0.05,
+            "maxRolls": 1,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:red_grape_cutting"
+            }
+          }
+        ],
+        "growthTicks": 1600,
+        "seed": {
+          "item": "seedtocellar:red_grape_cutting"
+        }
+      }
+    }
+  ]
+}

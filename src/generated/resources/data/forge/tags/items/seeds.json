@@ -1,0 +1,33 @@
+{
+  "values": [
+    "#forge:seeds/barley",
+    "#forge:seeds/rye",
+    "#forge:seeds/oats",
+    "#forge:seeds/sorghum",
+    "#forge:seeds/corn",
+    "#forge:seeds/rice",
+    "#forge:seeds/sugar_beet",
+    "#forge:seeds/onion",
+    "#forge:seeds/garlic",
+    "#forge:seeds/cabbage",
+    "#forge:seeds/ginger",
+    "#forge:seeds/coriander",
+    "#forge:seeds/anise",
+    "#forge:seeds/blueberry",
+    "#forge:seeds/blackberry",
+    "#forge:seeds/elderberry",
+    "#forge:seeds/juniper",
+    "#forge:seeds/cranberry",
+    "#forge:seeds/tomato",
+    "#forge:seeds/chili",
+    "#forge:seeds/cucumber",
+    "#forge:seeds/coffee",
+    "#forge:seeds/agave",
+    "#forge:seeds/red_grape",
+    "#forge:seeds/white_grape",
+    "#forge:seeds/mint",
+    "#forge:seeds/lavender",
+    "#forge:seeds/wormwood",
+    "#forge:seeds/hops"
+  ]
+}

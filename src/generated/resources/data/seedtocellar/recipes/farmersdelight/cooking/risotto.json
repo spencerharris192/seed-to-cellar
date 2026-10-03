@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "farmersdelight"
+        }
+      ],
+      "recipe": {
+        "type": "farmersdelight:cooking",
+        "container": {
+          "item": "minecraft:bowl"
+        },
+        "cookingtime": 300,
+        "experience": 1.0,
+        "ingredients": [
+          {
+            "tag": "forge:crops/rice"
+          },
+          {
+            "tag": "forge:crops/onion"
+          },
+          {
+            "tag": "forge:mushrooms"
+          },
+          {
+            "item": "seedtocellar:white_wine"
+          }
+        ],
+        "recipe_book_tab": "meals",
+        "result": {
+          "item": "seedtocellar:risotto"
+        }
+      }
+    }
+  ]
+}

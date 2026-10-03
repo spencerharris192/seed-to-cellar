@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:agave_pup"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:agave"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:agave_heart"
+          },
+          {
+            "item": "seedtocellar:agave_pup"
+          }
+        ],
+        "soil": {
+          "tag": "forge:sand"
+        },
+        "time": 1600
+      }
+    }
+  ]
+}

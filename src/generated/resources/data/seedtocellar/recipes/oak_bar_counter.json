@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "P": {
+      "item": "minecraft:oak_planks"
+    },
+    "S": {
+      "item": "minecraft:oak_slab"
+    }
+  },
+  "pattern": [
+    "SSS",
+    "P P",
+    "PPP"
+  ],
+  "result": {
+    "count": 4,
+    "item": "seedtocellar:oak_bar_counter"
+  },
+  "show_notification": true
+}

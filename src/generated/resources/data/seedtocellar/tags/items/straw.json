@@ -1,0 +1,9 @@
+{
+  "values": [
+    "seedtocellar:straw",
+    {
+      "id": "farmersdelight:straw",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/corn",
+  "config_toggle": "wild_corn",
+  "features": "seedtocellar:wild_corn",
+  "step": "vegetal_decoration"
+}

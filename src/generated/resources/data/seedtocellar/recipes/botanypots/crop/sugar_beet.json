@@ -1,0 +1,46 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botanypots"
+        }
+      ],
+      "recipe": {
+        "type": "botanypots:crop",
+        "categories": [
+          "dirt",
+          "farmland"
+        ],
+        "display": {
+          "type": "botanypots:aging",
+          "block": "seedtocellar:sugar_beet_crop"
+        },
+        "drops": [
+          {
+            "chance": 1.0,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:sugar_beet"
+            }
+          },
+          {
+            "chance": 0.05,
+            "maxRolls": 1,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:sugar_beet_seeds"
+            }
+          }
+        ],
+        "growthTicks": 1200,
+        "seed": {
+          "item": "seedtocellar:sugar_beet_seeds"
+        }
+      }
+    }
+  ]
+}

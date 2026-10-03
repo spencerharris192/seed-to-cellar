@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:peach_wine"
+  },
+  "result": "seedtocellar:peach_brandy"
+}

@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.5,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/buried_treasure"
+    }
+  ],
+  "entries": [
+    {
+      "brewed": true,
+      "item": "seedtocellar:rum",
+      "max": 2,
+      "max_years": 12
+    }
+  ]
+}

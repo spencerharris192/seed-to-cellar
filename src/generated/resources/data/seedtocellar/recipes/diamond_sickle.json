@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "M": {
+      "tag": "forge:gems/diamond"
+    },
+    "S": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    " MM",
+    "  M",
+    " S "
+  ],
+  "result": {
+    "item": "seedtocellar:diamond_sickle"
+  },
+  "show_notification": true
+}

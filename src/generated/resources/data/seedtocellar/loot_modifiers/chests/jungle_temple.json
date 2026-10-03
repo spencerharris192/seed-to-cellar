@@ -1,0 +1,30 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.7,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/jungle_temple"
+    }
+  ],
+  "entries": [
+    {
+      "item": "seedtocellar:vanilla_pod",
+      "max": 3,
+      "min": 2,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:coffee_beans",
+      "max": 4,
+      "min": 2,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:ginger",
+      "max": 3,
+      "weight": 2
+    }
+  ],
+  "rolls": 2
+}

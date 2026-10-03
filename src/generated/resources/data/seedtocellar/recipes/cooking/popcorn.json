@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:cooking",
+  "ingredients": [
+    {
+      "tag": "forge:crops/corn"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:popcorn"
+  },
+  "time": 160
+}

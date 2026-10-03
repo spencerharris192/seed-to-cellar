@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "D": {
+      "tag": "forge:dyes/green"
+    },
+    "G": {
+      "tag": "forge:glass/colorless"
+    }
+  },
+  "pattern": [
+    " G ",
+    "G G",
+    "GDG"
+  ],
+  "result": {
+    "count": 3,
+    "item": "seedtocellar:wine_bottle"
+  },
+  "show_notification": true
+}

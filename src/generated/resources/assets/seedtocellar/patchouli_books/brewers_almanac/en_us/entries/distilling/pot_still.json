@@ -1,0 +1,62 @@
+{
+  "category": "seedtocellar:distilling",
+  "icon": "seedtocellar:pot_still",
+  "name": "The Pot Still",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(item)Pot Still$() stands two blocks tall over heat. Pour a wash into its pot (up to 4 buckets): a run boils off half of it as spirit into the glass safe, and the rest stays behind as $(item)stillage$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "One run makes a drinkable spirit; press $(item)Run again$() on its screen for a second run, which earns the craft star and halves it again. Fill $(item)spirit bottles$() from it. An empty bucket takes the spirit, then the stillage: pour that on farmland as fertilizer."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Copper weathers. Left long enough, a Pot Still or Brew Kettle turns green in patches, like a copper block, and then all over. It works just the same. Wax it with $(item)honeycomb$() to keep the look it has; an $(item)axe$() takes the wax off, or else scrapes back a stage. Broken, it keeps both."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "seedtocellar:pot_still[half=lower,facing=south]",
+          "F": "minecraft:campfire[lit=true]",
+          "U": "seedtocellar:pot_still[half=upper,facing=south]",
+          "V": "seedtocellar:pot_still[half=upper,facing=south,weathering=weathered]",
+          "W": "seedtocellar:pot_still[half=upper,facing=south,weathering=oxidized]",
+          "a": "seedtocellar:pot_still[half=lower,facing=south,weathering=weathered]",
+          "b": "seedtocellar:pot_still[half=lower,facing=south,weathering=oxidized]"
+        },
+        "pattern": [
+          [
+            "U",
+            "V",
+            "W"
+          ],
+          [
+            "0",
+            "a",
+            "b"
+          ],
+          [
+            "F",
+            "F",
+            "F"
+          ]
+        ]
+      },
+      "name": "Copper Weathers",
+      "text": "Pot Stills over campfires: fresh copper, weathered and oxidized."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:pot_still"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:spirit_bottle"
+    }
+  ],
+  "sortnum": 0
+}

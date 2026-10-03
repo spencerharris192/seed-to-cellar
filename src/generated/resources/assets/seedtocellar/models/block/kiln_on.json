@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/orientable_with_bottom",
+  "textures": {
+    "bottom": "minecraft:block/bricks",
+    "front": "seedtocellar:block/kiln_front_lit",
+    "side": "minecraft:block/bricks",
+    "top": "seedtocellar:block/kiln_top_lit"
+  }
+}

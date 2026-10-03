@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/blueberry"
+  },
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:blueberry_juice"
+  },
+  "stomps": 2
+}

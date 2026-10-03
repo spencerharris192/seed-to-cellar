@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": true,
+  "input": "seedtocellar:hopped_wort",
+  "malt_max": {},
+  "malt_min": {
+    "black": 0.25
+  },
+  "max_strength": "strong",
+  "min_strength": "normal",
+  "priority": 50,
+  "result": "seedtocellar:stout",
+  "temperature": "mild",
+  "time": 24000,
+  "yeast": "ale"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/agave",
+  "config_toggle": "wild_agave",
+  "features": "seedtocellar:wild_agave",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/apple_tree",
+  "config_toggle": "apple_tree",
+  "features": "seedtocellar:wild_apple_tree",
+  "step": "vegetal_decoration"
+}

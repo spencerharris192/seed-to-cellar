@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": {
+      "tag": "forge:nuggets/iron"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "NNN",
+    "PPP",
+    "PPP"
+  ],
+  "result": {
+    "item": "seedtocellar:tavern_sign"
+  },
+  "show_notification": true
+}

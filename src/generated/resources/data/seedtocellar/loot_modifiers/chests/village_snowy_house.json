@@ -1,0 +1,34 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.6,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/village/village_snowy_house"
+    }
+  ],
+  "entries": [
+    {
+      "item": "seedtocellar:rye_seeds",
+      "max": 5,
+      "min": 2,
+      "weight": 4
+    },
+    {
+      "item": "seedtocellar:cabbage_seeds",
+      "max": 3,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:cranberries",
+      "max": 3,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:juniper_berries",
+      "max": 2,
+      "weight": 2
+    }
+  ],
+  "rolls": 2
+}

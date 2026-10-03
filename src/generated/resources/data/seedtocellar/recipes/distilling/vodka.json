@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:potato_wash"
+  },
+  "result": "seedtocellar:vodka"
+}

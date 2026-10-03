@@ -1,0 +1,11 @@
+{
+  "parent": "seedtocellar:block/spruce_cask_tapped",
+  "overrides": [
+    {
+      "model": "seedtocellar:block/spruce_cask_charred_tapped",
+      "predicate": {
+        "seedtocellar:charred": 1.0
+      }
+    }
+  ]
+}

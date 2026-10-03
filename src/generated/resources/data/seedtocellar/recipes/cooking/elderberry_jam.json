@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": {
+    "item": "minecraft:glass_bottle"
+  },
+  "ingredients": [
+    {
+      "tag": "forge:crops/elderberry"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:elderberry_jam"
+  },
+  "time": 200
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "N": {
+      "tag": "forge:nuggets/iron"
+    },
+    "P": {
+      "tag": "minecraft:planks"
+    }
+  },
+  "pattern": [
+    "P P",
+    "N N",
+    "PPP"
+  ],
+  "result": {
+    "item": "seedtocellar:malting_tub"
+  },
+  "show_notification": true
+}

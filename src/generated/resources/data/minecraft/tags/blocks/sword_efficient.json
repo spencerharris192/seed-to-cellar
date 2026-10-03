@@ -1,0 +1,32 @@
+{
+  "values": [
+    "seedtocellar:wild_barley",
+    "seedtocellar:wild_rye",
+    "seedtocellar:wild_oats",
+    "seedtocellar:wild_sorghum",
+    "seedtocellar:wild_corn",
+    "seedtocellar:wild_rice",
+    "seedtocellar:wild_sugar_beet",
+    "seedtocellar:wild_onion",
+    "seedtocellar:wild_garlic",
+    "seedtocellar:wild_cabbage",
+    "seedtocellar:wild_ginger",
+    "seedtocellar:wild_coriander",
+    "seedtocellar:wild_anise",
+    "seedtocellar:blueberry_bush",
+    "seedtocellar:blackberry_bush",
+    "seedtocellar:elderberry_bush",
+    "seedtocellar:juniper_bush",
+    "seedtocellar:cranberry_bush",
+    "seedtocellar:tomato_bush",
+    "seedtocellar:chili_bush",
+    "seedtocellar:cucumber_bush",
+    "seedtocellar:coffee_bush",
+    "seedtocellar:wild_red_grape",
+    "seedtocellar:wild_white_grape",
+    "seedtocellar:mint_crop",
+    "seedtocellar:lavender_crop",
+    "seedtocellar:wormwood_crop",
+    "seedtocellar:wild_hops"
+  ]
+}

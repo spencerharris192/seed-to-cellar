@@ -1,0 +1,74 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "Tank",
+                  "target": "BlockEntityTag.Tank"
+                },
+                {
+                  "op": "replace",
+                  "source": "AgeTicks",
+                  "target": "BlockEntityTag.AgeTicks"
+                }
+              ],
+              "source": "block_entity"
+            },
+            {
+              "block": "seedtocellar:oak_cask",
+              "conditions": [
+                {
+                  "block": "seedtocellar:oak_cask",
+                  "condition": "minecraft:block_state_property",
+                  "properties": {
+                    "charred": "true"
+                  }
+                }
+              ],
+              "function": "minecraft:copy_state",
+              "properties": [
+                "charred"
+              ]
+            }
+          ],
+          "name": "seedtocellar:oak_cask"
+        }
+      ],
+      "rolls": 1.0
+    },
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "seedtocellar:oak_cask",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "tap": "true"
+          }
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "seedtocellar:tap"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/oak_cask"
+}

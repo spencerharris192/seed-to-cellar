@@ -1,0 +1,34 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.6,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/village/village_desert_house"
+    }
+  ],
+  "entries": [
+    {
+      "item": "seedtocellar:agave_pup",
+      "max": 2,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:chili_seeds",
+      "max": 3,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:sorghum_seeds",
+      "max": 4,
+      "min": 2,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:coriander_seeds",
+      "max": 3,
+      "weight": 2
+    }
+  ],
+  "rolls": 2
+}

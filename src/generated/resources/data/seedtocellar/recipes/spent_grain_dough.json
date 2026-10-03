@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:dough/wheat"
+    },
+    {
+      "item": "seedtocellar:spent_grain"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:spent_grain_dough"
+  }
+}

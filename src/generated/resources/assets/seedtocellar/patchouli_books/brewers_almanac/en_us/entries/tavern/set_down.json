@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:tavern",
+  "icon": "seedtocellar:pale_ale",
+  "name": "Setting Drinks Down",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Set a drink down anywhere: sneak and right-click the top of a block with it. Up to four stand together, each keeping its stars. Right-click with an empty hand to take the last one back."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Anything with a solid top will hold them: a table, a bar counter, a slab in the top half of its block. Take the block away and the drinks fall, nothing lost."
+    }
+  ],
+  "sortnum": 0
+}

@@ -1,0 +1,38 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.6,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/village/village_savanna_house"
+    }
+  ],
+  "entries": [
+    {
+      "item": "seedtocellar:sorghum_seeds",
+      "max": 5,
+      "min": 2,
+      "weight": 4
+    },
+    {
+      "item": "seedtocellar:corn_seeds",
+      "max": 4,
+      "min": 2,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:chili_seeds",
+      "max": 3,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:red_grape_cutting",
+      "max": 2,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:peach_sapling"
+    }
+  ],
+  "rolls": 2
+}

@@ -1,0 +1,45 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom"
+        },
+        "east": {
+          "texture": "#inner"
+        },
+        "north": {
+          "texture": "#inner"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        2,
+        0,
+        8
+      ],
+      "to": [
+        8,
+        4,
+        14
+      ]
+    }
+  ],
+  "textures": {
+    "bottom": "seedtocellar:block/pie_bottom",
+    "inner": "seedtocellar:block/blueberry_pie_inner",
+    "particle": "seedtocellar:block/blueberry_pie_top",
+    "side": "seedtocellar:block/pie_side",
+    "top": "seedtocellar:block/blueberry_pie_top"
+  }
+}

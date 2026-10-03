@@ -1,0 +1,9 @@
+{
+  "parent": "seedtocellar:block/display/apple_crown_whiskey",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "emblem": "seedtocellar:block/display_crown_emblem_red",
+    "leaf": "seedtocellar:block/display_gold_leaf",
+    "rule": "seedtocellar:block/display_velvet"
+  }
+}

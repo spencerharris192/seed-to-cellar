@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/ginger",
+  "config_toggle": "wild_ginger",
+  "features": "seedtocellar:wild_ginger",
+  "step": "vegetal_decoration"
+}

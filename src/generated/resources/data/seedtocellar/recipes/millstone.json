@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "S": {
+      "tag": "forge:rods/wooden"
+    },
+    "T": {
+      "item": "minecraft:smooth_stone_slab"
+    }
+  },
+  "pattern": [
+    " S ",
+    "TTT",
+    "TTT"
+  ],
+  "result": {
+    "item": "seedtocellar:millstone"
+  },
+  "show_notification": true
+}

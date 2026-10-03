@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "seedtocellar:sugar_sack"
+    }
+  ],
+  "result": {
+    "count": 8,
+    "item": "minecraft:sugar"
+  }
+}

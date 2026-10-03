@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "seedtocellar:hop_bundle"
+    }
+  ],
+  "result": {
+    "count": 9,
+    "item": "seedtocellar:hop_cones"
+  }
+}

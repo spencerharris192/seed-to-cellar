@@ -1,0 +1,11 @@
+{
+  "parent": "seedtocellar:block/pot_still_upper",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "copper": "seedtocellar:block/pot_still_copper_exposed",
+    "neck": "seedtocellar:block/pot_still_neck_exposed",
+    "particle": "seedtocellar:block/pot_still_copper_exposed",
+    "pipe": "seedtocellar:block/pot_still_pipe_exposed",
+    "top": "seedtocellar:block/pot_still_top_exposed"
+  }
+}

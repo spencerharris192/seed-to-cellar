@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:plain_ale"
+  },
+  "result": "seedtocellar:malt_whiskey"
+}

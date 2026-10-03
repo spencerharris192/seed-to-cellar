@@ -1,0 +1,33 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:coffee_beans"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:coffee_bush"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:coffee_beans"
+          }
+        ],
+        "soil": {
+          "tag": "minecraft:dirt"
+        },
+        "time": 800
+      }
+    }
+  ]
+}

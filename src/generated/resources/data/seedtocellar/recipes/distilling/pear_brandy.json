@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:perry"
+  },
+  "result": "seedtocellar:pear_brandy"
+}

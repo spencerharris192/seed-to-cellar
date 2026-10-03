@@ -1,0 +1,39 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "minecraft:copy_nbt",
+              "ops": [
+                {
+                  "op": "replace",
+                  "source": "Tank",
+                  "target": "BlockEntityTag.Tank"
+                },
+                {
+                  "op": "replace",
+                  "source": "AgeTicks",
+                  "target": "BlockEntityTag.AgeTicks"
+                }
+              ],
+              "source": "block_entity"
+            }
+          ],
+          "name": "seedtocellar:keg"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/keg"
+}

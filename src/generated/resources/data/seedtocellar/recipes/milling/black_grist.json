@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:milling",
+  "cranks": 1,
+  "ingredient": {
+    "item": "seedtocellar:black_malt"
+  },
+  "result": {
+    "item": "seedtocellar:black_grist"
+  }
+}

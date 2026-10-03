@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/cherry"
+  },
+  "result": {
+    "item": "seedtocellar:dried_cherries"
+  },
+  "time": 18000
+}

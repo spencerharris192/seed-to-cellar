@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/hops",
+  "config_toggle": "wild_hops",
+  "features": "seedtocellar:wild_hops",
+  "step": "vegetal_decoration"
+}

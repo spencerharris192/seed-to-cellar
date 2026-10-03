@@ -1,0 +1,30 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:squeezer",
+        "energy": 6400,
+        "fluid": {
+          "amount": 500,
+          "fluid": "seedtocellar:lemon_juice"
+        },
+        "input": {
+          "base_ingredient": {
+            "tag": "forge:fruits/lemon"
+          },
+          "count": 4
+        },
+        "result": {
+          "item": "seedtocellar:fruit_pomace"
+        }
+      }
+    }
+  ]
+}

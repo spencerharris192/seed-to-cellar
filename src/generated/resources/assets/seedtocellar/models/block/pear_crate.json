@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "seedtocellar:block/crate_bottom",
+    "side": "seedtocellar:block/crate_side",
+    "top": "seedtocellar:block/pear_crate_top"
+  }
+}

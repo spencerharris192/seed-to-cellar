@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:pomace_wash"
+  },
+  "result": "seedtocellar:grappa"
+}

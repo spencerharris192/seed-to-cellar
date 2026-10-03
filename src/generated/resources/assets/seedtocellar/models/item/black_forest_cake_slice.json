@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "seedtocellar:item/black_forest_cake_slice"
+  }
+}

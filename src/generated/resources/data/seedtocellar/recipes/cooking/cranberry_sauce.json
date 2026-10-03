@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": {
+    "item": "minecraft:bowl"
+  },
+  "ingredients": [
+    {
+      "tag": "forge:crops/cranberry"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:cranberry_sauce"
+  },
+  "time": 200
+}

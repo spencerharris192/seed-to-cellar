@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/pear"
+  },
+  "result": {
+    "item": "seedtocellar:dried_pears"
+  },
+  "time": 18000
+}

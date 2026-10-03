@@ -1,0 +1,35 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "seedtocellar:jungle_cask"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_vat": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "seedtocellar:fermenting_vat"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_vat",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:jungle_cask"
+    ]
+  },
+  "sends_telemetry_event": false
+}

@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:milling",
+  "cranks": 1,
+  "ingredient": {
+    "item": "seedtocellar:roasted_coffee"
+  },
+  "result": {
+    "item": "seedtocellar:ground_coffee"
+  }
+}

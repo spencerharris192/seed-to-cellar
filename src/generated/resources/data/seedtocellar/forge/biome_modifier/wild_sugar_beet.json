@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/sugar_beet",
+  "config_toggle": "wild_sugar_beet",
+  "features": "seedtocellar:wild_sugar_beet",
+  "step": "vegetal_decoration"
+}

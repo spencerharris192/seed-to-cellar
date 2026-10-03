@@ -1,0 +1,44 @@
+{
+  "category": "seedtocellar:farming",
+  "icon": "seedtocellar:hop_rhizome",
+  "name": "Hops and Grapes",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Hops and grapes climb a $(item)Trellis$(). Stack trellises on soil and plant on the bottom one: a $(item)hop rhizome$() or a $(item)grape cutting$(). Pick the cones or bunches when they hang ripe; the vine stays. Shears prune grape vines for $(item)grape leaves$()."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "seedtocellar:red_grape_vine[age=5,axis=x]",
+          "D": "minecraft:grass_block",
+          "G": "seedtocellar:red_grape_vine[age=5,axis=x]",
+          "H": "seedtocellar:hops[age=5,axis=x]"
+        },
+        "pattern": [
+          [
+            "H",
+            "G"
+          ],
+          [
+            "H",
+            "0"
+          ],
+          [
+            "D",
+            "D"
+          ]
+        ]
+      },
+      "name": "On the Trellis",
+      "text": "Hops hanging with ripe cones, and a grape vine with its bunches."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:trellis"
+    }
+  ],
+  "sortnum": 2
+}

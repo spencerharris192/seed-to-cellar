@@ -1,0 +1,17 @@
+{
+  "type": "seedtocellar:cooking",
+  "fluid": {
+    "amount": 250,
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    {
+      "item": "seedtocellar:polished_rice"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:steamed_rice"
+  },
+  "time": 160
+}

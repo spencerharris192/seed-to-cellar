@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "seedtocellar:jerky_meats"
+  },
+  "result": {
+    "item": "seedtocellar:jerky"
+  },
+  "time": 24000
+}

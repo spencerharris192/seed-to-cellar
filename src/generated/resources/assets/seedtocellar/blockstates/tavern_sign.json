@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "emblem=ale,facing=east": {
+      "model": "seedtocellar:block/tavern_sign_ale",
+      "y": 90
+    },
+    "emblem=ale,facing=north": {
+      "model": "seedtocellar:block/tavern_sign_ale"
+    },
+    "emblem=ale,facing=south": {
+      "model": "seedtocellar:block/tavern_sign_ale",
+      "y": 180
+    },
+    "emblem=ale,facing=west": {
+      "model": "seedtocellar:block/tavern_sign_ale",
+      "y": 270
+    },
+    "emblem=cask,facing=east": {
+      "model": "seedtocellar:block/tavern_sign_cask",
+      "y": 90
+    },
+    "emblem=cask,facing=north": {
+      "model": "seedtocellar:block/tavern_sign_cask"
+    },
+    "emblem=cask,facing=south": {
+      "model": "seedtocellar:block/tavern_sign_cask",
+      "y": 180
+    },
+    "emblem=cask,facing=west": {
+      "model": "seedtocellar:block/tavern_sign_cask",
+      "y": 270
+    },
+    "emblem=spirits,facing=east": {
+      "model": "seedtocellar:block/tavern_sign_spirits",
+      "y": 90
+    },
+    "emblem=spirits,facing=north": {
+      "model": "seedtocellar:block/tavern_sign_spirits"
+    },
+    "emblem=spirits,facing=south": {
+      "model": "seedtocellar:block/tavern_sign_spirits",
+      "y": 180
+    },
+    "emblem=spirits,facing=west": {
+      "model": "seedtocellar:block/tavern_sign_spirits",
+      "y": 270
+    },
+    "emblem=wine,facing=east": {
+      "model": "seedtocellar:block/tavern_sign_wine",
+      "y": 90
+    },
+    "emblem=wine,facing=north": {
+      "model": "seedtocellar:block/tavern_sign_wine"
+    },
+    "emblem=wine,facing=south": {
+      "model": "seedtocellar:block/tavern_sign_wine",
+      "y": 180
+    },
+    "emblem=wine,facing=west": {
+      "model": "seedtocellar:block/tavern_sign_wine",
+      "y": 270
+    }
+  }
+}

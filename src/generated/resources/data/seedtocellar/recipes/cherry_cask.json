@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "P": {
+      "item": "minecraft:cherry_planks"
+    }
+  },
+  "pattern": [
+    "PIP",
+    "P P",
+    "PIP"
+  ],
+  "result": {
+    "item": "seedtocellar:cherry_cask"
+  },
+  "show_notification": true
+}

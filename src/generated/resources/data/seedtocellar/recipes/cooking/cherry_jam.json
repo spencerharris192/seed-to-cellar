@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": {
+    "item": "minecraft:glass_bottle"
+  },
+  "ingredients": [
+    {
+      "tag": "forge:fruits/cherry"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:cherry_jam"
+  },
+  "time": 200
+}

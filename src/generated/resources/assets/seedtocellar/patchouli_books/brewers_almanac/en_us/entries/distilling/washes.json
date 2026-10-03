@@ -1,0 +1,20 @@
+{
+  "category": "seedtocellar:distilling",
+  "icon": "seedtocellar:malt_whiskey",
+  "name": "Washes and Spirits",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "$(item)Plain Ale$() distils into malt whiskey; wine into $(item)brandy$(); cider, perry, cherry, plum and peach wine into fruit brandies."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Mash $(item)cornmeal$() or $(item)potatoes$() in the kettle with some malt grist, half or more of the mash, and ferment it with ale yeast: a corn wash distils into $(item)bourbon$(), a potato wash into $(item)vodka$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Boil cane juice alone in the kettle into molasses, and ferment it into rum wash: $(item)rum$(). Roast agave hearts, press them and ferment the juice: $(item)tequila$(). Steep grape pomace in a kettle of water and ferment it with wine yeast: $(item)grappa$()."
+    }
+  ],
+  "sortnum": 1
+}

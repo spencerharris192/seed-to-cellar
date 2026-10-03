@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:barley_seeds"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:barley_crop"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:barley"
+          },
+          {
+            "item": "seedtocellar:barley_seeds"
+          }
+        ],
+        "soil": {
+          "tag": "minecraft:dirt"
+        },
+        "time": 800
+      }
+    }
+  ]
+}

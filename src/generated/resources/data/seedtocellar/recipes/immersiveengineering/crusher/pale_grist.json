@@ -1,0 +1,24 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:crusher",
+        "energy": 1600,
+        "input": {
+          "item": "seedtocellar:pale_malt"
+        },
+        "result": {
+          "item": "seedtocellar:pale_grist"
+        },
+        "secondaries": []
+      }
+    }
+  ]
+}

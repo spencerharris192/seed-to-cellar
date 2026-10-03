@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/white_grape"
+  },
+  "result": {
+    "amount": 100,
+    "fluid": "seedtocellar:white_grape_juice"
+  },
+  "stomps": 2
+}

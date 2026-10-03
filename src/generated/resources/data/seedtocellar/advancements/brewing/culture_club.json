@@ -1,0 +1,38 @@
+{
+  "parent": "seedtocellar:brewing/first_pint",
+  "criteria": {
+    "yeast": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "seedtocellar:ale_yeast"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancements.seedtocellar.culture_club.description"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "seedtocellar:ale_yeast"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancements.seedtocellar.culture_club.title"
+    }
+  },
+  "requirements": [
+    [
+      "yeast"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

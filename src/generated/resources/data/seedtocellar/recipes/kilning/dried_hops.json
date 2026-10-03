@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": {
+    "tag": "forge:crops/hops"
+  },
+  "result": {
+    "item": "seedtocellar:dried_hops"
+  },
+  "roast": "light",
+  "time": 400
+}

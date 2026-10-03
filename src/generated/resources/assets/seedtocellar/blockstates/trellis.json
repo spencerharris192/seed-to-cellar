@@ -1,0 +1,11 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "seedtocellar:block/trellis"
+    },
+    "axis=z": {
+      "model": "seedtocellar:block/trellis",
+      "y": 90
+    }
+  }
+}

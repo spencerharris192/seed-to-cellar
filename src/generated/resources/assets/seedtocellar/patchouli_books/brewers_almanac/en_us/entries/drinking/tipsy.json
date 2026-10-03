@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:drinking",
+  "icon": "seedtocellar:rum",
+  "name": "Tipsy",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Alcohol adds up and wears off over time: Merry, then Tipsy (the view sways), Drunk, and Smashed (slow, and the hiccups). Milk sobers you up at once."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Drunk or worse, you'll have a $(item)Hangover$() when you sober up: slower mining for a few minutes, shorter after good drinks. Water, milk, a hearty breakfast or $(item)aromatic bitters$() cure it."
+    }
+  ],
+  "sortnum": 1
+}

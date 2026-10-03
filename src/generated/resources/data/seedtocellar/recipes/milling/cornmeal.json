@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:milling",
+  "cranks": 1,
+  "ingredient": {
+    "tag": "forge:crops/corn"
+  },
+  "result": {
+    "item": "seedtocellar:cornmeal"
+  }
+}

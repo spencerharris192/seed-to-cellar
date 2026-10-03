@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "M": {
+      "tag": "minecraft:planks"
+    },
+    "S": {
+      "tag": "forge:rods/wooden"
+    }
+  },
+  "pattern": [
+    " MM",
+    "  M",
+    " S "
+  ],
+  "result": {
+    "item": "seedtocellar:wooden_sickle"
+  },
+  "show_notification": true
+}

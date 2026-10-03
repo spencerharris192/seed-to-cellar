@@ -1,0 +1,12 @@
+{
+  "category": "seedtocellar:farming",
+  "icon": "seedtocellar:rice",
+  "name": "Rice",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Rice grows in water: plant it in water one block deep, over dirt or farmland. Its tops show above the water as it ripens."
+    }
+  ],
+  "sortnum": 3
+}

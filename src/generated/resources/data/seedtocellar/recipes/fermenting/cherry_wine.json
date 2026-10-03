@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": true,
+  "input": "seedtocellar:cherry_juice",
+  "priority": 0,
+  "result": "seedtocellar:cherry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

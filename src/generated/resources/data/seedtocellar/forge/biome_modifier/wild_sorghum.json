@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/sorghum",
+  "config_toggle": "wild_sorghum",
+  "features": "seedtocellar:wild_sorghum",
+  "step": "vegetal_decoration"
+}

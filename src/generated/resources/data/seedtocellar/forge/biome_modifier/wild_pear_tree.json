@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/pear_tree",
+  "config_toggle": "pear_tree",
+  "features": "seedtocellar:wild_pear_tree",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/white_grape",
+  "config_toggle": "wild_white_grape",
+  "features": "seedtocellar:wild_white_grape",
+  "step": "vegetal_decoration"
+}

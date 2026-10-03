@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:kitchen",
+  "icon": "seedtocellar:brew_kettle",
+  "name": "Kettle Cooking",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "The $(item)Brew Kettle$() cooks as well as brews. Set it over heat (a lit campfire, fire, magma or lava), add water and the ingredients, and soups, stews, jams and syrups come out. Bowls or bottles go in its container slot."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:brew_kettle"
+    }
+  ],
+  "sortnum": 0
+}

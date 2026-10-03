@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "weathering=exposed": {
+      "model": "seedtocellar:block/brew_kettle_exposed"
+    },
+    "weathering=oxidized": {
+      "model": "seedtocellar:block/brew_kettle_oxidized"
+    },
+    "weathering=unaffected": {
+      "model": "seedtocellar:block/brew_kettle"
+    },
+    "weathering=weathered": {
+      "model": "seedtocellar:block/brew_kettle_weathered"
+    }
+  }
+}

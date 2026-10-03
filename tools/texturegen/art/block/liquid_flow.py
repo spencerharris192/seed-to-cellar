@@ -1,0 +1,27 @@
+"""Shared flowing-liquid texture (grey, tinted per fluid). 8 frames: streaks move downward."""
+from texturegen.palettes import LIQUID
+
+LEGEND = {str(i): LIQUID[i] for i in range(6)}
+
+BASE = """
+2222322222222322
+2222322223222322
+2223322223222222
+2223222233222222
+2222222232222232
+2322222222222232
+2322223222222332
+2332223222222322
+2232223322223222
+2222222322223222
+2222222222233222
+2223322222232222
+2222322222222222
+2222332232222222
+3222232232222223
+3222222332222223
+"""
+
+rows = BASE.strip("\n").splitlines()
+FRAMES = ["\n".join(rows[-2 * f:] + rows[:-2 * f] if f else rows) for f in range(8)]
+FRAMETIME = 3

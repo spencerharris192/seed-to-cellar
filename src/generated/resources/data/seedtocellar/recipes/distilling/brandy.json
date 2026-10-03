@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "tag": "seedtocellar:grape_wines"
+  },
+  "result": "seedtocellar:brandy"
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/wormwood",
+  "config_toggle": "wild_wormwood",
+  "features": "seedtocellar:wild_wormwood",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,53 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "#side",
+    "handle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "name": "cask",
+      "from": [1, 0, 0], "to": [15, 14, 16],
+      "faces": {
+        "north": {"uv": [1, 1, 15, 15], "texture": "#head"},
+        "south": {"uv": [1, 1, 15, 15], "texture": "#head"},
+        "east": {"uv": [0, 1, 16, 15], "texture": "#side"},
+        "west": {"uv": [0, 1, 16, 15], "texture": "#side"},
+        "up": {"uv": [0, 1, 16, 15], "texture": "#side", "rotation": 90},
+        "down": {"uv": [0, 1, 16, 15], "texture": "#side", "rotation": 90, "cullface": "down"}
+      }
+    },
+    {
+      "name": "spigot",
+      "from": [7, 3, -2], "to": [9, 5, 0],
+      "faces": {
+        "north": {"uv": [6, 4, 8, 6], "texture": "#side"},
+        "east": {"uv": [6, 4, 8, 6], "texture": "#side"},
+        "west": {"uv": [6, 4, 8, 6], "texture": "#side"},
+        "up": {"uv": [6, 4, 8, 6], "texture": "#side"},
+        "down": {"uv": [6, 4, 8, 6], "texture": "#side"}
+      }
+    },
+    {
+      "name": "spout",
+      "from": [7.5, 1.5, -2], "to": [8.5, 3, -1],
+      "faces": {
+        "north": {"uv": [7, 5, 8, 6.5], "texture": "#side"},
+        "east": {"uv": [7, 5, 8, 6.5], "texture": "#side"},
+        "west": {"uv": [7, 5, 8, 6.5], "texture": "#side"},
+        "down": {"uv": [7, 5, 8, 6], "texture": "#side"}
+      }
+    },
+    {
+      "name": "handle",
+      "from": [7.5, 5, -1.5], "to": [8.5, 7.5, -0.5],
+      "faces": {
+        "north": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "south": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "east": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "west": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "up": {"uv": [0, 0, 1, 1], "texture": "#handle"}
+      }
+    }
+  ]
+}

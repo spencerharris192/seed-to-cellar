@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/mint",
+  "config_toggle": "wild_mint",
+  "features": "seedtocellar:wild_mint",
+  "step": "vegetal_decoration"
+}

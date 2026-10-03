@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:rum_wash"
+  },
+  "result": "seedtocellar:rum"
+}

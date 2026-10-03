@@ -1,0 +1,99 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "north": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#inner"
+        }
+      },
+      "from": [
+        8,
+        0,
+        2
+      ],
+      "to": [
+        14,
+        4,
+        8
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom"
+        },
+        "east": {
+          "texture": "#side"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        8,
+        0,
+        8
+      ],
+      "to": [
+        14,
+        4,
+        14
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "cullface": "down",
+          "texture": "#bottom"
+        },
+        "north": {
+          "texture": "#inner"
+        },
+        "south": {
+          "texture": "#side"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#side"
+        }
+      },
+      "from": [
+        2,
+        0,
+        8
+      ],
+      "to": [
+        8,
+        4,
+        14
+      ]
+    }
+  ],
+  "textures": {
+    "bottom": "seedtocellar:block/pie_bottom",
+    "inner": "seedtocellar:block/blackberry_pie_inner",
+    "particle": "seedtocellar:block/blackberry_pie_top",
+    "side": "seedtocellar:block/pie_side",
+    "top": "seedtocellar:block/blackberry_pie_top"
+  }
+}

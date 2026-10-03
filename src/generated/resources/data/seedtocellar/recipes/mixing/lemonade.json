@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:mixing",
+  "ingredient": {
+    "tag": "seedtocellar:sweeteners"
+  },
+  "liquid": {
+    "amount": 250,
+    "tag": "seedtocellar:lemon_juice"
+  },
+  "per_bucket": 2,
+  "result": "seedtocellar:lemonade",
+  "time": 400
+}

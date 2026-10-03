@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/peach"
+  },
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:peach_juice"
+  },
+  "stomps": 3
+}

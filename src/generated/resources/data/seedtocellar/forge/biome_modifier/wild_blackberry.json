@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/blackberry",
+  "config_toggle": "wild_blackberry",
+  "features": "seedtocellar:wild_blackberry",
+  "step": "vegetal_decoration"
+}

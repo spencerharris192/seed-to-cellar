@@ -1,0 +1,22 @@
+{
+  "variants": {
+    "bites=0": {
+      "model": "seedtocellar:block/black_forest_cake"
+    },
+    "bites=1": {
+      "model": "seedtocellar:block/black_forest_cake_bite1"
+    },
+    "bites=2": {
+      "model": "seedtocellar:block/black_forest_cake_bite2"
+    },
+    "bites=3": {
+      "model": "seedtocellar:block/black_forest_cake_bite3"
+    },
+    "bites=4": {
+      "model": "seedtocellar:block/black_forest_cake_bite4"
+    },
+    "bites=5": {
+      "model": "seedtocellar:block/black_forest_cake_bite5"
+    }
+  }
+}

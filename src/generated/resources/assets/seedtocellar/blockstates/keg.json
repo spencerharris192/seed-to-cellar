@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "seedtocellar:block/keg",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "seedtocellar:block/keg"
+    },
+    "facing=south": {
+      "model": "seedtocellar:block/keg",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "seedtocellar:block/keg",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": {
+    "item": "seedtocellar:green_barley_malt"
+  },
+  "result": {
+    "item": "seedtocellar:pale_malt"
+  },
+  "roast": "light",
+  "time": 600
+}

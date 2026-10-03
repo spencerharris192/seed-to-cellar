@@ -1,0 +1,16 @@
+{
+  "values": [
+    "seedtocellar:red_grape_vine",
+    "seedtocellar:white_grape_vine",
+    "seedtocellar:vanilla",
+    "#minecraft:sword_efficient",
+    "#minecraft:crops",
+    "#minecraft:leaves",
+    "#minecraft:replaceable_by_trees",
+    "seedtocellar:hops",
+    "seedtocellar:thatch",
+    "seedtocellar:thatch_stairs",
+    "seedtocellar:thatch_slab",
+    "minecraft:hay_block"
+  ]
+}

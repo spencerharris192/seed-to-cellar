@@ -1,0 +1,9 @@
+{
+  "parent": "seedtocellar:block/brew_kettle",
+  "textures": {
+    "bottom": "seedtocellar:block/brew_kettle_bottom_exposed",
+    "inner": "seedtocellar:block/brew_kettle_inner_exposed",
+    "particle": "seedtocellar:block/brew_kettle_side_exposed",
+    "side": "seedtocellar:block/brew_kettle_side_exposed"
+  }
+}

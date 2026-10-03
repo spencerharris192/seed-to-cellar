@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/plum"
+  },
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:plum_juice"
+  },
+  "stomps": 3
+}

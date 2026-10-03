@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": true,
+  "input": "seedtocellar:sweet_wort",
+  "malt_min": {
+    "potato": 0.5
+  },
+  "priority": 30,
+  "result": "seedtocellar:potato_wash",
+  "temperature": [
+    "mild",
+    "warm"
+  ],
+  "time": 24000,
+  "yeast": "ale"
+}

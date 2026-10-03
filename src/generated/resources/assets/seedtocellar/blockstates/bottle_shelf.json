@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "seedtocellar:block/bottle_shelf",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "seedtocellar:block/bottle_shelf"
+    },
+    "facing=south": {
+      "model": "seedtocellar:block/bottle_shelf",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "seedtocellar:block/bottle_shelf",
+      "y": 270
+    }
+  }
+}

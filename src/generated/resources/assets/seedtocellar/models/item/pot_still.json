@@ -1,0 +1,26 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "seedtocellar:item/pot_still_exposed",
+      "predicate": {
+        "seedtocellar:weathering": 1.0
+      }
+    },
+    {
+      "model": "seedtocellar:item/pot_still_weathered",
+      "predicate": {
+        "seedtocellar:weathering": 2.0
+      }
+    },
+    {
+      "model": "seedtocellar:item/pot_still_oxidized",
+      "predicate": {
+        "seedtocellar:weathering": 3.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "seedtocellar:item/pot_still"
+  }
+}

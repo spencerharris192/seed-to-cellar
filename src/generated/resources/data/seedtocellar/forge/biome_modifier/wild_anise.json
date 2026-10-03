@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/anise",
+  "config_toggle": "wild_anise",
+  "features": "seedtocellar:wild_anise",
+  "step": "vegetal_decoration"
+}

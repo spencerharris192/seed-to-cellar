@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/garlic",
+  "config_toggle": "wild_garlic",
+  "features": "seedtocellar:wild_garlic",
+  "step": "vegetal_decoration"
+}

@@ -1,0 +1,11 @@
+{
+  "parent": "seedtocellar:block/dark_oak_cask_tapped",
+  "overrides": [
+    {
+      "model": "seedtocellar:block/dark_oak_cask_charred_tapped",
+      "predicate": {
+        "seedtocellar:charred": 1.0
+      }
+    }
+  ]
+}

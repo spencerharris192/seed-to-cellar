@@ -1,0 +1,30 @@
+{
+  "category": "seedtocellar:cellar",
+  "icon": "minecraft:flint_and_steel",
+  "name": "Charring",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Use flint and steel on an empty cask to char it inside. Any charred cask is ideal for whiskey, and bourbon is only called Bourbon after 2 years in $(item)charred oak$(). Nether wood won't char."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "seedtocellar:oak_cask[facing=south]",
+          "c": "seedtocellar:oak_cask[charred=true,facing=south]"
+        },
+        "pattern": [
+          [
+            "0",
+            "c"
+          ]
+        ]
+      },
+      "name": "Charred",
+      "text": "Oak as it comes, and charred inside: its staves and hoops darkened."
+    }
+  ],
+  "sortnum": 2
+}

@@ -1,0 +1,16 @@
+{
+  "values": [
+    "seedtocellar:pale_ale",
+    "seedtocellar:amber_ale",
+    "seedtocellar:stout",
+    "seedtocellar:old_ale",
+    "seedtocellar:plain_ale",
+    "seedtocellar:table_beer",
+    "seedtocellar:lager",
+    "seedtocellar:wheat_beer",
+    "seedtocellar:cider",
+    "seedtocellar:perry",
+    "seedtocellar:mulled_wine",
+    "seedtocellar:coffee"
+  ]
+}

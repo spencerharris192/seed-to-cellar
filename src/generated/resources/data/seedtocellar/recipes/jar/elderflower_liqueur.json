@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid_amount": 250,
+  "fluid_tag": "seedtocellar:liqueur_bases",
+  "ingredients": [
+    {
+      "item": "seedtocellar:elderflowers"
+    },
+    {
+      "item": "seedtocellar:elderflowers"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result_fluid": "seedtocellar:elderflower_liqueur",
+  "time": 24000
+}

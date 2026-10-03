@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "seedtocellar:block/thatch_slab"
+    },
+    "type=double": {
+      "model": "seedtocellar:block/thatch"
+    },
+    "type=top": {
+      "model": "seedtocellar:block/thatch_slab_top"
+    }
+  }
+}

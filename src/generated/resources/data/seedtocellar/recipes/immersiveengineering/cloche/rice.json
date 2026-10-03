@@ -1,0 +1,33 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:rice"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:rice_crop"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:rice"
+          }
+        ],
+        "soil": {
+          "tag": "minecraft:dirt"
+        },
+        "time": 800
+      }
+    }
+  ]
+}

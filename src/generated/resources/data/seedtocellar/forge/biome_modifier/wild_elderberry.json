@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/elderberry",
+  "config_toggle": "wild_elderberry",
+  "features": "seedtocellar:wild_elderberry",
+  "step": "vegetal_decoration"
+}

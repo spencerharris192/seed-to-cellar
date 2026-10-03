@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/apple"
+  },
+  "result": {
+    "item": "seedtocellar:dried_apples"
+  },
+  "time": 18000
+}

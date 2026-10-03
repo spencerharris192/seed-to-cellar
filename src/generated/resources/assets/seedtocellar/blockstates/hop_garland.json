@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "seedtocellar:block/hop_garland",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "seedtocellar:block/hop_garland"
+    },
+    "facing=south": {
+      "model": "seedtocellar:block/hop_garland",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "seedtocellar:block/hop_garland",
+      "y": 270
+    }
+  }
+}

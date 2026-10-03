@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:winemaking",
+  "icon": "seedtocellar:sake",
+  "name": "Sake",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Mill rice into $(item)polished rice$() and steam it in a kettle of water (no bowl). Two steamed rice in a jar somewhere Warm grow into two $(item)koji rice$() in two days."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Stir 2 koji rice a bucket into a heated kettle of water for $(item)sake mash$(). Ferment it Cool with Wine Yeast, and bottle the $(item)sake$() in wine bottles."
+    }
+  ],
+  "sortnum": 2
+}

@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "seedtocellar:block/rice_bale_horizontal",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "seedtocellar:block/rice_bale"
+    },
+    "axis=z": {
+      "model": "seedtocellar:block/rice_bale_horizontal",
+      "x": 90
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/peach_tree",
+  "config_toggle": "peach_tree",
+  "features": "seedtocellar:wild_peach_tree",
+  "step": "vegetal_decoration"
+}

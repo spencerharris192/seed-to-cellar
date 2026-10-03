@@ -1,0 +1,39 @@
+{
+  "category": "seedtocellar:kitchen",
+  "icon": "seedtocellar:harvest_feast",
+  "name": "Foods to Place",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Pies, the Black Forest Cake and the Harvest Feast are placed on a surface and eaten a slice or a serving at a time, by anyone at the table."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:spruce_planks",
+          "A": "seedtocellar:apple_pie",
+          "C": "seedtocellar:black_forest_cake",
+          "H": "seedtocellar:harvest_feast[facing=south]",
+          "T": "minecraft:spruce_planks"
+        },
+        "pattern": [
+          [
+            "A",
+            "H",
+            "C"
+          ],
+          [
+            "T",
+            "0",
+            "T"
+          ]
+        ]
+      },
+      "name": "A Laid Table",
+      "text": "An apple pie, a Harvest Feast and a Black Forest Cake, set out to share."
+    }
+  ],
+  "sortnum": 3
+}

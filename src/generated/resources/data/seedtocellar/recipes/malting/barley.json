@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:malting",
+  "ingredient": {
+    "tag": "forge:crops/barley"
+  },
+  "result": {
+    "item": "seedtocellar:green_barley_malt"
+  },
+  "sprout_time": 3600,
+  "steep_time": 2400
+}

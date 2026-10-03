@@ -1,0 +1,12 @@
+{
+  "category": "seedtocellar:cellar",
+  "icon": "seedtocellar:bourbon",
+  "name": "Names That Change",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Spirits change their names as they age: New Make becomes Malt Whiskey at 3 years, Eau-de-vie becomes Brandy at 2, White Rum turns Gold, then Dark; Tequila Blanco becomes Reposado, then Añejo. Their color deepens too."
+    }
+  ],
+  "sortnum": 1
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "seedtocellar:block/template_tall_cross",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "cross": "seedtocellar:block/wild_rice",
+    "top": "seedtocellar:block/wild_rice_top"
+  }
+}

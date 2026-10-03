@@ -1,0 +1,55 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "particle": "seedtocellar:block/keg_side",
+    "side": "seedtocellar:block/keg_side",
+    "top": "seedtocellar:block/keg_top",
+    "handle": "minecraft:block/iron_block"
+  },
+  "elements": [
+    {
+      "name": "keg",
+      "from": [3, 0, 3], "to": [13, 12, 13],
+      "faces": {
+        "north": {"uv": [3, 4, 13, 16], "texture": "#side"},
+        "south": {"uv": [3, 4, 13, 16], "texture": "#side"},
+        "east": {"uv": [3, 4, 13, 16], "texture": "#side"},
+        "west": {"uv": [3, 4, 13, 16], "texture": "#side"},
+        "up": {"uv": [3, 3, 13, 13], "texture": "#top"},
+        "down": {"uv": [3, 3, 13, 13], "texture": "#top", "cullface": "down"}
+      }
+    },
+    {
+      "name": "spigot",
+      "from": [7, 3, 1], "to": [9, 5, 3],
+      "faces": {
+        "north": {"uv": [4, 9, 6, 11], "texture": "#side"},
+        "east": {"uv": [4, 9, 6, 11], "texture": "#side"},
+        "west": {"uv": [4, 9, 6, 11], "texture": "#side"},
+        "up": {"uv": [4, 9, 6, 11], "texture": "#side"},
+        "down": {"uv": [4, 9, 6, 11], "texture": "#side"}
+      }
+    },
+    {
+      "name": "spout",
+      "from": [7.5, 1.5, 1], "to": [8.5, 3, 2],
+      "faces": {
+        "north": {"uv": [5, 9, 6, 10.5], "texture": "#side"},
+        "east": {"uv": [5, 9, 6, 10.5], "texture": "#side"},
+        "west": {"uv": [5, 9, 6, 10.5], "texture": "#side"},
+        "down": {"uv": [5, 9, 6, 10], "texture": "#side"}
+      }
+    },
+    {
+      "name": "handle",
+      "from": [7.5, 5, 1.5], "to": [8.5, 7.5, 2.5],
+      "faces": {
+        "north": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "south": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "east": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "west": {"uv": [0, 0, 1, 2.5], "texture": "#handle"},
+        "up": {"uv": [0, 0, 1, 1], "texture": "#handle"}
+      }
+    }
+  ]
+}

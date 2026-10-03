@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.5,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/igloo_chest"
+    }
+  ],
+  "entries": [
+    {
+      "brewed": true,
+      "item": "seedtocellar:vodka"
+    }
+  ]
+}

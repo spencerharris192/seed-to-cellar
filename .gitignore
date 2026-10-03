@@ -1,0 +1,46 @@
+# Secrets and OS clutter
+.env
+*.log
+Thumbs.db
+desktop.ini
+
+# Eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+eclipse
+
+# IntelliJ IDEA
+out
+*.ipr
+*.iws
+*.iml
+.idea
+
+# Gradle
+build
+.gradle
+
+# Game run folders (worlds, logs, configs made while testing)
+run
+run-data
+run-gametest
+
+# Data generator cache (regenerated every runData)
+src/generated/resources/.cache
+
+# Texture tools: Python environment, preview output, and vanilla
+# reference textures (extracted locally for comparison ONLY; never commit or ship)
+tools/.venv
+tools/out
+tools/vanilla
+__pycache__
+
+# Store-page photos and the jar copy for uploading (made by the photo tour and the build; regenerate, don't commit)
+release/curseforge/gallery/
+release/curseforge/gallery_upload/
+release/curseforge/files/
+release/curseforge/gallery_contact_sheet.png

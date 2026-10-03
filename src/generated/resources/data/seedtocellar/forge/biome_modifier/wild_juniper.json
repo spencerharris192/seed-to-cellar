@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/juniper",
+  "config_toggle": "wild_juniper",
+  "features": "seedtocellar:wild_juniper",
+  "step": "vegetal_decoration"
+}

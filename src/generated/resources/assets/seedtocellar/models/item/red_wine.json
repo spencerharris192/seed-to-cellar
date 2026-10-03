@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "seedtocellar:item/wine_bottle_full",
+    "layer1": "seedtocellar:item/wine_bottle_wine"
+  }
+}

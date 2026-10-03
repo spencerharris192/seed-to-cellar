@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "charred=false,facing=east,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 90
+    },
+    "charred=false,facing=east,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 90
+    },
+    "charred=false,facing=north,tap=false": {
+      "model": "seedtocellar:block/crimson_cask"
+    },
+    "charred=false,facing=north,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped"
+    },
+    "charred=false,facing=south,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 180
+    },
+    "charred=false,facing=south,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 180
+    },
+    "charred=false,facing=west,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 270
+    },
+    "charred=false,facing=west,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 270
+    },
+    "charred=true,facing=east,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 90
+    },
+    "charred=true,facing=east,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 90
+    },
+    "charred=true,facing=north,tap=false": {
+      "model": "seedtocellar:block/crimson_cask"
+    },
+    "charred=true,facing=north,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped"
+    },
+    "charred=true,facing=south,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 180
+    },
+    "charred=true,facing=south,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 180
+    },
+    "charred=true,facing=west,tap=false": {
+      "model": "seedtocellar:block/crimson_cask",
+      "y": 270
+    },
+    "charred=true,facing=west,tap=true": {
+      "model": "seedtocellar:block/crimson_cask_tapped",
+      "y": 270
+    }
+  }
+}

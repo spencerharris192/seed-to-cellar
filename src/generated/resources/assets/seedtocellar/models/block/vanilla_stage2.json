@@ -1,0 +1,446 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "north": {
+          "texture": "#vine",
+          "uv": [
+            14.0,
+            0.0,
+            2.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#vine"
+        }
+      },
+      "from": [
+        2,
+        0,
+        0.8
+      ],
+      "to": [
+        14,
+        16,
+        0.8
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        }
+      },
+      "from": [
+        4,
+        11,
+        0.8
+      ],
+      "to": [
+        6,
+        13,
+        2.3
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        }
+      },
+      "from": [
+        4.5,
+        11.5,
+        2.3
+      ],
+      "to": [
+        5.5,
+        12.5,
+        2.8
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        }
+      },
+      "from": [
+        10,
+        7,
+        0.8
+      ],
+      "to": [
+        12,
+        9,
+        2.3
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        }
+      },
+      "from": [
+        10.5,
+        7.5,
+        2.3
+      ],
+      "to": [
+        11.5,
+        8.5,
+        2.8
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            2.0,
+            1.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.5,
+            2.0
+          ]
+        }
+      },
+      "from": [
+        7,
+        3,
+        0.8
+      ],
+      "to": [
+        9,
+        5,
+        2.3
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "east": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        },
+        "north": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "south": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+          ]
+        },
+        "up": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            1.0,
+            0.5
+          ]
+        },
+        "west": {
+          "texture": "#flower",
+          "uv": [
+            0.0,
+            0.0,
+            0.5,
+            1.0
+          ]
+        }
+      },
+      "from": [
+        7.5,
+        3.5,
+        2.3
+      ],
+      "to": [
+        8.5,
+        4.5,
+        2.8
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "flower": "seedtocellar:block/vanilla_flower",
+    "particle": "seedtocellar:block/vanilla_vine",
+    "pod": "seedtocellar:block/vanilla_pod",
+    "vine": "seedtocellar:block/vanilla_vine"
+  }
+}

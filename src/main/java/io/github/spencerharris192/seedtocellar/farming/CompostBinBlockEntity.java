@@ -1,0 +1,175 @@
+package io.github.spencerharris192.seedtocellar.farming;
+
+import io.github.spencerharris192.seedtocellar.brewing.HydrometerReadable;
+import io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity;
+import io.github.spencerharris192.seedtocellar.config.ModConfigs;
+import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
+import io.github.spencerharris192.seedtocellar.registry.ModItems;
+import io.github.spencerharris192.seedtocellar.registry.ModTags;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.ComposterBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Compost Bin logic (GDD section 7). Holds up to {@link #CAPACITY} organic leftovers; once
+ * full it composts for one in-game day (stored as a start time, finished by a scheduled
+ * block tick, so it keeps working in unloaded chunks), then holds {@link #YIELD} Compost.
+ * Hoppers put leftovers in from above or the sides and take Compost out from below.
+ */
+public class CompostBinBlockEntity extends SyncedBlockEntity implements HydrometerReadable {
+    public static final int CAPACITY = 16;
+    public static final int YIELD = 4;
+    public static final int BASE_TICKS = 24000;
+
+    private int count;
+    private long startTime = -1;
+    private final LazyOptional<IItemHandler> items = LazyOptional.of(Handler::new);
+
+    public CompostBinBlockEntity(BlockPos pos, BlockState state) {
+        super(ModBlockEntities.COMPOST_BIN.get(), pos, state);
+    }
+
+    /** What the bin takes: anything the vanilla composter takes, plus our compostables tag (spent grain, rotten flesh...). */
+    public static boolean accepts(ItemStack stack) {
+        return !stack.isEmpty() && (ComposterBlock.COMPOSTABLES.containsKey(stack.getItem()) || stack.is(ModTags.Items.COMPOSTABLES));
+    }
+
+    public static int duration() {
+        return ModConfigs.processTicks(BASE_TICKS);
+    }
+
+    public int count() {
+        return count;
+    }
+
+    public boolean isComposting() {
+        return startTime >= 0 && !isReady();
+    }
+
+    public boolean isReady() {
+        return getBlockState().getValue(CompostBinBlock.READY);
+    }
+
+    /** Puts up to `amount` leftovers in; returns how many it took. */
+    public int add(int amount, boolean simulate) {
+        if (level == null || startTime >= 0 || isReady()) return 0;
+        int taken = Math.min(amount, CAPACITY - count);
+        if (taken <= 0 || simulate) return Math.max(0, taken);
+        count += taken;
+        if (count >= CAPACITY) {
+            startTime = level.getGameTime();
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), duration());
+        }
+        level.setBlock(worldPosition, getBlockState().setValue(CompostBinBlock.LEVEL, levelFor(count)), Block.UPDATE_CLIENTS);
+        sync();
+        return taken;
+    }
+
+    /** Called by the block's scheduled tick: done composting? */
+    public void checkFinished() {
+        if (level != null && startTime >= 0 && !isReady() && level.getGameTime() - startTime >= duration()) {
+            level.setBlock(worldPosition, getBlockState().setValue(CompostBinBlock.READY, true), Block.UPDATE_CLIENTS);
+            sync();
+        } else if (level != null && startTime >= 0 && !isReady()) {
+            // Woken early (e.g. the time setting changed): check again when it should be done.
+            level.scheduleTick(worldPosition, getBlockState().getBlock(), (int) Math.max(1, duration() - (level.getGameTime() - startTime)));
+        }
+    }
+
+    /** Takes the finished compost out (empty if not ready) and resets the bin. */
+    public ItemStack takeCompost() {
+        if (level == null || !isReady()) return ItemStack.EMPTY;
+        count = 0;
+        startTime = -1;
+        level.setBlock(worldPosition, getBlockState().setValue(CompostBinBlock.READY, false).setValue(CompostBinBlock.LEVEL, 0), Block.UPDATE_CLIENTS);
+        sync();
+        return new ItemStack(ModItems.COMPOST.get(), YIELD);
+    }
+
+    /** Blockstate fill level 0-4 for a count of leftovers. */
+    public static int levelFor(int count) {
+        return count <= 0 ? 0 : Math.min(CompostBinBlock.MAX_LEVEL, 1 + (count - 1) * CompostBinBlock.MAX_LEVEL / CAPACITY);
+    }
+
+    @Override
+    public List<Component> hydrometerLines() {
+        List<Component> lines = new ArrayList<>();
+        if (isReady()) {
+            lines.add(Component.translatable("hydrometer.seedtocellar.compost_ready", YIELD));
+        } else if (startTime >= 0 && level != null) {
+            long pct = Math.min(99, (level.getGameTime() - startTime) * 100 / duration());
+            lines.add(Component.translatable("hydrometer.seedtocellar.composting", pct));
+        } else {
+            lines.add(Component.translatable("hydrometer.seedtocellar.compost_filling", count, CAPACITY).withStyle(ChatFormatting.GRAY));
+        }
+        return lines;
+    }
+
+    @Override
+    protected void saveAdditional(CompoundTag tag) {
+        super.saveAdditional(tag);
+        tag.putInt("Count", count);
+        tag.putLong("StartTime", startTime);
+    }
+
+    @Override
+    public void load(CompoundTag tag) {
+        super.load(tag);
+        count = tag.getInt("Count");
+        startTime = tag.contains("StartTime") ? tag.getLong("StartTime") : -1;
+    }
+
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+        return cap == ForgeCapabilities.ITEM_HANDLER ? items.cast() : super.getCapability(cap, side);
+    }
+
+    @Override
+    public void invalidateCaps() {
+        super.invalidateCaps();
+        items.invalidate();
+    }
+
+    /** Slot 0 takes leftovers in; slot 1 gives compost out when it's ready. */
+    private class Handler implements IItemHandler {
+        @Override public int getSlots() { return 2; }
+
+        @Override
+        public ItemStack getStackInSlot(int slot) {
+            return slot == 1 && isReady() ? new ItemStack(ModItems.COMPOST.get(), YIELD) : ItemStack.EMPTY;
+        }
+
+        @Override
+        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
+            if (slot != 0 || !accepts(stack)) return stack;
+            int taken = add(stack.getCount(), simulate);
+            if (taken <= 0) return stack;
+            ItemStack rest = stack.copy();
+            rest.shrink(taken);
+            return rest;
+        }
+
+        @Override
+        public ItemStack extractItem(int slot, int amount, boolean simulate) {
+            if (slot != 1 || !isReady() || amount < YIELD) return ItemStack.EMPTY;
+            return simulate ? new ItemStack(ModItems.COMPOST.get(), YIELD) : takeCompost();
+        }
+
+        @Override public int getSlotLimit(int slot) { return slot == 0 ? 1 : YIELD; }
+
+        @Override public boolean isItemValid(int slot, ItemStack stack) { return slot == 0 && accepts(stack); }
+    }
+}

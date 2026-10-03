@@ -1,0 +1,366 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        5,
+        0,
+        7
+      ],
+      "to": [
+        11,
+        3,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        3,
+        12
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#neck"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        6,
+        3,
+        7
+      ],
+      "to": [
+        10,
+        8,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#neck"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        5,
+        8,
+        7
+      ],
+      "to": [
+        11,
+        12,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#neck"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        6,
+        8,
+        6
+      ],
+      "to": [
+        10,
+        12,
+        12
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#neck"
+        },
+        "east": {
+          "texture": "#neck"
+        },
+        "north": {
+          "texture": "#neck"
+        },
+        "south": {
+          "texture": "#neck"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#neck"
+        }
+      },
+      "from": [
+        6,
+        12,
+        7
+      ],
+      "to": [
+        10,
+        13,
+        11
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "north": {
+          "texture": "#pipe"
+        },
+        "south": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        }
+      },
+      "from": [
+        7,
+        9,
+        1
+      ],
+      "to": [
+        9,
+        11,
+        6
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#pipe"
+        },
+        "east": {
+          "texture": "#pipe"
+        },
+        "north": {
+          "texture": "#pipe"
+        },
+        "south": {
+          "texture": "#pipe"
+        },
+        "up": {
+          "texture": "#pipe"
+        },
+        "west": {
+          "texture": "#pipe"
+        }
+      },
+      "from": [
+        7,
+        0,
+        1
+      ],
+      "to": [
+        9,
+        9,
+        3
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#basket"
+        },
+        "east": {
+          "texture": "#basket"
+        },
+        "north": {
+          "texture": "#basket"
+        },
+        "south": {
+          "texture": "#basket"
+        },
+        "up": {
+          "texture": "#basket"
+        },
+        "west": {
+          "texture": "#basket"
+        }
+      },
+      "from": [
+        5.5,
+        7.5,
+        1.5
+      ],
+      "to": [
+        10.5,
+        12.5,
+        5
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        5,
+        7,
+        1
+      ],
+      "to": [
+        11,
+        8,
+        5.5
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#top"
+        },
+        "east": {
+          "texture": "#top"
+        },
+        "north": {
+          "texture": "#top"
+        },
+        "south": {
+          "texture": "#top"
+        },
+        "up": {
+          "texture": "#top"
+        },
+        "west": {
+          "texture": "#top"
+        }
+      },
+      "from": [
+        5,
+        12,
+        1
+      ],
+      "to": [
+        11,
+        13,
+        5.5
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "basket": "seedtocellar:block/pot_still_basket",
+    "copper": "seedtocellar:block/pot_still_copper",
+    "neck": "seedtocellar:block/pot_still_neck",
+    "particle": "seedtocellar:block/pot_still_copper",
+    "pipe": "seedtocellar:block/pot_still_pipe",
+    "top": "seedtocellar:block/pot_still_top"
+  }
+}

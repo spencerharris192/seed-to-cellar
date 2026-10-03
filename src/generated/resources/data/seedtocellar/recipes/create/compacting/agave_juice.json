@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "ingredients": [
+          {
+            "item": "seedtocellar:roasted_agave"
+          },
+          {
+            "item": "seedtocellar:roasted_agave"
+          },
+          {
+            "item": "seedtocellar:roasted_agave"
+          },
+          {
+            "item": "seedtocellar:roasted_agave"
+          }
+        ],
+        "results": [
+          {
+            "amount": 500,
+            "fluid": "seedtocellar:agave_juice"
+          },
+          {
+            "item": "seedtocellar:agave_fiber"
+          }
+        ]
+      }
+    }
+  ]
+}

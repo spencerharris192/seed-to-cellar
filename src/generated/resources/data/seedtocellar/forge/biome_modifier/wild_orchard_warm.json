@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/orchard_warm",
+  "config_toggle": "wild_orchards",
+  "features": "seedtocellar:wild_orchard_warm",
+  "step": "vegetal_decoration"
+}

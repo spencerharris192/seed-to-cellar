@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "block": "seedtocellar:harvest_feast",
+          "condition": "minecraft:block_state_property",
+          "properties": {
+            "servings": "6"
+          }
+        },
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "seedtocellar:harvest_feast"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/harvest_feast"
+}

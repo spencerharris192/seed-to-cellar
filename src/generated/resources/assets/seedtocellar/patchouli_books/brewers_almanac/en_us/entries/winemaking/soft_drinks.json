@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:winemaking",
+  "icon": "seedtocellar:lemonade",
+  "name": "Soft Drinks",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Juice is a drink in itself: pour it into a vat and fill glass bottles from it. In a heated kettle, lemon juice and sugar make $(item)lemonade$(); water, elderflowers, sugar and a lemon $(item)elderflower cordial$(); red wine, an orange and sugar $(item)mulled wine$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Roast coffee beans in the Kiln (Medium), grind them, and brew them in a kettle of water with glass bottles: $(item)coffee$(). Ginger, sugar and ale yeast in a jar of water brew into $(item)ginger beer$()."
+    }
+  ],
+  "sortnum": 3
+}

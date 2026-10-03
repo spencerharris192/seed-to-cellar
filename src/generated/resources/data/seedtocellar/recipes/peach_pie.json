@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "E": {
+      "tag": "forge:eggs"
+    },
+    "F": {
+      "tag": "forge:fruits/peach"
+    },
+    "S": {
+      "tag": "seedtocellar:sweeteners"
+    },
+    "W": {
+      "tag": "forge:flour/wheat"
+    }
+  },
+  "pattern": [
+    "FFF",
+    "SES",
+    "WWW"
+  ],
+  "result": {
+    "item": "seedtocellar:peach_pie"
+  },
+  "show_notification": true
+}

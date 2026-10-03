@@ -1,0 +1,20 @@
+{
+  "category": "seedtocellar:winemaking",
+  "icon": "seedtocellar:white_wine",
+  "name": "Wines",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "Ferment with $(item)Wine Yeast$(): red must makes $(item)red wine$() (Mild); white grape juice $(item)white wine$() and red grape juice $(item)rosé$() (Cool). Apple juice is $(item)cider$(), pear juice $(item)perry$()."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "Stir 2 honey bottles a bucket into a heated kettle of water for $(item)honey water$(): it ferments into $(item)mead$() (Mild). Every other fruit juice makes its own fruit wine, fermented Cool."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:wine_bottle"
+    }
+  ],
+  "sortnum": 1
+}

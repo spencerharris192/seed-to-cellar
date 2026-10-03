@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:pressing",
+  "byproduct": {
+    "item": "seedtocellar:olive_pomace"
+  },
+  "count": 4,
+  "cranks": 6,
+  "ingredient": {
+    "tag": "forge:fruits/olive"
+  },
+  "result": {
+    "amount": 250,
+    "fluid": "seedtocellar:olive_oil"
+  }
+}

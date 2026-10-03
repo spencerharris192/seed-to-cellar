@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/oats",
+  "config_toggle": "wild_oats",
+  "features": "seedtocellar:wild_oats",
+  "step": "vegetal_decoration"
+}

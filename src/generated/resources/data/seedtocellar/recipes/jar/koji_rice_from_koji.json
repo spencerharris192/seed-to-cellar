@@ -1,0 +1,22 @@
+{
+  "type": "seedtocellar:jar",
+  "ingredients": [
+    {
+      "item": "seedtocellar:steamed_rice"
+    },
+    {
+      "item": "seedtocellar:steamed_rice"
+    },
+    {
+      "item": "seedtocellar:koji_rice"
+    }
+  ],
+  "result": {
+    "count": 3,
+    "item": "seedtocellar:koji_rice"
+  },
+  "temperature": [
+    "warm"
+  ],
+  "time": 24000
+}

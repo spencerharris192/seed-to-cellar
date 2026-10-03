@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:fruits/red_grape"
+  },
+  "result": {
+    "item": "seedtocellar:raisins"
+  },
+  "time": 18000
+}

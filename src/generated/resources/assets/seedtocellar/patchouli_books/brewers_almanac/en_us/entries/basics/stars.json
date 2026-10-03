@@ -1,0 +1,16 @@
+{
+  "category": "seedtocellar:basics",
+  "icon": "seedtocellar:old_ale",
+  "name": "Stars",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "A drink earns up to five stars: one to start, then one each for $(item)cultured yeast$(), the $(item)right temperature$(), its $(item)craft step$() and $(item)aging$(). Hold Shift over a drink to see which it earned."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "The craft step: a day's rest in a cask or keg for beer and wine; a second run through the still for spirits. Aging: years in a cask of the right wood.$(br2)Better stars mean longer effects and gentler hangovers."
+    }
+  ],
+  "sortnum": 4
+}

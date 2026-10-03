@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:mixing",
+        "heatRequirement": "heated",
+        "ingredients": [
+          {
+            "item": "minecraft:honey_bottle"
+          },
+          {
+            "item": "minecraft:honey_bottle"
+          },
+          {
+            "amount": 1000,
+            "fluidTag": "minecraft:water"
+          }
+        ],
+        "results": [
+          {
+            "amount": 1000,
+            "fluid": "seedtocellar:honey_water"
+          },
+          {
+            "count": 2,
+            "item": "minecraft:glass_bottle"
+          }
+        ]
+      }
+    }
+  ]
+}

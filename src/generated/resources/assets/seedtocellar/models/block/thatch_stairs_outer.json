@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/outer_stairs",
+  "textures": {
+    "bottom": "seedtocellar:block/thatch",
+    "side": "seedtocellar:block/thatch",
+    "top": "seedtocellar:block/thatch"
+  }
+}

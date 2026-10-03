@@ -1,0 +1,8 @@
+{
+  "parent": "seedtocellar:block/template_trellis_plant",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "plant": "seedtocellar:block/red_grape_stage0",
+    "trellis": "seedtocellar:block/trellis"
+  }
+}

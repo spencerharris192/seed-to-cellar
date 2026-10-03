@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "bites=0": {
+      "model": "seedtocellar:block/peach_pie"
+    },
+    "bites=1": {
+      "model": "seedtocellar:block/peach_pie_bite1"
+    },
+    "bites=2": {
+      "model": "seedtocellar:block/peach_pie_bite2"
+    },
+    "bites=3": {
+      "model": "seedtocellar:block/peach_pie_bite3"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/orientable",
+  "textures": {
+    "front": "seedtocellar:block/wine_rack_front",
+    "side": "seedtocellar:block/wine_rack_side",
+    "top": "seedtocellar:block/wine_rack_top"
+  }
+}

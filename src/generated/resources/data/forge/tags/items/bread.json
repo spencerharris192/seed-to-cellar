@@ -1,0 +1,10 @@
+{
+  "values": [
+    "seedtocellar:rye_bread",
+    "seedtocellar:sourdough_bread",
+    "seedtocellar:cornbread",
+    "seedtocellar:spent_grain_bread",
+    "seedtocellar:beer_bread",
+    "minecraft:bread"
+  ]
+}

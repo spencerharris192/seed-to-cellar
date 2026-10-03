@@ -1,0 +1,18 @@
+{
+  "values": [
+    "seedtocellar:barley_crop",
+    "seedtocellar:rye_crop",
+    "seedtocellar:oat_crop",
+    "seedtocellar:sorghum_crop",
+    "seedtocellar:corn_crop",
+    "seedtocellar:rice_crop",
+    "seedtocellar:sugar_beet_crop",
+    "seedtocellar:onion_crop",
+    "seedtocellar:garlic_crop",
+    "seedtocellar:cabbage_crop",
+    "seedtocellar:ginger_crop",
+    "seedtocellar:coriander_crop",
+    "seedtocellar:anise_crop",
+    "seedtocellar:agave"
+  ]
+}

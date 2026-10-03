@@ -1,0 +1,98 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#wood"
+        },
+        "east": {
+          "texture": "#wood"
+        },
+        "north": {
+          "texture": "#wood"
+        },
+        "south": {
+          "texture": "#wood"
+        },
+        "up": {
+          "texture": "#wood"
+        },
+        "west": {
+          "texture": "#wood"
+        }
+      },
+      "from": [
+        3,
+        10,
+        3
+      ],
+      "to": [
+        13,
+        11.5,
+        13
+      ]
+    },
+    {
+      "faces": {
+        "down": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            10.0,
+            8.5,
+            20.5
+          ]
+        },
+        "north": {
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            10.0,
+            8.5,
+            20.5
+          ]
+        },
+        "south": {
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            10.0,
+            8.5,
+            20.5
+          ]
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            10.0,
+            8.5,
+            20.5
+          ]
+        }
+      },
+      "from": [
+        7.5,
+        11.5,
+        7.5
+      ],
+      "to": [
+        8.5,
+        22,
+        8.5
+      ]
+    }
+  ],
+  "textures": {
+    "iron": "seedtocellar:block/fruit_press_iron",
+    "particle": "seedtocellar:block/fruit_press_iron",
+    "wood": "seedtocellar:block/fruit_press_wood"
+  }
+}

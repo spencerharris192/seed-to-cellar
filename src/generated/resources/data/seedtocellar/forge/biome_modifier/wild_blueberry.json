@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/blueberry",
+  "config_toggle": "wild_blueberry",
+  "features": "seedtocellar:wild_blueberry",
+  "step": "vegetal_decoration"
+}

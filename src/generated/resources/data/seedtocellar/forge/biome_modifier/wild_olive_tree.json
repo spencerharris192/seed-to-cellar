@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/olive_tree",
+  "config_toggle": "olive_tree",
+  "features": "seedtocellar:wild_olive_tree",
+  "step": "vegetal_decoration"
+}

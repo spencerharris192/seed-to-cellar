@@ -1,0 +1,42 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.6,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/village/village_plains_house"
+    }
+  ],
+  "entries": [
+    {
+      "item": "seedtocellar:barley_seeds",
+      "max": 5,
+      "min": 2,
+      "weight": 4
+    },
+    {
+      "item": "seedtocellar:oat_seeds",
+      "max": 4,
+      "min": 2,
+      "weight": 3
+    },
+    {
+      "item": "seedtocellar:onion",
+      "max": 3,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:cabbage_seeds",
+      "max": 3,
+      "weight": 2
+    },
+    {
+      "item": "seedtocellar:hop_rhizome",
+      "max": 2
+    },
+    {
+      "item": "seedtocellar:apple_sapling"
+    }
+  ],
+  "rolls": 2
+}

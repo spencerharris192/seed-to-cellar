@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/cherry_tree",
+  "config_toggle": "cherry_tree",
+  "features": "seedtocellar:wild_cherry_tree",
+  "step": "vegetal_decoration"
+}

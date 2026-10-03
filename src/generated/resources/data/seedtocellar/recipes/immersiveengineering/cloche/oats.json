@@ -1,0 +1,36 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "immersiveengineering"
+        }
+      ],
+      "recipe": {
+        "type": "immersiveengineering:cloche",
+        "input": {
+          "item": "seedtocellar:oat_seeds"
+        },
+        "render": {
+          "type": "crop",
+          "block": "seedtocellar:oat_crop"
+        },
+        "results": [
+          {
+            "count": 2,
+            "item": "seedtocellar:oats"
+          },
+          {
+            "item": "seedtocellar:oat_seeds"
+          }
+        ],
+        "soil": {
+          "tag": "minecraft:dirt"
+        },
+        "time": 800
+      }
+    }
+  ]
+}

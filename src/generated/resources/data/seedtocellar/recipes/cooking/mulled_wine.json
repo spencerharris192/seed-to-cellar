@@ -1,0 +1,22 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": {
+    "item": "seedtocellar:mug"
+  },
+  "fluid": {
+    "amount": 250,
+    "fluid": "seedtocellar:red_wine"
+  },
+  "ingredients": [
+    {
+      "tag": "forge:fruits/orange"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:mulled_wine"
+  },
+  "time": 200
+}

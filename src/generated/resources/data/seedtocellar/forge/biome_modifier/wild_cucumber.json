@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/cucumber",
+  "config_toggle": "wild_cucumber",
+  "features": "seedtocellar:wild_cucumber",
+  "step": "vegetal_decoration"
+}

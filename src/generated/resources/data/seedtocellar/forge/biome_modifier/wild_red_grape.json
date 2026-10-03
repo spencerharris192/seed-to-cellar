@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/red_grape",
+  "config_toggle": "wild_red_grape",
+  "features": "seedtocellar:wild_red_grape",
+  "step": "vegetal_decoration"
+}

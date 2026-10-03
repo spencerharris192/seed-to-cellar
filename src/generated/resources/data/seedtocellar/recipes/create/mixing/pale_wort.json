@@ -1,0 +1,39 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:mixing",
+        "heatRequirement": "heated",
+        "ingredients": [
+          {
+            "item": "seedtocellar:pale_grist"
+          },
+          {
+            "item": "seedtocellar:pale_grist"
+          },
+          {
+            "amount": 1000,
+            "fluid": "minecraft:water"
+          }
+        ],
+        "results": [
+          {
+            "amount": 1000,
+            "fluid": "seedtocellar:sweet_wort",
+            "nbt": "{Wort:{Malts:{pale:1.0f},Strength:\"NORMAL\"}}"
+          },
+          {
+            "item": "seedtocellar:spent_grain"
+          }
+        ]
+      }
+    }
+  ]
+}

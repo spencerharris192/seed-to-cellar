@@ -1,0 +1,11 @@
+{
+  "parent": "seedtocellar:block/pot_still_lower",
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "copper": "seedtocellar:block/pot_still_copper_oxidized",
+    "particle": "seedtocellar:block/pot_still_copper_oxidized",
+    "pipe": "seedtocellar:block/pot_still_pipe_oxidized",
+    "safe": "seedtocellar:block/pot_still_safe_oxidized",
+    "top": "seedtocellar:block/pot_still_top_oxidized"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/plum_tree",
+  "config_toggle": "plum_tree",
+  "features": "seedtocellar:wild_plum_tree",
+  "step": "vegetal_decoration"
+}

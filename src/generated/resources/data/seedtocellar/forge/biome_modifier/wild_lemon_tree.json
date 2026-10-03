@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/lemon_tree",
+  "config_toggle": "lemon_tree",
+  "features": "seedtocellar:wild_lemon_tree",
+  "step": "vegetal_decoration"
+}

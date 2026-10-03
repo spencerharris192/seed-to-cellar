@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/rye",
+  "config_toggle": "wild_rye",
+  "features": "seedtocellar:wild_rye",
+  "step": "vegetal_decoration"
+}

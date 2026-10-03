@@ -1,0 +1,34 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:mixing",
+        "heatRequirement": "heated",
+        "ingredients": [
+          {
+            "item": "seedtocellar:dried_hops"
+          },
+          {
+            "amount": 1000,
+            "fluid": "seedtocellar:sweet_wort",
+            "nbt": "{Wort:{Malts:{pale:0.5f,wheat:0.5f},Strength:\"NORMAL\"}}"
+          }
+        ],
+        "results": [
+          {
+            "amount": 1000,
+            "fluid": "seedtocellar:hopped_wort",
+            "nbt": "{Wort:{Malts:{pale:0.5f,wheat:0.5f},Strength:\"NORMAL\"}}"
+          }
+        ]
+      }
+    }
+  ]
+}

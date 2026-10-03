@@ -1,0 +1,18 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": {
+    "item": "minecraft:glass_bottle"
+  },
+  "ingredients": [
+    {
+      "tag": "forge:fruits/orange"
+    },
+    {
+      "tag": "seedtocellar:sweeteners"
+    }
+  ],
+  "result": {
+    "item": "seedtocellar:marmalade"
+  },
+  "time": 200
+}

@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "fermenting=false,open=false,powered=false": {
+      "model": "seedtocellar:block/fermenting_vat_closed"
+    },
+    "fermenting=false,open=false,powered=true": {
+      "model": "seedtocellar:block/fermenting_vat_closed"
+    },
+    "fermenting=false,open=true,powered=false": {
+      "model": "seedtocellar:block/fermenting_vat"
+    },
+    "fermenting=false,open=true,powered=true": {
+      "model": "seedtocellar:block/fermenting_vat"
+    },
+    "fermenting=true,open=false,powered=false": {
+      "model": "seedtocellar:block/fermenting_vat_closed"
+    },
+    "fermenting=true,open=false,powered=true": {
+      "model": "seedtocellar:block/fermenting_vat_closed"
+    },
+    "fermenting=true,open=true,powered=false": {
+      "model": "seedtocellar:block/fermenting_vat"
+    },
+    "fermenting=true,open=true,powered=true": {
+      "model": "seedtocellar:block/fermenting_vat"
+    }
+  }
+}

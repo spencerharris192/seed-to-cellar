@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/chili",
+  "config_toggle": "wild_chili",
+  "features": "seedtocellar:wild_chili",
+  "step": "vegetal_decoration"
+}

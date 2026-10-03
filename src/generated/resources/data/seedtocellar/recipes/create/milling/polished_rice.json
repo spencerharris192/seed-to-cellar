@@ -1,0 +1,30 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "create"
+        }
+      ],
+      "recipe": {
+        "type": "create:milling",
+        "ingredients": [
+          {
+            "tag": "forge:crops/rice"
+          }
+        ],
+        "processingTime": 150,
+        "results": [
+          {
+            "item": "seedtocellar:polished_rice"
+          },
+          {
+            "item": "seedtocellar:rice_bran"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "botanypots"
+        }
+      ],
+      "recipe": {
+        "type": "botanypots:crop",
+        "categories": [
+          "dirt",
+          "farmland"
+        ],
+        "display": {
+          "type": "botanypots:aging",
+          "block": "seedtocellar:lavender_crop"
+        },
+        "drops": [
+          {
+            "chance": 1.0,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:lavender"
+            }
+          },
+          {
+            "chance": 0.15,
+            "maxRolls": 2,
+            "minRolls": 1,
+            "output": {
+              "item": "seedtocellar:lavender"
+            }
+          }
+        ],
+        "growthTicks": 1600,
+        "seed": {
+          "item": "seedtocellar:lavender"
+        }
+      }
+    }
+  ]
+}

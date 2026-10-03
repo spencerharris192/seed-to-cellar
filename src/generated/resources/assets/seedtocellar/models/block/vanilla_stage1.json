@@ -1,0 +1,38 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "north": {
+          "texture": "#vine",
+          "uv": [
+            14.0,
+            0.0,
+            2.0,
+            16.0
+          ]
+        },
+        "south": {
+          "texture": "#vine"
+        }
+      },
+      "from": [
+        2,
+        0,
+        0.8
+      ],
+      "to": [
+        14,
+        16,
+        0.8
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "flower": "seedtocellar:block/vanilla_flower",
+    "particle": "seedtocellar:block/vanilla_vine",
+    "pod": "seedtocellar:block/vanilla_pod",
+    "vine": "seedtocellar:block/vanilla_vine"
+  }
+}

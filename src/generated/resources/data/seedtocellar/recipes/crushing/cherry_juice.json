@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": {
+    "tag": "forge:fruits/cherry"
+  },
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:cherry_juice"
+  },
+  "stomps": 3
+}

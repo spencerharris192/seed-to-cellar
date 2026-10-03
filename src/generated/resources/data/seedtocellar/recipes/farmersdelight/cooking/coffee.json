@@ -1,0 +1,30 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "farmersdelight"
+        }
+      ],
+      "recipe": {
+        "type": "farmersdelight:cooking",
+        "container": {
+          "item": "minecraft:glass_bottle"
+        },
+        "cookingtime": 160,
+        "experience": 1.0,
+        "ingredients": [
+          {
+            "item": "seedtocellar:ground_coffee"
+          }
+        ],
+        "recipe_book_tab": "meals",
+        "result": {
+          "item": "seedtocellar:coffee"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:config_add_features",
+  "biomes": "#seedtocellar:has_wild/cranberry",
+  "config_toggle": "wild_cranberry",
+  "features": "seedtocellar:wild_cranberry",
+  "step": "vegetal_decoration"
+}

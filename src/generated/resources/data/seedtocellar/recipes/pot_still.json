@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "C": {
+      "tag": "forge:ingots/copper"
+    },
+    "K": {
+      "item": "seedtocellar:brew_kettle"
+    }
+  },
+  "pattern": [
+    " CC",
+    " C ",
+    "CKC"
+  ],
+  "result": {
+    "item": "seedtocellar:pot_still"
+  },
+  "show_notification": true
+}

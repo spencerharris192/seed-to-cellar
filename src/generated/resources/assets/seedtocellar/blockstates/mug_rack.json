@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=east": {
+      "model": "seedtocellar:block/mug_rack",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "seedtocellar:block/mug_rack"
+    },
+    "facing=south": {
+      "model": "seedtocellar:block/mug_rack",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "seedtocellar:block/mug_rack",
+      "y": 270
+    }
+  }
+}

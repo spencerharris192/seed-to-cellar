@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "overrides": [
+    {
+      "model": "seedtocellar:item/apple_crown_whiskey_crowned",
+      "predicate": {
+        "seedtocellar:crowned": 1.0
+      }
+    }
+  ],
+  "textures": {
+    "layer0": "seedtocellar:item/apple_crown_whiskey"
+  }
+}

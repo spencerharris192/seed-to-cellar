@@ -1,0 +1,7 @@
+{
+  "parent": "seedtocellar:block/cask",
+  "textures": {
+    "head": "seedtocellar:block/crimson_cask_head",
+    "side": "seedtocellar:block/crimson_cask_side"
+  }
+}

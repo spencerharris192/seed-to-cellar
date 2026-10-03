@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "seedtocellar:pale_malt_sack"
+    }
+  ],
+  "result": {
+    "count": 8,
+    "item": "seedtocellar:pale_malt"
+  }
+}

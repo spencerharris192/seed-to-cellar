@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "bottom": "seedtocellar:block/pale_malt_sack_bottom",
+    "side": "seedtocellar:block/pale_malt_sack_side",
+    "top": "seedtocellar:block/pale_malt_sack_top"
+  }
+}

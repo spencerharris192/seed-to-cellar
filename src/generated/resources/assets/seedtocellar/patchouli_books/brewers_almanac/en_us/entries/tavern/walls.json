@@ -1,0 +1,55 @@
+{
+  "category": "seedtocellar:tavern",
+  "icon": "seedtocellar:tavern_sign",
+  "name": "On the Walls",
+  "pages": [
+    {
+      "type": "patchouli:text",
+      "text": "A $(item)Tavern Sign$() hangs out from a wall on its iron bracket. Repaint it with what you serve: right-click it with a mug of beer for an alehouse, wine for a wine bar, a spirit for a distillery, or a cask for a cellar."
+    },
+    {
+      "type": "patchouli:text",
+      "text": "A $(item)Mug Rack$() holds four empty mugs, hung by their handles from its pegs. A $(item)Hop Garland$() is fresh bines strung along a wall: hang several in a row and they join into one."
+    },
+    {
+      "type": "patchouli:multiblock",
+      "enable_visualize": false,
+      "multiblock": {
+        "mapping": {
+          "0": "minecraft:spruce_planks",
+          "G": "seedtocellar:hop_garland[facing=north]",
+          "M": "seedtocellar:mug_rack[facing=north]",
+          "W": "minecraft:spruce_planks",
+          "s": "seedtocellar:tavern_sign[emblem=wine,facing=north]"
+        },
+        "pattern": [
+          [
+            "GW",
+            "GW",
+            " W"
+          ],
+          [
+            "MW",
+            " 0",
+            "sW"
+          ]
+        ]
+      },
+      "name": "A Tavern Wall",
+      "text": "A hop garland strung along the top, a Mug Rack and a sign for a wine bar."
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:tavern_sign"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:mug_rack"
+    },
+    {
+      "type": "patchouli:crafting",
+      "recipe": "seedtocellar:hop_garland"
+    }
+  ],
+  "sortnum": 2
+}

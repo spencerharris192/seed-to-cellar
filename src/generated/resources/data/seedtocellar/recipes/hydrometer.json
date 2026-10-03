@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "G": {
+      "tag": "forge:glass_panes/colorless"
+    },
+    "N": {
+      "tag": "forge:nuggets/iron"
+    }
+  },
+  "pattern": [
+    "G",
+    "G",
+    "N"
+  ],
+  "result": {
+    "item": "seedtocellar:hydrometer"
+  },
+  "show_notification": true
+}

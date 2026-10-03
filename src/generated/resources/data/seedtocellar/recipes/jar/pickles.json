@@ -1,0 +1,24 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "seedtocellar:vinegar",
+  "fluid_amount": 250,
+  "ingredients": [
+    {
+      "tag": "forge:crops/cucumber"
+    },
+    {
+      "tag": "forge:crops/cucumber"
+    },
+    {
+      "tag": "forge:crops/garlic"
+    },
+    {
+      "tag": "forge:crops/coriander"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "item": "seedtocellar:pickles"
+  },
+  "time": 24000
+}

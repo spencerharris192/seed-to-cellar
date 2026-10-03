@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:agave_wash"
+  },
+  "result": "seedtocellar:tequila"
+}

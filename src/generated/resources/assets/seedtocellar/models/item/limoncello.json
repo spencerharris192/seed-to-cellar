@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "seedtocellar:item/spirit_bottle_full",
+    "layer1": "seedtocellar:item/spirit_bottle_spirit",
+    "layer2": "seedtocellar:item/spirit_bottle_label",
+    "layer3": "seedtocellar:item/spirit_bottle_print"
+  }
+}

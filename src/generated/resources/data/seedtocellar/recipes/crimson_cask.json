@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "I": {
+      "tag": "forge:ingots/iron"
+    },
+    "P": {
+      "item": "minecraft:crimson_planks"
+    }
+  },
+  "pattern": [
+    "PIP",
+    "P P",
+    "PIP"
+  ],
+  "result": {
+    "item": "seedtocellar:crimson_cask"
+  },
+  "show_notification": true
+}

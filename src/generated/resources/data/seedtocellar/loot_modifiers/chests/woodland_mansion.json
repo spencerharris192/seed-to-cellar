@@ -1,0 +1,29 @@
+{
+  "type": "seedtocellar:chest_loot",
+  "chance": 0.5,
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:chests/woodland_mansion"
+    }
+  ],
+  "entries": [
+    {
+      "brewed": true,
+      "item": "seedtocellar:red_wine",
+      "max_years": 10,
+      "weight": 2
+    },
+    {
+      "brewed": true,
+      "item": "seedtocellar:brandy",
+      "max_years": 12
+    },
+    {
+      "brewed": true,
+      "item": "seedtocellar:malt_whiskey",
+      "max_years": 15
+    }
+  ],
+  "rolls": 2
+}

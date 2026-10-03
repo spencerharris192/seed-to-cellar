@@ -1,0 +1,71 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "north": {
+          "texture": "#heart"
+        },
+        "south": {
+          "texture": "#heart"
+        }
+      },
+      "from": [
+        5.5,
+        0,
+        8
+      ],
+      "rotation": {
+        "angle": 45.0,
+        "axis": "y",
+        "origin": [
+          8,
+          0,
+          8
+        ]
+      },
+      "to": [
+        10.5,
+        4,
+        8
+      ]
+    },
+    {
+      "faces": {
+        "north": {
+          "texture": "#heart"
+        },
+        "south": {
+          "texture": "#heart"
+        }
+      },
+      "from": [
+        5.5,
+        0,
+        8
+      ],
+      "rotation": {
+        "angle": -45.0,
+        "axis": "y",
+        "origin": [
+          8,
+          0,
+          8
+        ]
+      },
+      "to": [
+        10.5,
+        4,
+        8
+      ]
+    }
+  ],
+  "render_type": "minecraft:cutout",
+  "textures": {
+    "flower": "seedtocellar:block/agave_flower",
+    "heart": "seedtocellar:block/agave_heart",
+    "leaf": "seedtocellar:block/agave_leaf",
+    "particle": "seedtocellar:block/agave_leaf",
+    "stalk": "seedtocellar:block/agave_stalk"
+  }
+}

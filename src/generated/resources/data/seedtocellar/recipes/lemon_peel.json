@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:fruits/lemon"
+    }
+  ],
+  "result": {
+    "count": 2,
+    "item": "seedtocellar:lemon_peel"
+  }
+}

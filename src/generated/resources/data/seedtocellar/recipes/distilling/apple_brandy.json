@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:distilling",
+  "input": {
+    "fluid": "seedtocellar:cider"
+  },
+  "result": "seedtocellar:apple_brandy"
+}

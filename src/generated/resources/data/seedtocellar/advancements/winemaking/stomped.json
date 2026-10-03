@@ -1,0 +1,30 @@
+{
+  "parent": "seedtocellar:brewing/root",
+  "criteria": {
+    "stomp": {
+      "conditions": {},
+      "trigger": "seedtocellar:stomp"
+    }
+  },
+  "display": {
+    "announce_to_chat": true,
+    "description": {
+      "translate": "advancements.seedtocellar.stomped.description"
+    },
+    "frame": "task",
+    "hidden": false,
+    "icon": {
+      "item": "seedtocellar:crushing_tub"
+    },
+    "show_toast": true,
+    "title": {
+      "translate": "advancements.seedtocellar.stomped.title"
+    }
+  },
+  "requirements": [
+    [
+      "stomp"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "seedtocellar:block/rye_bale_top",
+    "side": "seedtocellar:block/rye_bale_side"
+  }
+}

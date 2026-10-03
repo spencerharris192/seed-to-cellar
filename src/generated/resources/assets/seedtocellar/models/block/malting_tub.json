@@ -1,0 +1,8 @@
+{
+  "parent": "seedtocellar:block/template_malting_tub",
+  "textures": {
+    "bottom": "seedtocellar:block/malting_tub_bottom",
+    "inner": "seedtocellar:block/malting_tub_inner",
+    "side": "seedtocellar:block/malting_tub_side"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": {
+    "tag": "forge:crops/hops"
+  },
+  "result": {
+    "item": "seedtocellar:dried_hops"
+  },
+  "time": 12000
+}
