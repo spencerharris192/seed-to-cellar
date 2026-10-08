@@ -4,10 +4,22 @@
     {
       "faces": {
         "north": {
-          "texture": "#heart"
+          "texture": "#heart",
+          "uv": [
+            5.5,
+            12,
+            10.5,
+            16
+          ]
         },
         "south": {
-          "texture": "#heart"
+          "texture": "#heart",
+          "uv": [
+            5.5,
+            12,
+            10.5,
+            16
+          ]
         }
       },
       "from": [
@@ -33,10 +45,22 @@
     {
       "faces": {
         "north": {
-          "texture": "#heart"
+          "texture": "#heart",
+          "uv": [
+            5.5,
+            12,
+            10.5,
+            16
+          ]
         },
         "south": {
-          "texture": "#heart"
+          "texture": "#heart",
+          "uv": [
+            5.5,
+            12,
+            10.5,
+            16
+          ]
         }
       },
       "from": [
@@ -60,7 +84,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "flower": "seedtocellar:block/agave_flower",
     "heart": "seedtocellar:block/agave_heart",

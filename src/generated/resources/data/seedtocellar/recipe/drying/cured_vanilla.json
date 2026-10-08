@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "seedtocellar:vanilla_pod",
+  "result": {
+    "id": "seedtocellar:cured_vanilla"
+  },
+  "time": 18000
+}

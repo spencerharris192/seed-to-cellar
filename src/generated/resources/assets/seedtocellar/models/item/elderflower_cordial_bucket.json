@@ -1,5 +1,0 @@
-{
-  "parent": "forge:item/bucket",
-  "fluid": "seedtocellar:elderflower_cordial",
-  "loader": "forge:fluid_container"
-}

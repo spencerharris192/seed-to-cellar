@@ -17,8 +17,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.ToolActions;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.component.BlockItemStateProperties;
+import net.minecraft.world.level.block.LevelEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Locale;
@@ -72,30 +77,43 @@ public final class CopperWeathering {
     @Nullable
     public static InteractionResult wax(BlockState state, Level level, BlockPos pos, Player player, ItemStack held) {
         if (!held.is(Items.HONEYCOMB) || state.getValue(WAXED)) return null;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             BlockState waxed = state.setValue(WAXED, true);
             level.setBlock(pos, waxed, Block.UPDATE_ALL_IMMEDIATE);
             if (!player.getAbilities().instabuild) held.shrink(1);
             level.levelEvent(player, 3003, pos, 0);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, waxed));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
-    /** What an axe makes of it: the wax off, or else a stage scraped back (Forge's axe does the sound, sparks and wear). */
+    /** What an axe makes of it: the wax off, or else a stage scraped back; null if there's nothing to scrape. */
     @Nullable
-    public static BlockState axed(BlockState state, ToolAction action) {
-        if (action == ToolActions.AXE_SCRAPE && !state.getValue(WAXED) && state.getValue(STAGE) != Stage.UNAFFECTED) {
-            return state.setValue(STAGE, state.getValue(STAGE).previous());
-        }
-        if (action == ToolActions.AXE_WAX_OFF && state.getValue(WAXED)) return state.setValue(WAXED, false);
+    public static BlockState axed(BlockState state) {
+        if (state.getValue(WAXED)) return state.setValue(WAXED, false);
+        if (state.getValue(STAGE) != Stage.UNAFFECTED) return state.setValue(STAGE, state.getValue(STAGE).previous());
         return null;
     }
 
-    /** The held item is an axe with something to do here: the block lets the axe have the click. */
-    public static boolean axeWorks(BlockState state, ItemStack held) {
-        return held.canPerformAction(ToolActions.AXE_SCRAPE) && axed(state, ToolActions.AXE_SCRAPE) != null
-                || held.canPerformAction(ToolActions.AXE_WAX_OFF) && axed(state, ToolActions.AXE_WAX_OFF) != null;
+    /**
+     * An axe on it scrapes the wax off, or else a stage of patina, as on vanilla copper: the sound, the sparks and a point
+     * of wear on the axe. Null if the held item isn't an axe or there's nothing to scrape.
+     */
+    @Nullable
+    public static InteractionResult axe(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, ItemStack held) {
+        if (!held.is(ItemTags.AXES)) return null;
+        BlockState result = axed(state);
+        if (result == null) return null;
+        if (!level.isClientSide()) {
+            boolean waxOff = state.getValue(WAXED);
+            level.setBlock(pos, result, Block.UPDATE_ALL_IMMEDIATE);
+            if (waxOff) level.playSound(null, pos, SoundEvents.AXE_WAX_OFF.value(), SoundSource.BLOCKS, 1F, 1F);
+            else level.playSound(null, pos, SoundEvents.AXE_SCRAPE.value(), SoundSource.BLOCKS, 1F, 1F);
+            level.levelEvent(player, waxOff ? LevelEvent.PARTICLES_WAX_OFF : LevelEvent.PARTICLES_SCRAPE, pos, 0);
+            level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, result));
+            held.hurtAndBreak(1, player, hand);
+        }
+        return InteractionResult.SUCCESS;
     }
 
     /** The other half of a two-block copper block, in step with this one. */
@@ -106,15 +124,12 @@ public final class CopperWeathering {
     // --- on the item ----------------------------------------------------------------------------
 
     public static Stage stage(ItemStack stack) {
-        CompoundTag tag = stack.getTagElement(BlockItem.BLOCK_STATE_TAG);
-        if (tag == null) return Stage.UNAFFECTED;
-        for (Stage stage : Stage.values()) if (stage.getSerializedName().equals(tag.getString(STAGE.getName()))) return stage;
-        return Stage.UNAFFECTED;
+        Stage stage = stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(STAGE);
+        return stage != null ? stage : Stage.UNAFFECTED;
     }
 
     public static boolean waxed(ItemStack stack) {
-        CompoundTag tag = stack.getTagElement(BlockItem.BLOCK_STATE_TAG);
-        return tag != null && "true".equals(tag.getString(WAXED.getName()));
+        return Boolean.TRUE.equals(stack.getOrDefault(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY).get(WAXED));
     }
 
     /** "Waxed Weathered Brew Kettle", in vanilla's order. */

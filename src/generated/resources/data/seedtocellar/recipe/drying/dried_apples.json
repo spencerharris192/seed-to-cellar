@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/apple",
+  "result": {
+    "id": "seedtocellar:dried_apples"
+  },
+  "time": 18000
+}

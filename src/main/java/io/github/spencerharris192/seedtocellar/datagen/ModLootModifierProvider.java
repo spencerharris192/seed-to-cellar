@@ -13,40 +13,58 @@ import io.github.spencerharris192.seedtocellar.brewing.Drinks;
 import io.github.spencerharris192.seedtocellar.farming.FruitTrees;
 import net.minecraft.world.item.Item;
 import java.util.List;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.minecraft.advancements.predicates.ItemPredicate;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
+import net.minecraft.world.level.storage.loot.predicates.AllOfCondition;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.predicates.AnyOfCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.MatchTool;
-import net.minecraftforge.common.data.GlobalLootModifierProvider;
-import net.minecraftforge.common.loot.LootTableIdCondition;
+import net.neoforged.neoforge.common.data.GlobalLootModifierProvider;
+import net.neoforged.neoforge.common.loot.LootTableIdCondition;
 
 /** Additions to vanilla loot, without replacing vanilla loot tables. */
 public class ModLootModifierProvider extends GlobalLootModifierProvider {
-    public ModLootModifierProvider(PackOutput output) {
-        super(output, SeedToCellar.MOD_ID);
+    private static final int PRIORITY = IGlobalLootModifier.DEFAULT_PRIORITY;
+
+    public ModLootModifierProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
+        super(output, registries, SeedToCellar.MOD_ID);
+    }
+
+    /** All of these conditions (none: always). */
+    private static Optional<Holder<LootItemCondition>> when(LootItemCondition.Builder... conditions) {
+        if (conditions.length == 0) return Optional.empty();
+        if (conditions.length == 1) return Optional.of(Holder.direct(conditions[0].build()));
+        return Optional.of(Holder.direct(AllOfCondition.allOf(conditions).build()));
     }
 
     @Override
     protected void start() {
+        HolderGetter<Item> items = registries.lookupOrThrow(Registries.ITEM);
         chestLoot();
         // Fertile Farmland: extra harvests and fertility use, for every crop (see FertileHarvestModifier).
-        add("fertile_harvest", new FertileHarvestModifier(new LootItemCondition[0]));
+        add("fertile_harvest", new FertileHarvestModifier(when(), PRIORITY));
         // Straw: ripe grain harvested with a sickle (see StrawModifier).
-        add("straw", new StrawModifier(new LootItemCondition[]{
-                MatchTool.toolMatches(ItemPredicate.Builder.item().of(ModTags.Items.SICKLES)).build()}, ModItems.STRAW.get()));
+        add("straw", new StrawModifier(when(MatchTool.toolMatches(ItemPredicate.Builder.item().of(items, ModTags.Items.SICKLES))), PRIORITY,
+                ModItems.STRAW.get()));
 
         // Grass and tall grass: a small chance of seeds (5% each for barley, oats, and rye in cold
         // biomes; the grassSeedChances settings), unless cut with shears. Vanilla wheat seeds drop 12.5% of the time.
         for (Crop crop : Crops.all()) {
             if (crop.grassDrop == null) continue;
-            add(crop.seedId + "_from_grass", new GrassSeedsModifier(new LootItemCondition[]{
+            add(crop.seedId + "_from_grass", new GrassSeedsModifier(when(
                     AnyOfCondition.anyOf(
-                            LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "blocks/grass")),
-                            LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "blocks/tall_grass"))).build(),
-                    MatchTool.toolMatches(ItemPredicate.Builder.item().of(Items.SHEARS)).invert().build()
-            }, crop.seeds(), crop.grassDrop.coldOnly(), crop.grassDrop.chance()));
+                            LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "blocks/short_grass")),
+                            LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "blocks/tall_grass"))),
+                    MatchTool.toolMatches(ItemPredicate.Builder.item().of(items, Items.SHEARS)).invert()
+            ), PRIORITY, crop.seeds(), crop.grassDrop.coldOnly(), crop.grassDrop.chance()));
         }
     }
 
@@ -80,8 +98,8 @@ public class ModLootModifierProvider extends GlobalLootModifierProvider {
     }
 
     private void chest(String name, String table, float chance, int rolls, ChestLootModifier.Entry... entries) {
-        add("chests/" + name, new ChestLootModifier(new LootItemCondition[]{
-                LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "chests/" + table)).build()}, chance, rolls, List.of(entries)));
+        add("chests/" + name, new ChestLootModifier(when(LootTableIdCondition.builder(SeedToCellar.rl("minecraft", "chests/" + table))),
+                PRIORITY, chance, rolls, List.of(entries)));
     }
 
     private static ChestLootModifier.Entry find(Item item, int weight, int min, int max) {

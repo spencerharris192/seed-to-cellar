@@ -1,0 +1,23 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "seedtocellar:item/apple_brandy",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "neoforge:fluid_contents_tint"
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15722188
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 5147182
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "E": "#c:eggs",
+    "F": "#c:foods/fruit/pear",
+    "S": "#seedtocellar:sweeteners",
+    "W": "#c:flours/wheat"
+  },
+  "pattern": [
+    "FFF",
+    "SES",
+    "WWW"
+  ],
+  "result": {
+    "id": "seedtocellar:pear_pie"
+  }
+}

@@ -1,0 +1,30 @@
+license="${mod_license}"
+issueTrackerURL="https://github.com/spencerharris192/seed-to-cellar/issues"
+
+[[mods]]
+modId="${mod_id}"
+version="${mod_version}"
+displayName="${mod_name}"
+displayURL="https://github.com/spencerharris192/seed-to-cellar"
+authors="${mod_authors}"
+iconFile="logo.png"
+logoBlur=false
+credits="Designed and playtested by Mebb. Built with Claude (Anthropic)."
+description='''${mod_description}'''
+
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"
+
+[[dependencies.${mod_id}]]
+    modId="neoforge"
+    type="required"
+    versionRange="${neo_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
+    modId="minecraft"
+    type="required"
+    versionRange="${minecraft_version_range}"
+    ordering="NONE"
+    side="BOTH"

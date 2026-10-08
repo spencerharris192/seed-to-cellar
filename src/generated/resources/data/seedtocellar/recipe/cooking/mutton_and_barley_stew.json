@@ -1,0 +1,17 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "minecraft:mutton",
+    "#c:crops/barley",
+    "#c:crops/carrot",
+    "#c:crops/onion"
+  ],
+  "result": {
+    "id": "seedtocellar:mutton_and_barley_stew"
+  },
+  "time": 300
+}

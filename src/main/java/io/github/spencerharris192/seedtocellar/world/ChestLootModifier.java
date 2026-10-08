@@ -1,7 +1,9 @@
 package io.github.spencerharris192.seedtocellar.world;
 
-import com.google.common.base.Suppliers;
+import java.util.Optional;
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
@@ -16,13 +18,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 /**
  * Our finds in vanilla's chests (GDD section 18.4), added to their loot without replacing it: with `chance`, `rolls`
@@ -34,7 +37,7 @@ public class ChestLootModifier extends LootModifier {
     /** One find: `weight` against the others, `min`-`max` of it; `brewed` drinks get a random quality and age. */
     public record Entry(Item item, int weight, int min, int max, boolean brewed, int maxYears) {
         public static final Codec<Entry> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-                ForgeRegistries.ITEMS.getCodec().fieldOf("item").forGetter(Entry::item),
+                BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(Entry::item),
                 Codec.INT.optionalFieldOf("weight", 1).forGetter(Entry::weight),
                 Codec.INT.optionalFieldOf("min", 1).forGetter(Entry::min),
                 Codec.INT.optionalFieldOf("max", 1).forGetter(Entry::max),
@@ -42,19 +45,19 @@ public class ChestLootModifier extends LootModifier {
                 Codec.INT.optionalFieldOf("max_years", 0).forGetter(Entry::maxYears)).apply(inst, Entry::new));
     }
 
-    public static final Supplier<Codec<ChestLootModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.create(inst ->
+    public static final MapCodec<ChestLootModifier> CODEC = RecordCodecBuilder.mapCodec(inst ->
             codecStart(inst).and(inst.group(
                             Codec.FLOAT.fieldOf("chance").forGetter(m -> m.chance),
                             Codec.INT.optionalFieldOf("rolls", 1).forGetter(m -> m.rolls),
                             Entry.CODEC.listOf().fieldOf("entries").forGetter(m -> m.entries)))
-                    .apply(inst, ChestLootModifier::new)));
+                    .apply(inst, ChestLootModifier::new));
 
     private final float chance;
     private final int rolls;
     private final List<Entry> entries;
 
-    public ChestLootModifier(LootItemCondition[] conditions, float chance, int rolls, List<Entry> entries) {
-        super(conditions);
+    public ChestLootModifier(Optional<Holder<LootItemCondition>> condition, int priority, float chance, int rolls, List<Entry> entries) {
+        super(condition, priority);
         this.chance = chance;
         this.rolls = rolls;
         this.entries = List.copyOf(entries);
@@ -95,15 +98,16 @@ public class ChestLootModifier extends LootModifier {
             data.putInt(CraftStep.RUNS, craft ? (step == CraftStep.NEUTRAL ? 3 : 2) : 1);
             craft = step.earned(data);
         }
-        FluidStack raw = new BrewQuality(random.nextFloat() < 0.75F, random.nextFloat() < 0.6F, craft, false)
-                .applyTo(new FluidStack(drink.fluid(), 250, data.isEmpty() ? null : data));
+        FluidStack base = new FluidStack(drink.fluid(), 250);
+        io.github.spencerharris192.seedtocellar.brewing.BrewData.set(base, data);
+        FluidStack raw = new BrewQuality(random.nextFloat() < 0.75F, random.nextFloat() < 0.6F, craft, false).applyTo(base);
         int years = maxYears <= 0 ? 0 : random.nextInt(maxYears + 1);
         FluidStack poured = CaskBlockEntity.serving(raw, (long) years * CaskBlockEntity.DAY, CaskWood.OAK, false);
-        stack.setTag(poured.getTag() == null ? null : poured.getTag().copy());
+        io.github.spencerharris192.seedtocellar.brewing.BrewData.copy(poured, stack);
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
     }
 }

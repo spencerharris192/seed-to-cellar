@@ -1,0 +1,14 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "seedtocellar:ground_coffee"
+  ],
+  "result": {
+    "id": "seedtocellar:coffee"
+  },
+  "time": 160
+}

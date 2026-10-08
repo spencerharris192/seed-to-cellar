@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.winery;
 
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -45,7 +47,7 @@ public class CrushingTubBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -55,14 +57,14 @@ public class CrushingTubBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return level.getBlockEntity(pos) instanceof CrushingTubBlockEntity tub ? tub.onUse(player, hand) : InteractionResult.PASS;
     }
 
     /** Landing on the fruit (a jump, not just walking in) is a stomp. Soft fruit: almost no fall damage. */
     @Override
-    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float fallDistance) {
-        if (!level.isClientSide && fallDistance > 0.4F && entity instanceof LivingEntity
+    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, double fallDistance) {
+        if (!level.isClientSide() && fallDistance > 0.4F && entity instanceof LivingEntity
                 && level.getBlockEntity(pos) instanceof CrushingTubBlockEntity tub) {
             tub.stomp(entity);
         }
@@ -70,20 +72,15 @@ public class CrushingTubBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     /** Comparators read how full of juice the tub is (0-15). */
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return level.getBlockEntity(pos) instanceof CrushingTubBlockEntity tub
                 ? (int) Math.ceil(15.0 * tub.tank().getFluidAmount() / CrushingTubBlockEntity.CAPACITY) : 0;
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof CrushingTubBlockEntity tub) tub.dropContents();
-        super.onRemove(state, level, pos, newState, moved);
-    }
 }

@@ -24,10 +24,9 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 /**
  * A bottle rack (GDD section 16), laid out by its {@link RackLayout}: the Wine Rack's six cubbies, the Bottle Shelf's two
@@ -36,7 +35,7 @@ import net.minecraftforge.items.ItemHandlerHelper;
  * Faces the player who placed it; bottles drop when it's broken.
  */
 public class WineRackBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     /** The Bottle Shelf is half a block deep, against the wall behind it. */
     private static final Map<Direction, VoxelShape> SHELF_SHAPES = Map.of(
             Direction.NORTH, box(0, 0, 8, 16, 16, 16), Direction.SOUTH, box(0, 0, 0, 16, 16, 8),
@@ -89,7 +88,7 @@ public class WineRackBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -120,7 +119,7 @@ public class WineRackBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof WineRackBlockEntity rack)) return InteractionResult.PASS;
         int slot = slotAt(state, pos, hit.getLocation(), hit.getDirection());
         if (slot < 0) return InteractionResult.PASS;
@@ -128,42 +127,37 @@ public class WineRackBlock extends BaseEntityBlock {
         ItemStack racked = rack.bottle(slot);
         boolean bottleInHand = rack.bottles().isItemValid(slot, held);
         if (!racked.isEmpty() && (held.isEmpty() || bottleInHand)) {   // other items (a Hydrometer) do their own thing
-            if (!level.isClientSide) {
-                ItemHandlerHelper.giveItemToPlayer(player, rack.bottles().extractItem(slot, 1, false));
+            if (!level.isClientSide()) {
+                io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity.give(player, rack.bottles().extractItem(slot, 1, false));
                 level.playSound(null, pos, SoundEvents.CHISELED_BOOKSHELF_PICKUP, SoundSource.BLOCKS, 1F, 1.2F);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (racked.isEmpty() && bottleInHand) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 ItemStack left = rack.bottles().insertItem(slot, held.copyWithCount(1), false);
                 if (left.isEmpty() && !player.getAbilities().instabuild) held.shrink(1);
                 level.playSound(null, pos, SoundEvents.CHISELED_BOOKSHELF_INSERT, SoundSource.BLOCKS, 1F, 1.2F);
                 if (rack.layout() == RackLayout.BOTTLE_SHELF && rack.differentDrinks() == rack.bottles().getSlots()
                         && player instanceof net.minecraft.server.level.ServerPlayer server) {
-                    io.github.spencerharris192.seedtocellar.registry.ModTriggers.TAVERN_KEEPER.trigger(server);   // a full shelf, all different
+                    io.github.spencerharris192.seedtocellar.registry.ModTriggers.TAVERN_KEEPER.get().trigger(server);   // a full shelf, all different
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     /** Comparators read how many bottles are racked (0-15). */
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return level.getBlockEntity(pos) instanceof WineRackBlockEntity rack
-                ? ItemHandlerHelper.calcRedstoneFromInventory(rack.bottles()) : 0;
+                ? net.neoforged.neoforge.transfer.ResourceHandlerUtil.getRedstoneSignalFromResourceHandler(rack.bottles()) : 0;
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof WineRackBlockEntity rack) rack.dropContents();
-        super.onRemove(state, level, pos, newState, moved);
-    }
 }

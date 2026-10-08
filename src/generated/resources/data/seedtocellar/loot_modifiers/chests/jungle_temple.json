@@ -1,12 +1,10 @@
 {
   "type": "seedtocellar:chest_loot",
   "chance": 0.7,
-  "conditions": [
-    {
-      "condition": "forge:loot_table_id",
-      "loot_table_id": "minecraft:chests/jungle_temple"
-    }
-  ],
+  "condition": {
+    "type": "neoforge:loot_table_id",
+    "loot_table_id": "minecraft:chests/jungle_temple"
+  },
   "entries": [
     {
       "item": "seedtocellar:vanilla_pod",

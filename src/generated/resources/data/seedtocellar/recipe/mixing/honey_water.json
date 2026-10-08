@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:mixing",
+  "ingredient": "minecraft:honey_bottle",
+  "liquid": {
+    "tag": "minecraft:water"
+  },
+  "per_bucket": 2,
+  "result": "seedtocellar:honey_water"
+}

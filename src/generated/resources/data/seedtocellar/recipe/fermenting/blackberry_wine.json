@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:blackberry_juice",
+  "result": "seedtocellar:blackberry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

@@ -1,0 +1,75 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "seedtocellar:pot_still",
+            "state": {
+              "half": "lower"
+            }
+          },
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "seedtocellar:pot_still",
+              "condition": {
+                "type": "minecraft:inverted",
+                "term": {
+                  "type": "minecraft:match_block",
+                  "blocks": "seedtocellar:pot_still",
+                  "state": {
+                    "weathering": "unaffected"
+                  }
+                }
+              },
+              "properties": [
+                "weathering"
+              ]
+            },
+            {
+              "type": "minecraft:copy_state",
+              "block": "seedtocellar:pot_still",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "seedtocellar:pot_still",
+                "state": {
+                  "waxed": "true"
+                }
+              },
+              "properties": [
+                "waxed"
+              ]
+            }
+          ],
+          "name": "seedtocellar:pot_still"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "seedtocellar:pot_still",
+        "state": {
+          "basket": "true",
+          "half": "lower"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "seedtocellar:gin_basket"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/pot_still"
+}

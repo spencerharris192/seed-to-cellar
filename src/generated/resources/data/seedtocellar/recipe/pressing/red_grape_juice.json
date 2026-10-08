@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:pressing",
+  "byproduct": {
+    "id": "seedtocellar:grape_pomace"
+  },
+  "ingredient": "#c:foods/fruit/red_grape",
+  "result": {
+    "amount": 500,
+    "fluid": "seedtocellar:red_grape_juice"
+  }
+}

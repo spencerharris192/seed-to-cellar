@@ -1,5 +1,14 @@
 package io.github.spencerharris192.seedtocellar.distillery;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationItems;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CraftStep;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
@@ -18,10 +27,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import io.github.spencerharris192.seedtocellar.brewing.BrewData;
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
+import io.github.spencerharris192.seedtocellar.recipe.Recipes;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.neoforged.neoforge.transfer.fluid.FluidUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,16 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RangedWrapper;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -69,26 +74,26 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     public static final int TICKS_PER_BUCKET = 400;
     public static final int MIN_TICKS = 100;
 
-    private final FluidTank pot = new FluidTank(CAPACITY, this::isDistillable) {
+    private final StationTank pot = new StationTank(CAPACITY, this::isDistillable) {
         @Override
         protected void onContentsChanged() {
             sync();
         }
     };
-    private final FluidTank receiver = new FluidTank(CAPACITY) {
+    private final StationTank receiver = new StationTank(CAPACITY) {
         @Override
         protected void onContentsChanged() {
             sync();
         }
     };
-    private final FluidTank stillage = new FluidTank(CAPACITY, stack -> stack.getFluid() == ModFluids.STILLAGE.get()) {
+    private final StationTank stillage = new StationTank(CAPACITY, stack -> stack.getFluid() == ModFluids.STILLAGE.get()) {
         @Override
         protected void onContentsChanged() {
             sync();
         }
     };
 
-    private final ItemStackHandler items = new ItemStackHandler(SLOTS) {
+    private final StationItems items = new StationItems(SLOTS) {
         @Override
         protected void onContentsChanged(int slot) {
             sync();
@@ -105,7 +110,7 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     private int progress;
     private int total;
     private boolean heated;
-    @Nullable private ResourceLocation recipeId;
+    @Nullable private Identifier recipeId;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -129,21 +134,16 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
         }
     };
 
-    private final LazyOptional<IItemHandler> filterCap = LazyOptional.of(() -> new RangedWrapper(items, FILTER, FILTER + 1));
-    private final LazyOptional<IItemHandler> basketCap = LazyOptional.of(() -> new RangedWrapper(items, BASKET, SLOTS));
-    private final LazyOptional<IFluidHandler> pipesCap = LazyOptional.of(() -> new Pipes(false));
-    private final LazyOptional<IFluidHandler> stillageCap = LazyOptional.of(() -> new Pipes(true));
-
     public PotStillBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.POT_STILL.get(), pos, state);
     }
 
     // --- queries ---------------------------------------------------------------------------
 
-    public FluidTank pot() { return pot; }
-    public FluidTank receiver() { return receiver; }
-    public FluidTank stillage() { return stillage; }
-    public ItemStackHandler items() { return items; }
+    public StationTank pot() { return pot; }
+    public StationTank receiver() { return receiver; }
+    public StationTank stillage() { return stillage; }
+    public StationItems items() { return items; }
     public boolean isRunning() { return running; }
     public boolean isHeated() { return heated; }
     public float progress() { return total == 0 ? 0 : progress / (float) total; }
@@ -165,12 +165,12 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     }
 
     private List<DistillingRecipe> recipes() {
-        return level == null ? List.of() : level.getRecipeManager().getAllRecipesFor(ModRecipes.DISTILLING.get());
+        return Recipes.stream(level, ModRecipes.DISTILLING.get()).toList();
     }
 
     /** Something some recipe distils (a wash, a wine, a spirit). */
     private boolean isDistillable(FluidStack stack) {
-        FluidStack probe = new FluidStack(stack.getFluid(), Math.max(1, stack.getAmount()), stack.getTag());
+        FluidStack probe = stack.copyWithAmount(Math.max(1, stack.getAmount()));
         return recipes().stream().anyMatch(r -> r.input().test(probe));
     }
 
@@ -186,27 +186,31 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
 
     /** The recipe the pot would run with now (client and server). */
     public Optional<DistillingRecipe> expectedRecipe() {
+        return expectedHolder().map(RecipeHolder::value);
+    }
+
+    private Optional<RecipeHolder<DistillingRecipe>> expectedHolder() {
         if (pot.isEmpty()) return Optional.empty();
         boolean filter = filterPresent();
         List<ItemStack> basket = basketStacks();
-        return recipes().stream().filter(r -> r.matches(pot.getFluid(), filter, basket))
-                .max(Comparator.comparingInt(DistillingRecipe::priority));
+        return Recipes.holders(level, ModRecipes.DISTILLING.get()).filter(h -> h.value().matches(pot.getFluid(), filter, basket))
+                .max(Comparator.comparingInt(h -> h.value().priority()));
     }
 
     private Optional<DistillingRecipe> currentRecipe() {
-        if (level == null || recipeId == null) return Optional.empty();
-        return level.getRecipeManager().byKey(recipeId).filter(DistillingRecipe.class::isInstance).map(DistillingRecipe.class::cast);
+        return Recipes.byId(level, recipeId, DistillingRecipe.class);
     }
 
     /** What a run of the pot with {@code recipe} would put in the receiver: half the volume, one more run, its stars. */
     public FluidStack output(DistillingRecipe recipe) {
         FluidStack in = pot.getFluid();
-        CompoundTag before = in.getTag();
+        CompoundTag before = BrewData.orNull(in);
         CompoundTag tag = new CompoundTag();
         tag.putInt(CraftStep.RUNS, DistillingRecipe.runs(in) + 1);
-        if (recipe.filter() || before != null && before.getBoolean(CraftStep.FILTERED)) tag.putBoolean(CraftStep.FILTERED, true);
+        if (recipe.filter() || before != null && before.getBooleanOr(CraftStep.FILTERED, false)) tag.putBoolean(CraftStep.FILTERED, true);
         if (recipe.basket() != null) tag.putInt(CraftStep.BOTANICAL_COUNT, DistillingRecipe.Basket.distinct(basketStacks()));
-        FluidStack out = new FluidStack(recipe.resultFor(in), in.getAmount() / 2, tag);
+        FluidStack out = new FluidStack(recipe.resultFor(in), in.getAmount() / 2);
+        BrewData.set(out, tag);
         boolean craft = Drinks.byFluid(out.getFluid()).map(d -> d.profile().craft().earned(tag)).orElse(false);
         BrewQuality wash = BrewQuality.of(in);
         return new BrewQuality(wash.yeast(), wash.temperature(), craft, false).applyTo(out);
@@ -218,11 +222,11 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
         String k = "gui.seedtocellar.still.";
         FluidStack out = output(recipe);
         if (out.isEmpty()) return Component.translatable(k + "too_little");
-        if (receiver.fill(out, IFluidHandler.FluidAction.SIMULATE) < out.getAmount()) {
-            return Component.translatable(receiver.isEmpty() || receiver.getFluid().isFluidEqual(out) ? k + "receiver_full" : k + "receiver_other");
+        if (receiver.fill(out, StationTank.Action.SIMULATE) < out.getAmount()) {
+            return Component.translatable(receiver.isEmpty() || FluidStack.isSameFluidSameComponents(receiver.getFluid(), out) ? k + "receiver_full" : k + "receiver_other");
         }
         int left = pot.getFluidAmount() - out.getAmount();
-        if (stillage.fill(new FluidStack(ModFluids.STILLAGE.get(), left), IFluidHandler.FluidAction.SIMULATE) < left) {
+        if (stillage.fill(new FluidStack(ModFluids.STILLAGE.get(), left), StationTank.Action.SIMULATE) < left) {
             return Component.translatable(k + "stillage_full");
         }
         return null;
@@ -243,7 +247,7 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
                 still.setChanged();
             }
         } else if (still.heated) {
-            still.expectedRecipe().filter(r -> still.blocked(r) == null).ifPresent(still::begin);
+            still.expectedHolder().filter(h -> still.blocked(h.value()) == null).ifPresent(still::begin);
         }
         boolean active = still.running && still.heated;
         if (state.getValue(PotStillBlock.ACTIVE) != active) {
@@ -251,9 +255,9 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
         }
     }
 
-    private void begin(DistillingRecipe recipe) {
+    private void begin(RecipeHolder<DistillingRecipe> recipe) {
         running = true;
-        recipeId = recipe.getId();
+        recipeId = recipe.id().identifier();
         progress = 0;
         int base = Math.max(MIN_TICKS, TICKS_PER_BUCKET * pot.getFluidAmount() / 1000);
         total = ModConfigs.processTicks(base);
@@ -278,8 +282,8 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
         recipeId = null;
         progress = 0;
         pot.setFluid(FluidStack.EMPTY);
-        receiver.fill(out, IFluidHandler.FluidAction.EXECUTE);
-        stillage.fill(new FluidStack(ModFluids.STILLAGE.get(), left), IFluidHandler.FluidAction.EXECUTE);
+        receiver.fill(out, StationTank.Action.EXECUTE);
+        stillage.fill(new FluidStack(ModFluids.STILLAGE.get(), left), StationTank.Action.EXECUTE);
         if (level != null) level.playSound(null, worldPosition, SoundEvents.BREWING_STAND_BREW, SoundSource.BLOCKS, 0.8F, 0.7F);
         sync();
     }
@@ -300,16 +304,16 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     public boolean useHeldItem(Player player, InteractionHand hand) {
         ItemStack held = player.getItemInHand(hand);
         if (held.is(io.github.spencerharris192.seedtocellar.registry.ModItems.GIN_BASKET.get()) && !hasBasket()) {
-            if (level != null && !level.isClientSide && fitBasket() && !player.getAbilities().instabuild) held.shrink(1);
+            if (level != null && !level.isClientSide() && fitBasket() && !player.getAbilities().instabuild) held.shrink(1);
             return true;
         }
-        if (!FluidUtil.getFluidHandler(held).isPresent()) return false;
-        if (level != null && !level.isClientSide) {
-            boolean full = FluidUtil.getFluidContained(held).isPresent();
+        if (!holdsLiquidContainer(player, hand)) return false;
+        if (level != null && !level.isClientSide()) {
+            boolean full = !FluidUtil.getFirstStackContained(held).isEmpty();
             if (full && running) {
-                player.displayClientMessage(Component.translatable("message.seedtocellar.still.busy").withStyle(ChatFormatting.YELLOW), true);
-            } else if (!FluidUtil.interactWithFluidHandler(player, hand, new Pipes(false)) && full) {
-                player.displayClientMessage(Component.translatable("message.seedtocellar.still.wont_distil").withStyle(ChatFormatting.YELLOW), true);
+                player.sendOverlayMessage(Component.translatable("message.seedtocellar.still.busy").withStyle(ChatFormatting.YELLOW));
+            } else if (!pourWith(player, hand, new Pipes(false)) && full) {
+                player.sendOverlayMessage(Component.translatable("message.seedtocellar.still.wont_distil").withStyle(ChatFormatting.YELLOW));
             }
         }
         return true;
@@ -322,14 +326,14 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
         String k = "gui.seedtocellar.still.";
         FluidStack in = pot.getFluid();
         lines.add(in.isEmpty() ? Component.translatable(k + "pot_empty")
-                : Component.translatable(k + "pot", in.getDisplayName(), in.getAmount()));
+                : Component.translatable(k + "pot", in.getHoverName(), in.getAmount()));
         Optional<DistillingRecipe> recipe = running ? currentRecipe() : expectedRecipe();
         recipe.ifPresent(r -> lines.add(makesLine(r)));
         if (!heated) lines.add(Component.translatable(k + "no_heat").withStyle(ChatFormatting.RED));
         else if (running) lines.add(Component.translatable(h + "progress", Math.round(progress() * 100)));
         if (!receiver.isEmpty()) {
             FluidStack out = receiver.getFluid();
-            lines.add(Component.translatable(k + "receiver", out.getDisplayName(), out.getAmount()));
+            lines.add(Component.translatable(k + "receiver", out.getHoverName(), out.getAmount()));
             lines.add(DrinkItem.stars(BrewQuality.of(out).stars()));
         }
         if (!stillage.isEmpty()) lines.add(Component.translatable(k + "stillage", stillage.getFluidAmount()).withStyle(ChatFormatting.GRAY));
@@ -339,10 +343,11 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     /** "Makes: Malt Whiskey (run 1)". */
     public Component makesLine(DistillingRecipe recipe) {
         FluidStack out = new FluidStack(recipe.resultFor(pot.getFluid()), 1);
-        return Component.translatable("gui.seedtocellar.still.makes", out.getDisplayName(), DistillingRecipe.runs(pot.getFluid()) + 1);
+        return Component.translatable("gui.seedtocellar.still.makes", out.getHoverName(), DistillingRecipe.runs(pot.getFluid()) + 1);
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < items.getSlots(); i++) {
             Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), items.getStackInSlot(i));
@@ -364,82 +369,78 @@ public class PotStillBlockEntity extends SyncedBlockEntity implements MenuProvid
     // --- save / load -----------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Pot", pot.writeToNBT(new CompoundTag()));
-        tag.put("Receiver", receiver.writeToNBT(new CompoundTag()));
-        tag.put("Stillage", stillage.writeToNBT(new CompoundTag()));
-        tag.put("Items", items.serializeNBT());
-        tag.putBoolean("Running", running);
-        tag.putInt("Progress", progress);
-        tag.putInt("Total", total);
-        if (recipeId != null) tag.putString("Recipe", recipeId.toString());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        pot.serialize(output.child("Pot"));
+        receiver.serialize(output.child("Receiver"));
+        stillage.serialize(output.child("Stillage"));
+        items.serialize(output.child("Items"));
+        output.putBoolean("Running", running);
+        output.putInt("Progress", progress);
+        output.putInt("Total", total);
+        if (recipeId != null) output.putString("Recipe", recipeId.toString());
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        pot.readFromNBT(tag.getCompound("Pot"));
-        receiver.readFromNBT(tag.getCompound("Receiver"));
-        stillage.readFromNBT(tag.getCompound("Stillage"));
-        items.deserializeNBT(tag.getCompound("Items"));
-        running = tag.getBoolean("Running");
-        progress = tag.getInt("Progress");
-        total = tag.getInt("Total");
-        recipeId = tag.contains("Recipe") ? ResourceLocation.tryParse(tag.getString("Recipe")) : null;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        pot.deserialize(input.childOrEmpty("Pot"));
+        receiver.deserialize(input.childOrEmpty("Receiver"));
+        stillage.deserialize(input.childOrEmpty("Stillage"));
+        items.deserialize(input.childOrEmpty("Items"));
+        running = input.getBooleanOr("Running", false);
+        progress = input.getIntOr("Progress", 0);
+        total = input.getIntOr("Total", 0);
+        recipeId = input.getString("Recipe").map(Identifier::tryParse).orElse(null);
     }
 
     // --- automation ------------------------------------------------------------------------
-
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return side == Direction.DOWN ? stillageCap.cast() : pipesCap.cast();
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return side == Direction.UP ? basketCap.cast() : filterCap.cast();
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        filterCap.invalidate();
-        basketCap.invalidate();
-        pipesCap.invalidate();
-        stillageCap.invalidate();
-    }
 
     /**
      * What buckets and pipes see. Filling always goes into the pot (never while it runs); draining takes the spirit, or
      * (from the bottom, or for an empty bucket once the spirit is gone) the stillage.
      */
-    private class Pipes implements IFluidHandler {
+    private class Pipes implements ResourceHandler<FluidResource> {
         private final boolean bottom;
 
         Pipes(boolean bottom) {
             this.bottom = bottom;
         }
 
-        private FluidTank drainTank() {
+        private StationTank drainTank() {
             return bottom || receiver.isEmpty() ? stillage : receiver;
         }
 
-        @Override public int getTanks() { return 2; }
-        @Override public FluidStack getFluidInTank(int t) { return t == 0 ? pot.getFluid() : drainTank().getFluid(); }
-        @Override public int getTankCapacity(int t) { return CAPACITY; }
-        @Override public boolean isFluidValid(int t, FluidStack stack) { return t == 0 && pot.isFluidValid(stack); }
+        // index 0: the pot (fill only); index 1: the spirit, or the stillage (drain only)
+        @Override public int size() { return 2; }
+        @Override public FluidResource getResource(int index) { return index == 0 ? pot.getResource(0) : drainTank().getResource(0); }
+        @Override public long getAmountAsLong(int index) { return index == 0 ? pot.getAmountAsLong(0) : drainTank().getAmountAsLong(0); }
+        @Override public long getCapacityAsLong(int index, FluidResource resource) { return CAPACITY; }
+        @Override public boolean isValid(int index, FluidResource resource) { return index == 0 && !bottom && pot.isValid(0, resource); }
 
         @Override
-        public int fill(FluidStack resource, FluidAction action) {
-            return bottom || running ? 0 : pot.fill(resource, action);
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return index == 0 && !bottom && !running ? pot.insert(0, resource, amount, transaction) : 0;
         }
 
         @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
-            return drainTank().drain(resource, action);
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return index == 1 ? drainTank().extract(0, resource, amount, transaction) : 0;
         }
+    }
 
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return drainTank().drain(maxDrain, action);
-        }
+    private final ResourceHandler<FluidResource> sidePipes = new Pipes(false);
+    private final ResourceHandler<FluidResource> bottomPipes = new Pipes(true);
+    private final ResourceHandler<ItemResource> filterSide = RangedResourceHandler.ofSingleIndex(items, FILTER);
+    private final ResourceHandler<ItemResource> basketSide = RangedResourceHandler.of(items, BASKET, SLOTS);
+
+    /** Pipes: the wash in from any side but the bottom, the spirit out (the stillage from below). */
+    public ResourceHandler<FluidResource> fluidHandler(@Nullable Direction side) {
+        return side == Direction.DOWN ? bottomPipes : sidePipes;
+    }
+
+    /** Hoppers: botanicals from the top, charcoal for the filter from the sides and below. */
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return side == Direction.UP ? basketSide : filterSide;
     }
 }

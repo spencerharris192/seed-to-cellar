@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "seedtocellar:rolled_oats",
+    "seedtocellar:rolled_oats",
+    "minecraft:honey_bottle",
+    "#seedtocellar:dried_fruits"
+  ],
+  "result": {
+    "count": 3,
+    "id": "seedtocellar:granola"
+  }
+}

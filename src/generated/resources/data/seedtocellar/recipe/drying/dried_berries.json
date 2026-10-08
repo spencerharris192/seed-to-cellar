@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#seedtocellar:dryable_berries",
+  "result": {
+    "id": "seedtocellar:dried_berries"
+  },
+  "time": 18000
+}

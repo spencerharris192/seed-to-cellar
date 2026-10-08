@@ -1,5 +1,13 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
@@ -10,15 +18,17 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import io.github.spencerharris192.seedtocellar.brewing.BrewData;
+import io.github.spencerharris192.seedtocellar.brewing.CaskContents;
+import io.github.spencerharris192.seedtocellar.registry.ModComponents;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.fluids.SimpleFluidContent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,7 +51,7 @@ import java.util.Optional;
 public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerReadable {
     public static final int DAY = 24000;
 
-    private final FluidTank tank;
+    private final StationTank tank;
     private final boolean ages;
     @Nullable
     private final CaskWood wood;
@@ -49,23 +59,22 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
     /** Age carried in from an item (broken cask), applied once the block has a level. */
     private long pendingAge = -1;
 
-    private final LazyOptional<IFluidHandler> fluidCap = LazyOptional.of(Handler::new);
-
     public CaskBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.CASK.get(), pos, state);
         AbstractCaskBlock block = (AbstractCaskBlock) state.getBlock();
         this.ages = block.ages();
         this.wood = block.wood();
         // fermented drinks only: juices and kettle drinks have nothing to gain from a cask
-        this.tank = new FluidTank(block.capacity(), stack -> Drinks.byFluid(stack.getFluid()).map(d -> d.profile().graded()).orElse(false)) {
+        this.tank = new StationTank(block.capacity(), stack -> Drinks.byFluid(stack.getFluid()).map(d -> d.profile().graded()).orElse(false)) {
             @Override
-            protected void onContentsChanged() {
+            protected void onContentsChanged(FluidStack previous) {
+                blendAge(previous, getFluid());
                 sync();
             }
         };
     }
 
-    public FluidTank tank() {
+    public StationTank tank() {
         return tank;
     }
 
@@ -138,12 +147,13 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
             int years = (int) (ageTicks / DAY);
             int starAt = drink.get().profile().starYears(wood, charred);
             if (starAt >= 0 && years >= starAt) quality = quality.withAged(true);
-            CompoundTag tag = out.getOrCreateTag();
-            if (years > tag.getInt(DrinkItem.AGE)) { // the label names the cask that gave it the most years
+            CompoundTag tag = BrewData.get(out);
+            if (years > tag.getIntOr(DrinkItem.AGE, 0)) { // the label names the cask that gave it the most years
                 tag.putInt(DrinkItem.AGE, years);
                 tag.putString(DrinkItem.WOOD, wood.id());
                 if (charred) tag.putBoolean(DrinkItem.CHARRED, true);
                 else tag.remove(DrinkItem.CHARRED);
+                BrewData.set(out, tag);
             }
         }
         return quality.applyTo(out);
@@ -151,20 +161,21 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
 
     // --- filling and pouring -----------------------------------------------------------------
 
-    private int fill(FluidStack resource, IFluidHandler.FluidAction action) {
-        int accepted = tank.fill(resource, IFluidHandler.FluidAction.SIMULATE);
-        if (accepted <= 0 || action.simulate()) return accepted;
+    /** New contents start their age now; more of the same blends its age with what's there, by volume (solera). */
+    private void blendAge(FluidStack before, FluidStack after) {
+        if (after.getAmount() <= before.getAmount()) return;   // poured out: the rest keeps its age
         long now = level == null ? 0 : level.getGameTime();
-        if (tank.isEmpty()) {
+        if (before.isEmpty()) {
             filledTime = now;
+            pendingAge = -1;
         } else {
-            long age = rawAgeTicks();
-            filledTime = now - age * tank.getFluidAmount() / (tank.getFluidAmount() + accepted); // blend ages by volume
+            long age = level == null ? 0 : Math.max(0, now - filledTime);
+            filledTime = now - age * before.getAmount() / after.getAmount();
         }
-        return tank.fill(resource, IFluidHandler.FluidAction.EXECUTE);
     }
 
-    private FluidStack drain(int amount, IFluidHandler.FluidAction action) {
+    /** Pours out through the tap: the serving (stars applied), or nothing without a tap. */
+    public FluidStack drain(int amount, StationTank.Action action) {
         if (!tapped()) return FluidStack.EMPTY;
         FluidStack preview = serving(tank.getFluid());
         FluidStack drained = tank.drain(amount, action);
@@ -173,8 +184,32 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
         return preview;
     }
 
-    public IFluidHandler handler() {
-        return fluidCap.orElseThrow(IllegalStateException::new);
+    /** Fill from any side; pour only through the tap. Poured drinks carry their stars and age. */
+    private final ResourceHandler<FluidResource> handler = new ResourceHandler<>() {
+        @Override public int size() { return 1; }
+        @Override public FluidResource getResource(int index) { return FluidResource.of(serving(tank.getFluid())); }
+        @Override public long getAmountAsLong(int index) { return tank.getFluidAmount(); }
+        @Override public long getCapacityAsLong(int index, FluidResource resource) { return tank.getCapacity(); }
+        @Override public boolean isValid(int index, FluidResource resource) { return tank.isValid(0, resource); }
+
+        @Override
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return tank.insert(0, resource, amount, transaction);
+        }
+
+        @Override
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            if (!tapped() || tank.isEmpty() || !resource.equals(getResource(0))) return 0;
+            return tank.extract(0, FluidResource.of(tank.getFluid()), amount, transaction);
+        }
+    };
+
+    public ResourceHandler<FluidResource> handler() {
+        return handler;
+    }
+
+    public ResourceHandler<FluidResource> fluidHandler(@Nullable Direction side) {
+        return handler;
     }
 
     // --- read-outs ---------------------------------------------------------------------------
@@ -187,7 +222,7 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
             return lines;
         }
         FluidStack serving = serving(tank.getFluid());
-        lines.add(serving.getDisplayName().copy().append(" " + tank.getFluidAmount() + " mB"));
+        lines.add(serving.getHoverName().copy().append(" " + tank.getFluidAmount() + " mB"));
         lines.add(DrinkItem.stars(BrewQuality.of(serving).stars()));
         if (Drinks.byFluid(serving.getFluid()).map(d -> d.profile().craft().byResting()).orElse(true)) {
             lines.add(Component.translatable(conditioned() ? "hydrometer.seedtocellar.conditioned" : "hydrometer.seedtocellar.conditioning",
@@ -208,55 +243,48 @@ public class CaskBlockEntity extends SyncedBlockEntity implements HydrometerRead
     // --- save / load -------------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Tank", tank.writeToNBT(new CompoundTag()));
-        // Only a cask with contents has a birth time. (Placing a cask item merges its data into a
-        // fresh cask's; a stray FilledTime of 0 would make the drink as old as the world.)
-        if (!tank.isEmpty()) tag.putLong("FilledTime", filledTime);
-        tag.putLong("AgeTicks", rawAgeTicks());
-    }
-
-    @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        tank.readFromNBT(tag.getCompound("Tank"));
-        if (tag.contains("FilledTime")) {
-            filledTime = tag.getLong("FilledTime");
-            pendingAge = -1;
-        } else {
-            pendingAge = tag.getLong("AgeTicks"); // placed from an item: age resumes from here
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        tank.serialize(output.child("Tank"));
+        if (!tank.isEmpty()) {
+            rawAgeTicks();   // settles an age carried in from an item into a fill time
+            output.putLong("FilledTime", filledTime);
         }
     }
 
     @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return fluidCap.cast();
-        return super.getCapability(cap, side);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tank.deserialize(input.childOrEmpty("Tank"));
+        filledTime = input.getLongOr("FilledTime", 0L);
+        // a template's cask (the Brewhouse cellar's) gives an age instead, as no fill time can be known before it's placed
+        pendingAge = input.getLongOr("AgeTicks", -1L);
+    }
+
+    /** Broken full, the cask item keeps the drink and how long it had rested (CaskItem shows it; loot copies it). */
+    @Override
+    protected void collectImplicitComponents(DataComponentMap.Builder components) {
+        super.collectImplicitComponents(components);
+        if (!tank.isEmpty()) {
+            components.set(ModComponents.CASK_CONTENTS.get(), new CaskContents(SimpleFluidContent.copyOf(tank.getFluid()), rawAgeTicks()));
+        }
+    }
+
+    /** Placed from a full cask item: the drink goes back in, and its age resumes from where it was. */
+    @Override
+    protected void applyImplicitComponents(DataComponentGetter components) {
+        super.applyImplicitComponents(components);
+        CaskContents contents = components.get(ModComponents.CASK_CONTENTS.get());
+        if (contents != null && !contents.fluid().isEmpty()) {
+            tank.setFluid(contents.fluid().copy());
+            pendingAge = contents.ageTicks();
+        }
     }
 
     @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        fluidCap.invalidate();
-    }
-
-    /** Fill from any side; pour only through the tap. Poured drinks carry their stars and age. */
-    private class Handler implements IFluidHandler {
-        @Override public int getTanks() { return 1; }
-        @Override public FluidStack getFluidInTank(int t) { return serving(tank.getFluid()); }
-        @Override public int getTankCapacity(int t) { return tank.getCapacity(); }
-        @Override public boolean isFluidValid(int t, FluidStack stack) { return tank.isFluidValid(stack); }
-        @Override public int fill(FluidStack resource, FluidAction action) { return CaskBlockEntity.this.fill(resource, action); }
-
-        @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
-            return resource.getFluid() == tank.getFluid().getFluid() ? CaskBlockEntity.this.drain(resource.getAmount(), action) : FluidStack.EMPTY;
-        }
-
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return CaskBlockEntity.this.drain(maxDrain, action);
-        }
+    public void removeComponentsFromTag(ValueOutput output) {
+        super.removeComponentsFromTag(output);
+        output.discard("Tank");
+        output.discard("FilledTime");
     }
 }

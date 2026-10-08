@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "seedtocellar:red_grape_crate"
+  ],
+  "result": {
+    "count": 8,
+    "id": "seedtocellar:red_grapes"
+  }
+}

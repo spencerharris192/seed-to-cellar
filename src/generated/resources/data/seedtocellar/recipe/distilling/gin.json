@@ -1,0 +1,12 @@
+{
+  "type": "seedtocellar:distilling",
+  "basket": {
+    "min": 3,
+    "required": "#c:crops/juniper"
+  },
+  "input": {
+    "fluid": "seedtocellar:vodka"
+  },
+  "priority": 20,
+  "result": "seedtocellar:gin"
+}

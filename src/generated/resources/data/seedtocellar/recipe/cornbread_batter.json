@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:flours/corn",
+    "#c:flours/corn",
+    "#c:eggs",
+    "minecraft:milk_bucket"
+  ],
+  "result": {
+    "count": 2,
+    "id": "seedtocellar:cornbread_batter"
+  }
+}

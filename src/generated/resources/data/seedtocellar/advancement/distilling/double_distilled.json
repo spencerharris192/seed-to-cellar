@@ -1,0 +1,35 @@
+{
+  "parent": "seedtocellar:distilling/first_run",
+  "criteria": {
+    "spirit": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_craft": {}
+            },
+            "items": "#seedtocellar:spirits"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.double_distilled.description"
+    },
+    "icon": {
+      "id": "seedtocellar:malt_whiskey"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.double_distilled.title"
+    }
+  },
+  "requirements": [
+    [
+      "spirit"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

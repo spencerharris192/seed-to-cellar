@@ -2,7 +2,7 @@
 
 # Seed to Cellar
 
-A farming and brewing mod for **Minecraft 1.20.1 (Forge)**. Find wild plants, grow them in many different ways, and turn
+A farming and brewing mod for **Minecraft 26.3 (NeoForge)**. Find wild plants, grow them in many different ways, and turn
 one farm into a whole web of foods and drinks: bread and stews, beer and wine, cider and mead, and whiskey, brandy, rum
 and gin aging in casks in your cellar.
 
@@ -12,14 +12,15 @@ you what you got right and what you didn't.
 
 ## Requirements
 
-- Minecraft **1.20.1** with **Forge 47** (any 47.x build; built and tested on 47.4.10)
+- Minecraft **26.3** with **NeoForge 26.3** (26.3.0.52-beta or later)
 - Install it on **both** the client and the server. No other mods are required.
+- **New worlds only.** Worlds played with the Minecraft 1.20.1 version of Seed to Cellar can't be carried over to this one.
 
 ## Installing
 
-1. Install Forge 47 for Minecraft 1.20.1 (from [files.minecraftforge.net](https://files.minecraftforge.net)).
-2. Put `seedtocellar-1.20.1-1.0.0.jar` in your `mods` folder.
-3. Start the game and make a new world, or open an existing one: wild crops appear in chunks generated from now on.
+1. Install NeoForge for Minecraft 26.3 (from [neoforged.net](https://neoforged.net)).
+2. Put `seedtocellar-26.3-1.1.0.jar` in your `mods` folder.
+3. Start the game and make a new world, or open an existing 26.3 one: wild crops appear in chunks generated from now on.
 
 ## What's in it
 
@@ -36,7 +37,7 @@ you what you got right and what you didn't.
   ten fruit wines, sake, juices, lemonade, vinegar.
 - **The distillery.** The Pot Still makes whiskey, bourbon, vodka, brandy and fruit brandies, rum, tequila, grappa and,
   through the Gin Basket, gin. Liqueurs and bitters steep in the jar.
-- **The cellar.** Casks in all ten vanilla woods age drinks a year every in-game day. Each drink has its best woods; char a
+- **The cellar.** Casks in all twelve vanilla woods age drinks a year every in-game day. Each drink has its best woods; char a
   cask for whiskey. Spirits change name and color as they age (New Make becomes Malt Whiskey, White Rum turns Gold, then
   Dark).
 - **The tavern.** Bottle shelves, wine racks and displays that show your actual bottles; set drinks down on any table; bar
@@ -52,30 +53,28 @@ you what you got right and what you didn't.
 
 - **Tooltips:** every item says what it is and what to do next. Hold **Shift** on a drink for its quality checklist.
 - **The Hydrometer** reads any station, cask or crop: progress, temperature, quality, climate.
-- **The Brewer's Almanac** (with Patchouli installed): a guidebook crafted from a book and barley seeds.
-- **JEI** shows every recipe, station and growing plant; **Jade** or **The One Probe** show the Hydrometer's read-out as you
-  look at things.
+- **JEI** shows every recipe, station and growing plant; **Jade** shows the Hydrometer's read-out as you look at things.
+- **The Brewer's Almanac**, a guidebook, comes back once Patchouli is out for 26.3.
 
 ## Works with (all optional)
 
 | Mod | What you get |
 |---|---|
 | JEI (and EMI through its JEI support) | Pages for every station, every plant and how to get every item |
-| Jade, The One Probe | Live read-outs on stations, casks and crops |
-| Patchouli | The Brewer's Almanac |
-| Farmer's Delight | Our dishes in its Cooking Pot, our pies and cake on its Cutting Board, shared ingredient tags |
-| Create, Mekanism, Immersive Engineering | Our milling, pressing and mixing on their machines; a Create brewery can make every beer |
-| Botany Pots, IE Garden Cloche | Every crop (and the fruit trees, in Botany Pots) grows in them |
+| Jade | Live read-outs on stations, casks and crops |
 | Serene Seasons | Seasons replace climates for crops, and change fermentation temperature |
-| Tough As Nails, Cold Sweat | Drinks quench thirst; Warmth keeps you warm |
-| KubeJS, CraftTweaker | Every recipe type is plain JSON: see [docs/PACK_MAKERS.md](docs/PACK_MAKERS.md) |
+| Datapacks and scripting mods | Every recipe type is plain JSON: see [docs/PACK_MAKERS.md](docs/PACK_MAKERS.md) |
+
+The 1.20.1 version also works with The One Probe, Patchouli, Farmer's Delight, Create, Mekanism, Immersive Engineering,
+Botany Pots, Tough As Nails and Cold Sweat. Each comes back here once that mod is out for Minecraft 26.3.
 
 ## Settings
 
 `config/seedtocellar-common.toml`: crop growth speed, climate strength, Fertile Farmland, grass seed chances, every kind
-of wild plant, orchard and village building, chest loot, The One Probe.
-`saves/<world>/serverconfig/seedtocellar-server.toml` (per world): station, fermentation and aging speeds, drink effects,
-tipsiness, hangovers, hiccups, seasons' effect on temperature.
+of wild plant, orchard and village building, chest loot.
+`config/seedtocellar-server.toml` (the server's, shared with players who join): station, fermentation and aging speeds,
+drink effects, tipsiness, hangovers, hiccups, seasons' effect on temperature. For one world only, put a copy in
+`saves/<world>/syncedconfig/`.
 `config/seedtocellar-client.toml`: how much the view sways.
 
 Every number a player feels is listed in [docs/BALANCE.md](docs/BALANCE.md).
@@ -86,7 +85,7 @@ Recipe formats, drink data, tags and integrations: [docs/PACK_MAKERS.md](docs/PA
 
 ## Building it yourself
 
-Needs JDK 17. From the project folder: `gradlew build` (the jar lands in `build/libs`), `gradlew runClient` to play in a
+Needs JDK 25. From the project folder: `gradlew build` (the jar lands in `build/libs`), `gradlew runClient` to play in a
 development game, `gradlew runGameTestServer` to run the automated tests.
 
 ## License

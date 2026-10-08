@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/elderberry",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:elderberry_juice"
+  }
+}

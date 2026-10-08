@@ -11,12 +11,10 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraftforge.common.IPlantable;
-import net.minecraftforge.common.PlantType;
 
 /**
  * Fertile Farmland (GDD section 6.5): farmland enriched with Compost, holding 1-3 fertility.
@@ -29,12 +27,16 @@ import net.minecraftforge.common.PlantType;
  *   <li>Otherwise it's farmland: it needs water, dries out, and turns to dirt if trampled.</li>
  * </ul>
  */
-public class FertileFarmlandBlock extends FarmBlock {
+public class FertileFarmlandBlock extends FarmlandBlock {
     public static final IntegerProperty FERTILITY = IntegerProperty.create("fertility", 1, 3);
     public static final int MAX_FERTILITY = 3;
 
+    /**
+     * Trampled, it turns to dirt like farmland. Crops (vanilla's too) take it like farmland because it's in every block tag
+     * farmland is in ({@code minecraft:supports_crops}, {@code minecraft:grows_crops}...: ModBlockTagsProvider).
+     */
     public FertileFarmlandBlock(Properties properties) {
-        super(properties);
+        super(Blocks.DIRT, properties);
         registerDefaultState(defaultBlockState().setValue(FERTILITY, MAX_FERTILITY));
     }
 
@@ -42,13 +44,6 @@ public class FertileFarmlandBlock extends FarmBlock {
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(FERTILITY);
-    }
-
-    /** Crops (vanilla's too) accept it like farmland: Forge asks the soil, and vanilla crops only know FARMLAND. */
-    @Override
-    public boolean canSustainPlant(BlockState state, BlockGetter level, BlockPos pos, Direction facing, IPlantable plantable) {
-        PlantType type = plantable.getPlantType(level, pos.relative(facing));
-        return type == PlantType.CROP || type == PlantType.PLAINS || super.canSustainPlant(state, level, pos, facing, plantable);
     }
 
     /** Wet like watered farmland, so crops count it when working out their growth speed. */
@@ -88,7 +83,7 @@ public class FertileFarmlandBlock extends FarmBlock {
         } else {
             return false;
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlock(pos, result, Block.UPDATE_ALL);
             level.levelEvent(1505, pos, 0);
         }
@@ -109,7 +104,7 @@ public class FertileFarmlandBlock extends FarmBlock {
         } else {
             return false;
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlock(pos, result, Block.UPDATE_ALL);
             level.playSound(null, pos, SoundEvents.COMPOSTER_FILL_SUCCESS, SoundSource.BLOCKS, 1.0F, 1.0F);
             level.levelEvent(1505, pos, 0);   // the green growth sparkles, as bone meal shows

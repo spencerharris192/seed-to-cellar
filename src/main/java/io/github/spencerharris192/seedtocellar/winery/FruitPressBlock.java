@@ -1,5 +1,8 @@
 package io.github.spencerharris192.seedtocellar.winery;
 
+import org.jspecify.annotations.Nullable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -16,7 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -29,7 +32,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * take the pomace out (or a hopper underneath). The spout faces the player who placed it.
  */
 public class FruitPressBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
     public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
     private static final VoxelShape SHAPE = Shapes.or(box(0, 0, 0, 16, 3, 16), box(2, 3, 2, 14, 10, 14),
             box(0, 3, 6, 2, 16, 10), box(14, 3, 6, 16, 16, 10), box(0, 13, 6, 16, 16, 10));
@@ -55,7 +58,7 @@ public class FruitPressBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -65,12 +68,12 @@ public class FruitPressBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         return level.getBlockEntity(pos) instanceof FruitPressBlockEntity press ? press.onUse(player, hand) : InteractionResult.PASS;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moving) {
         boolean powered = level.hasNeighborSignal(pos);
         if (powered != state.getValue(POWERED)) {
             if (powered && level.getBlockEntity(pos) instanceof FruitPressBlockEntity press) press.crank();
@@ -79,20 +82,15 @@ public class FruitPressBlock extends BaseEntityBlock {
     }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     /** Comparators read how full of juice the tray is (0-15). */
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return level.getBlockEntity(pos) instanceof FruitPressBlockEntity press
                 ? (int) Math.ceil(15.0 * press.tank().getFluidAmount() / FruitPressBlockEntity.CAPACITY) : 0;
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FruitPressBlockEntity press) press.dropContents();
-        super.onRemove(state, level, pos, newState, moved);
-    }
 }

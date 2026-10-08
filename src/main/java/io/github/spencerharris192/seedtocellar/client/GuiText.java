@@ -1,7 +1,7 @@
 package io.github.spencerharris192.seedtocellar.client;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
@@ -13,10 +13,10 @@ final class GuiText {
     static final int LINE_HEIGHT = 9;
 
     /** Draws {@code text} wrapped to {@code width} and returns how many lines it took. */
-    static int draw(GuiGraphics graphics, Font font, Component text, int x, int y, int width, int color) {
+    static int draw(GuiGraphicsExtractor graphics, Font font, Component text, int x, int y, int width, int color) {
         List<FormattedCharSequence> lines = wrap(font, text, width);
         for (int i = 0; i < lines.size(); i++) {
-            graphics.drawString(font, lines.get(i), x, y + i * LINE_HEIGHT, color, false);
+            graphics.text(font, lines.get(i), x, y + i * LINE_HEIGHT, color, false);
         }
         return lines.size();
     }

@@ -1,11 +1,3 @@
 {
-  "parent": "seedtocellar:block/oak_cask_tapped",
-  "overrides": [
-    {
-      "model": "seedtocellar:block/oak_cask_charred_tapped",
-      "predicate": {
-        "seedtocellar:charred": 1.0
-      }
-    }
-  ]
+  "parent": "seedtocellar:block/oak_cask_tapped"
 }

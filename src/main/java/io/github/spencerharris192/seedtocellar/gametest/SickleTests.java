@@ -8,7 +8,6 @@ import io.github.spencerharris192.seedtocellar.farming.TallCropBlock;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -26,12 +25,8 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 /** Sickles (GDD section 6.6) and straw. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SickleTests {
     private static final String EMPTY = "empty";
     private static final BlockPos CENTER = new BlockPos(1, 2, 1);   // plants at y=2, soil at y=1 (template is 3x3x3)
@@ -49,7 +44,7 @@ public final class SickleTests {
         helper.setBlock(outside.below(), Blocks.FARMLAND);
         place(helper, outside, ripe(Blocks.WHEAT));
 
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.IRON_SICKLE.get()));
         helper.assertTrue(swing(helper, player, CENTER).consumesAction(), "the sickle should act on the ripe crops around");
         for (BlockPos corner : corners) helper.assertBlockProperty(corner, CropBlock.AGE, 0);   // harvested and replanted
@@ -79,7 +74,7 @@ public final class SickleTests {
         BlockPos bush = new BlockPos(1, 2, 0);
         place(helper, bush, ((BushCropBlock) Crops.BLUEBERRY.block()).ripe());
 
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.WOODEN_SICKLE.get()));
         swing(helper, player, corn.above());   // aimed at the top of the corn: the 3x3 is at that height...
         helper.assertBlockProperty(corn, CropBlock.AGE, 0);   // ...and still harvests the corn itself
@@ -95,7 +90,7 @@ public final class SickleTests {
     @GameTest(template = EMPTY)
     public static void grainCutWithASickleGivesStraw(GameTestHelper helper) {
         helper.setBlock(CENTER.below(), Blocks.FARMLAND);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
 
         // By hand: no straw.
         helper.setBlock(CENTER, ripe(Crops.BARLEY.block()));

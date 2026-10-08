@@ -4,22 +4,58 @@
     {
       "faces": {
         "down": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
         },
         "east": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            4.5,
+            13,
+            6
+          ]
         },
         "north": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            4.5,
+            13,
+            6
+          ]
         },
         "south": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            4.5,
+            13,
+            6
+          ]
         },
         "up": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            3,
+            13,
+            13
+          ]
         },
         "west": {
-          "texture": "#wood"
+          "texture": "#wood",
+          "uv": [
+            3,
+            4.5,
+            13,
+            6
+          ]
         }
       },
       "from": [
@@ -36,13 +72,19 @@
     {
       "faces": {
         "down": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
         },
         "east": {
           "texture": "#iron",
           "uv": [
             7.5,
-            10.0,
+            10,
             8.5,
             20.5
           ]
@@ -51,7 +93,7 @@
           "texture": "#iron",
           "uv": [
             7.5,
-            10.0,
+            10,
             8.5,
             20.5
           ]
@@ -60,19 +102,25 @@
           "texture": "#iron",
           "uv": [
             7.5,
-            10.0,
+            10,
             8.5,
             20.5
           ]
         },
         "up": {
-          "texture": "#iron"
+          "texture": "#iron",
+          "uv": [
+            7.5,
+            7.5,
+            8.5,
+            8.5
+          ]
         },
         "west": {
           "texture": "#iron",
           "uv": [
             7.5,
-            10.0,
+            10,
             8.5,
             20.5
           ]

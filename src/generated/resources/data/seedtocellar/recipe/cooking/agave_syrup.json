@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "fluid": {
+    "fluid": "seedtocellar:agave_juice"
+  },
+  "result": {
+    "id": "seedtocellar:agave_syrup"
+  },
+  "time": 300
+}

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "F": "minecraft:oak_fence",
+    "I": "#c:ingots/iron",
+    "L": "#minecraft:logs",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "pattern": [
+    "LIL",
+    "LFL",
+    "SSS"
+  ],
+  "result": {
+    "id": "seedtocellar:fruit_press"
+  }
+}

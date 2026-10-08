@@ -10,7 +10,7 @@ message="${1:?usage: tools/public_snapshot.sh \"Seed to Cellar <version>\"}"
 cd "$(git rev-parse --show-toplevel)"
 
 # Kept private: working notes, design documents, this machine's launcher and the store-page materials.
-PRIVATE=(CLAUDE.md PROGRESS.md docs/GDD.md docs/DESIGN_BRIEF.md play-dev.bat release)
+PRIVATE=(CLAUDE.md PROGRESS.md docs/GDD.md docs/DESIGN_BRIEF.md docs/PORT_26.3.md play-dev.bat release)
 
 index="$(git rev-parse --git-dir)/public-index"
 rm -f "$index"

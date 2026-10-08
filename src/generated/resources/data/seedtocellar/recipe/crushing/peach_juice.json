@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/peach",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:peach_juice"
+  },
+  "stomps": 3
+}

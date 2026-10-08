@@ -1,0 +1,51 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": [
+            {
+              "type": "minecraft:copy_state",
+              "block": "seedtocellar:brew_kettle",
+              "condition": {
+                "type": "minecraft:inverted",
+                "term": {
+                  "type": "minecraft:match_block",
+                  "blocks": "seedtocellar:brew_kettle",
+                  "state": {
+                    "weathering": "unaffected"
+                  }
+                }
+              },
+              "properties": [
+                "weathering"
+              ]
+            },
+            {
+              "type": "minecraft:copy_state",
+              "block": "seedtocellar:brew_kettle",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "seedtocellar:brew_kettle",
+                "state": {
+                  "waxed": "true"
+                }
+              },
+              "properties": [
+                "waxed"
+              ]
+            }
+          ],
+          "name": "seedtocellar:brew_kettle"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/brew_kettle"
+}

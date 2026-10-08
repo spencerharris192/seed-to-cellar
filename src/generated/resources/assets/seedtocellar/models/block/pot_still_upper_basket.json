@@ -354,7 +354,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "basket": "seedtocellar:block/pot_still_basket",
     "copper": "seedtocellar:block/pot_still_copper",

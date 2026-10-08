@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "minecraft:water",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:flours/wheat",
+    "#c:flours/wheat"
+  ],
+  "result": {
+    "id": "seedtocellar:sourdough_starter"
+  },
+  "time": 12000
+}

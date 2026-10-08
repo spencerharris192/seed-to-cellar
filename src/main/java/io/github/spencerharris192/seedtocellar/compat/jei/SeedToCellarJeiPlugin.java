@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.compat.jei;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.spencerharris192.seedtocellar.farming.Crop;
 import io.github.spencerharris192.seedtocellar.farming.Crops;
 import io.github.spencerharris192.seedtocellar.farming.FruitTree;
@@ -19,7 +20,7 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ItemLike;
@@ -34,7 +35,7 @@ import java.util.List;
 @JeiPlugin
 public class SeedToCellarJeiPlugin implements IModPlugin {
     @Override
-    public ResourceLocation getPluginUid() {
+    public Identifier getPluginUid() {
         return SeedToCellar.id("jei_plugin");
     }
 
@@ -50,20 +51,20 @@ public class SeedToCellarJeiPlugin implements IModPlugin {
 
     @Override
     public void registerRecipes(IRecipeRegistration registration) {
-        RecipeManager recipes = Minecraft.getInstance().level.getRecipeManager();
-        registration.addRecipes(JeiTypes.MALTING, recipes.getAllRecipesFor(ModRecipes.MALTING.get()));
-        registration.addRecipes(JeiTypes.KILNING, recipes.getAllRecipesFor(ModRecipes.KILNING.get()));
-        registration.addRecipes(JeiTypes.MILLING, recipes.getAllRecipesFor(ModRecipes.MILLING.get()));
-        registration.addRecipes(JeiTypes.DRYING, recipes.getAllRecipesFor(ModRecipes.DRYING.get()));
-        registration.addRecipes(JeiTypes.COOKING, recipes.getAllRecipesFor(ModRecipes.COOKING.get()));
-        registration.addRecipes(JeiTypes.CRUSHING, recipes.getAllRecipesFor(ModRecipes.CRUSHING.get()));
-        registration.addRecipes(JeiTypes.MIXING, recipes.getAllRecipesFor(ModRecipes.MIXING.get()));
-        registration.addRecipes(JeiTypes.PRESSING, recipes.getAllRecipesFor(ModRecipes.PRESSING.get()));
+        var level = Minecraft.getInstance().level;
+        registration.addRecipes(JeiTypes.MALTING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.MALTING.get()).toList());
+        registration.addRecipes(JeiTypes.KILNING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.KILNING.get()).toList());
+        registration.addRecipes(JeiTypes.MILLING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.MILLING.get()).toList());
+        registration.addRecipes(JeiTypes.DRYING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.DRYING.get()).toList());
+        registration.addRecipes(JeiTypes.COOKING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.COOKING.get()).toList());
+        registration.addRecipes(JeiTypes.CRUSHING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.CRUSHING.get()).toList());
+        registration.addRecipes(JeiTypes.MIXING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.MIXING.get()).toList());
+        registration.addRecipes(JeiTypes.PRESSING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.PRESSING.get()).toList());
         registration.addRecipes(JeiTypes.KETTLE, List.of(new StationCategories.KettleStep(false), new StationCategories.KettleStep(true)));
-        registration.addRecipes(JeiTypes.FERMENTING, recipes.getAllRecipesFor(ModRecipes.FERMENTING.get()).stream()
+        registration.addRecipes(JeiTypes.FERMENTING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.FERMENTING.get())
                 .sorted(Comparator.comparingInt(FermentingRecipe::priority).reversed()).toList());
-        registration.addRecipes(JeiTypes.JAR, recipes.getAllRecipesFor(ModRecipes.JAR.get()).stream().filter(r -> !r.crowns()).toList());   // a secret stays one
-        registration.addRecipes(JeiTypes.DISTILLING, recipes.getAllRecipesFor(ModRecipes.DISTILLING.get()).stream()
+        registration.addRecipes(JeiTypes.JAR, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.JAR.get()).filter(r -> !r.crowns()).toList());   // a secret stays one
+        registration.addRecipes(JeiTypes.DISTILLING, io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(level, ModRecipes.DISTILLING.get())
                 .sorted(Comparator.comparingInt(io.github.spencerharris192.seedtocellar.recipe.DistillingRecipe::priority).reversed()).toList());
 
         registration.addRecipes(JeiTypes.GROWING, growing());
@@ -139,8 +140,8 @@ public class SeedToCellarJeiPlugin implements IModPlugin {
                 Component.translatable("jei.seedtocellar.info.buckets"));
         // Liquids only ever poured from their bottles or mugs.
         for (Drinks.Drink drink : List.of(Drinks.COFFEE, Drinks.ELDERFLOWER_CORDIAL, Drinks.MULLED_WINE)) {
-            registration.addIngredientInfo(new net.minecraftforge.fluids.FluidStack(drink.fluid().get(), 1000),
-                    mezz.jei.api.forge.ForgeTypes.FLUID_STACK, Component.translatable("jei.seedtocellar.info.poured"));
+            registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(drink.fluid().get(), 1000),
+                    mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, Component.translatable("jei.seedtocellar.info.poured"));
         }
         for (Crop crop : Crops.all()) if (crop.hasWild()) info(registration, crop.wildItem(), "wild_" + crop.name);
         info(registration, ModItems.WILD_HOPS.get(), "wild_hops");
@@ -158,7 +159,7 @@ public class SeedToCellarJeiPlugin implements IModPlugin {
     /** An info page for a liquid, shown for its bucket and for the liquid itself. */
     private static void info(IRecipeRegistration registration, ModFluids.Entry fluid, String key) {
         info(registration, fluid.bucket.get(), key);
-        registration.addIngredientInfo(new net.minecraftforge.fluids.FluidStack(fluid.get(), 1000), mezz.jei.api.forge.ForgeTypes.FLUID_STACK,
+        registration.addIngredientInfo(new net.neoforged.neoforge.fluids.FluidStack(fluid.get(), 1000), mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK,
                 Component.translatable("jei.seedtocellar.info." + key));
     }
 
@@ -190,34 +191,34 @@ public class SeedToCellarJeiPlugin implements IModPlugin {
      */
     @Override
     public void onRuntimeAvailable(mezz.jei.api.runtime.IJeiRuntime runtime) {
-        if (net.minecraftforge.fml.loading.FMLLoader.isProduction()) return;
+        if (net.neoforged.fml.loading.FMLEnvironment.isProduction()) return;
         var focuses = runtime.getJeiHelpers().getFocusFactory();
         var manager = runtime.getRecipeManager();
         java.util.function.BiPredicate<mezz.jei.api.recipe.RecipeIngredientRole, Object> shown = (role, value) -> {
             mezz.jei.api.recipe.IFocus<?> focus = value instanceof ItemStack stack
                     ? focuses.createFocus(role, mezz.jei.api.constants.VanillaTypes.ITEM_STACK, stack)
-                    : focuses.createFocus(role, mezz.jei.api.forge.ForgeTypes.FLUID_STACK, (net.minecraftforge.fluids.FluidStack) value);
+                    : focuses.createFocus(role, mezz.jei.api.neoforge.NeoForgeTypes.FLUID_STACK, (net.neoforged.neoforge.fluids.FluidStack) value);
             return manager.createRecipeCategoryLookup().limitFocus(List.of(focus)).get()
                     .anyMatch(category -> manager.createRecipeLookup(category.getRecipeType()).limitFocus(List.of(focus)).get().findAny().isPresent());
         };
         List<String> noSource = new java.util.ArrayList<>();
         List<String> noUse = new java.util.ArrayList<>();
         int items = 0, fluids = 0;
-        for (var entry : net.minecraftforge.registries.ForgeRegistries.ITEMS.getEntries()) {
-            if (!entry.getKey().location().getNamespace().equals(SeedToCellar.MOD_ID)) continue;
+        for (var entry : net.minecraft.core.registries.BuiltInRegistries.ITEM.entrySet()) {
+            if (!entry.getKey().identifier().getNamespace().equals(SeedToCellar.MOD_ID)) continue;
             items++;
             ItemStack stack = new ItemStack(entry.getValue());
-            if (!shown.test(mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT, stack)) noSource.add(entry.getKey().location().getPath());
-            boolean consumed = stack.isEdible() || entry.getKey().location().getPath().endsWith("_bucket");   // eaten, drunk or poured
+            if (!shown.test(mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT, stack)) noSource.add(entry.getKey().identifier().getPath());
+            boolean consumed = stack.has(net.minecraft.core.component.DataComponents.CONSUMABLE) || entry.getKey().identifier().getPath().endsWith("_bucket");   // eaten, drunk or poured
             if (!consumed && !shown.test(mezz.jei.api.recipe.RecipeIngredientRole.INPUT, stack)
-                    && !shown.test(mezz.jei.api.recipe.RecipeIngredientRole.CATALYST, stack)) noUse.add(entry.getKey().location().getPath());
+                    && !shown.test(mezz.jei.api.recipe.RecipeIngredientRole.CRAFTING_STATION, stack)) noUse.add(entry.getKey().identifier().getPath());
         }
-        for (var entry : net.minecraftforge.registries.ForgeRegistries.FLUIDS.getEntries()) {
+        for (var entry : net.minecraft.core.registries.BuiltInRegistries.FLUID.entrySet()) {
             var fluid = entry.getValue();
-            if (!entry.getKey().location().getNamespace().equals(SeedToCellar.MOD_ID) || !fluid.isSource(fluid.defaultFluidState())) continue;
+            if (!entry.getKey().identifier().getNamespace().equals(SeedToCellar.MOD_ID) || !fluid.isSource(fluid.defaultFluidState())) continue;
             fluids++;
-            var stack = new net.minecraftforge.fluids.FluidStack(fluid, 1000);
-            if (!shown.test(mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT, stack)) noSource.add("liquid " + entry.getKey().location().getPath());
+            var stack = new net.neoforged.neoforge.fluids.FluidStack(fluid, 1000);
+            if (!shown.test(mezz.jei.api.recipe.RecipeIngredientRole.OUTPUT, stack)) noSource.add("liquid " + entry.getKey().identifier().getPath());
         }
         if (noSource.isEmpty()) {
             SeedToCellar.LOGGER.info("[jei audit] OK: all {} items and {} liquids show how to get them", items, fluids);

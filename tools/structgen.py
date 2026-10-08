@@ -13,7 +13,7 @@ import struct
 from pathlib import Path
 
 DATA_VERSION = 3465  # Minecraft 1.20.1
-STRUCTURES = Path(__file__).resolve().parent.parent / "src/main/resources/data/seedtocellar/structures"
+STRUCTURES = Path(__file__).resolve().parent.parent / "src/main/resources/data/seedtocellar/structure"
 
 TAG_END, TAG_BYTE, TAG_INT, TAG_LONG, TAG_STRING, TAG_LIST, TAG_COMPOUND = 0, 1, 3, 4, 8, 9, 10
 

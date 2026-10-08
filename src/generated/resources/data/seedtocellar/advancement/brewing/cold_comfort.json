@@ -1,0 +1,32 @@
+{
+  "parent": "seedtocellar:brewing/culture_club",
+  "criteria": {
+    "lager": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:lager"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.cold_comfort.description"
+    },
+    "icon": {
+      "id": "seedtocellar:lager_yeast"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.cold_comfort.title"
+    }
+  },
+  "requirements": [
+    [
+      "lager"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

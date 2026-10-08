@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "seedtocellar:apple_pie_slice",
+    "seedtocellar:apple_pie_slice",
+    "seedtocellar:apple_pie_slice",
+    "seedtocellar:apple_pie_slice"
+  ],
+  "result": {
+    "id": "seedtocellar:apple_pie"
+  }
+}

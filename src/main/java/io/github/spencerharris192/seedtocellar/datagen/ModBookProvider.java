@@ -14,7 +14,9 @@ import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -499,8 +501,8 @@ public class ModBookProvider implements DataProvider {
      */
     private static void checkState(String scene, String state) {
         int bracket = state.indexOf('[');
-        net.minecraft.resources.ResourceLocation id = SeedToCellar.parse(bracket < 0 ? state : state.substring(0, bracket));
-        net.minecraft.world.level.block.Block block = ForgeRegistries.BLOCKS.getValue(id);
+        net.minecraft.resources.Identifier id = SeedToCellar.parse(bracket < 0 ? state : state.substring(0, bracket));
+        net.minecraft.world.level.block.Block block = BuiltInRegistries.BLOCK.getValue(id);
         if (block == null || block == net.minecraft.world.level.block.Blocks.AIR) {
             throw new IllegalStateException("Almanac scene " + scene + ": no block " + id);
         }
@@ -602,6 +604,6 @@ public class ModBookProvider implements DataProvider {
     }
 
     private static String key(ItemLike item) {
-        return ForgeRegistries.ITEMS.getKey(item.asItem()).toString();
+        return BuiltInRegistries.ITEM.getKey(item.asItem()).toString();
     }
 }

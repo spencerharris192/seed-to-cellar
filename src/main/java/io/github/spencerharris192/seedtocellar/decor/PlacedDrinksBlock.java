@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.decor;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,7 +25,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -38,7 +40,7 @@ import org.jetbrains.annotations.Nullable;
  * an empty hand takes the last one back. Each keeps its stars and age; breaking the spot drops them all.
  */
 public class PlacedDrinksBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final IntegerProperty DRINKS = IntegerProperty.create("drinks", 1, PlacedDrinksBlockEntity.SLOTS);
     /** Where each drink stands, by how many there are (x, z in pixels, facing north), and each one's turn. */
     public static final float[][][] SPOTS = {
@@ -68,8 +70,8 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
-        return RenderShape.ENTITYBLOCK_ANIMATED;   // only the drinks show, drawn by their renderer
+    protected RenderShape getRenderShape(BlockState state) {
+        return RenderShape.INVISIBLE;   // only the drinks show, drawn by their renderer
     }
 
     @Override
@@ -88,10 +90,10 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         return direction == Direction.DOWN && !canSurvive(state, level, pos)
                 ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+                : super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     /**
@@ -104,7 +106,7 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
         BlockState there = level.getBlockState(pos);
         if (there.getBlock() instanceof PlacedDrinksBlock) return add(level, pos, there, drink);
         if (!context.canPlace() || !canSupport(level, pos.below())) return false;
-        if (level.isClientSide) return true;
+        if (level.isClientSide()) return true;
         BlockState state = io.github.spencerharris192.seedtocellar.registry.ModBlocks.PLACED_DRINKS.get().defaultBlockState()
                 .setValue(FACING, context.getHorizontalDirection().getOpposite());
         level.setBlock(pos, state, Block.UPDATE_ALL);
@@ -116,7 +118,7 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
     /** Adds `drink` to the drinks at `pos` if there's room. True if it was added (the caller takes it from the hand). */
     public static boolean add(Level level, BlockPos pos, BlockState state, ItemStack drink) {
         if (state.getValue(DRINKS) >= PlacedDrinksBlockEntity.SLOTS) return false;
-        if (level.isClientSide) return true;
+        if (level.isClientSide()) return true;
         if (!(level.getBlockEntity(pos) instanceof PlacedDrinksBlockEntity spot) || !spot.add(drink.copyWithCount(1))) return false;
         level.setBlock(pos, state.setValue(DRINKS, spot.count()), Block.UPDATE_ALL);
         level.playSound(null, pos, SoundEvents.GLASS_PLACE, SoundSource.BLOCKS, 0.8F, 1.3F);
@@ -125,15 +127,15 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
 
     /** Clicked with a drink: another joins them. With an empty hand: the last one set down comes back. */
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getItemInHand(hand);
         if (held.getItem() instanceof DrinkItem) {
             if (!add(level, pos, state, held)) return InteractionResult.PASS;
-            if (!level.isClientSide && !player.getAbilities().instabuild) held.shrink(1);
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            if (!level.isClientSide() && !player.getAbilities().instabuild) held.shrink(1);
+            return InteractionResult.SUCCESS;
         }
         if (!held.isEmpty()) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!(level.getBlockEntity(pos) instanceof PlacedDrinksBlockEntity spot)) return InteractionResult.PASS;
         ItemStack taken = spot.takeLast();
         if (taken.isEmpty()) return InteractionResult.PASS;
@@ -146,17 +148,10 @@ public class PlacedDrinksBlock extends BaseEntityBlock {
 
     /** Pick block gives the drink set down last. */
     @Override
-    public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter level, BlockPos pos, Player player) {
+    public ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData, Player player) {
         return level.getBlockEntity(pos) instanceof PlacedDrinksBlockEntity spot ? spot.last().copy() : ItemStack.EMPTY;
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moving) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof PlacedDrinksBlockEntity spot) {
-            for (ItemStack drink : spot.drinks()) Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), drink);
-        }
-        super.onRemove(state, level, pos, newState, moving);
-    }
 
     @Nullable
     @Override

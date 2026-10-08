@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.datagen;
 
+import net.neoforged.neoforge.registries.DeferredItem;
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.spencerharris192.seedtocellar.compat.jade.JadeIds;
 import java.util.List;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
@@ -19,8 +21,8 @@ import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.data.LanguageProvider;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.data.LanguageProvider;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.Locale;
 import java.util.Map;
@@ -491,7 +493,7 @@ public class ModLanguageProvider extends LanguageProvider {
         guide(ModItems.COQ_AU_VIN.get(), "Chicken braised in red wine", "Eat it (the bowl comes back)");
         guide(ModItems.COMPOST_BIN.get(), "Turns plant leftovers into compost", "Fill it with 16 leftovers");
         guide(ModItems.COMPOST.get(), "Rich, crumbly compost", "Use it on farmland to make it fertile");
-        for (RegistryObject<Item> sickle : ModItems.SICKLES) {
+        for (DeferredItem<Item> sickle : ModItems.SICKLES) {
             guide(sickle.get(), "Right-click a crop: harvests and replants all ripe crops around it", "Harvest grain with it for Straw");
         }
         guide(ModItems.STRAW.get(), "From grain harvested with a Sickle", "Craft 4 into Thatch, or compost it");
@@ -540,7 +542,7 @@ public class ModLanguageProvider extends LanguageProvider {
         guide(ModItems.RICE_BALL.get(), "Pressed rice in a strip of dried kelp", "Eat it on the go");
         guide(ModItems.POPCORN.get(), "Popped in the kettle", "Snack on it");
         guide(ModItems.CRANBERRY_SAUCE.get(), "Tart and sweet", "Make a Harvest Feast, or eat it");
-        for (RegistryObject<Item> jam : ModItems.JAMS) {
+        for (DeferredItem<Item> jam : ModItems.JAMS) {
             if (jam != ModItems.MARMALADE) guide(jam.get(), "Fruit cooked down with sugar", "Spread it on bread for jam toast");
         }
         guide(ModItems.MARMALADE.get(), "Oranges cooked down with sugar, peel and all", "Spread it on bread for jam toast");
@@ -634,7 +636,7 @@ public class ModLanguageProvider extends LanguageProvider {
         for (var bundle : List.of(new String[]{"hop_bundle", "Hop cones, tied in a bunch to dry"}, new String[]{"lavender_bundle",
                 "Lavender, hung upside down to dry"}, new String[]{"garlic_braid", "Garlic bulbs braided by their stalks"},
                 new String[]{"chili_string", "Red chilies threaded on a string"})) {
-            guide(net.minecraftforge.registries.ForgeRegistries.ITEMS.getValue(SeedToCellar.id(bundle[0])), bundle[1],
+            guide(net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(SeedToCellar.id(bundle[0])), bundle[1],
                     "Hang it under a block or on a wall");
         }
         generatedGuides();
@@ -931,8 +933,8 @@ public class ModLanguageProvider extends LanguageProvider {
         advancement("morning_after", "Morning After", "Cure a hangover: water, milk, a hearty breakfast or bitters");
         advancement("tavern_keeper", "Tavern Keeper", "Fill a Bottle Shelf with six different drinks");
         advancement("long_live_the_king", "Long Live the King", "Crown a perfect whiskey: the only six-star drink");
-        add("entity.minecraft.villager." + SeedToCellar.MOD_ID + ".vintner", "Vintner");
-        add("entity.minecraft.villager." + SeedToCellar.MOD_ID + ".brewer", "Brewer");
+        add("entity." + SeedToCellar.MOD_ID + ".villager.vintner", "Vintner");
+        add("entity." + SeedToCellar.MOD_ID + ".villager.brewer", "Brewer");
 
         add("hydrometer." + SeedToCellar.MOD_ID + ".vine_ripe", "Ripe: right-click to pick");
         add("hydrometer." + SeedToCellar.MOD_ID + ".vanilla_ripe", "Pods ripe: right-click to pick");
@@ -954,10 +956,11 @@ public class ModLanguageProvider extends LanguageProvider {
     private static final Map<String, String> SPECIAL_NAMES = Map.of("rose", "Rosé", "creme_de_mure", "Crème de Mûre");
 
     /** Each wood's character (GDD section 13), for its cask's tooltip and JEI page. */
-    private static final Map<CaskWood, String> WOOD_CHARACTER = Map.of(CaskWood.OAK, "Balanced and classic",
-            CaskWood.SPRUCE, "Resinous", CaskWood.BIRCH, "Light and neutral", CaskWood.JUNGLE, "Spicy", CaskWood.ACACIA, "Honeyed",
-            CaskWood.DARK_OAK, "Rich", CaskWood.MANGROVE, "Earthy", CaskWood.CHERRY, "Fruity", CaskWood.CRIMSON, "Fast but rough",
-            CaskWood.WARPED, "Fast but rough");
+    private static final Map<CaskWood, String> WOOD_CHARACTER = Map.ofEntries(Map.entry(CaskWood.OAK, "Balanced and classic"),
+            Map.entry(CaskWood.SPRUCE, "Resinous"), Map.entry(CaskWood.BIRCH, "Light and neutral"), Map.entry(CaskWood.JUNGLE, "Spicy"),
+            Map.entry(CaskWood.ACACIA, "Honeyed"), Map.entry(CaskWood.DARK_OAK, "Rich"), Map.entry(CaskWood.MANGROVE, "Earthy"),
+            Map.entry(CaskWood.CHERRY, "Fruity"), Map.entry(CaskWood.PALE_OAK, "Delicate"), Map.entry(CaskWood.POPLAR, "Mild"),
+            Map.entry(CaskWood.CRIMSON, "Fast but rough"), Map.entry(CaskWood.WARPED, "Fast but rough"));
 
     /** "Old Ale and Red Wine": the drinks a wood is ideal for, with the fruit wines as one; "every drink that ages" for oak. */
     private static String idealFor(CaskWood wood) {
@@ -977,7 +980,7 @@ public class ModLanguageProvider extends LanguageProvider {
     private final java.util.Set<net.minecraft.world.item.Item> guided = new java.util.HashSet<>();
 
     private void guide(net.minecraft.world.item.Item item, @org.jetbrains.annotations.Nullable String desc, @org.jetbrains.annotations.Nullable String next) {
-        String base = "tooltip." + SeedToCellar.MOD_ID + "." + net.minecraftforge.registries.ForgeRegistries.ITEMS.getKey(item).getPath();
+        String base = "tooltip." + SeedToCellar.MOD_ID + "." + net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(item).getPath();
         if (desc != null) add(base + ".desc", desc);
         if (next != null) add(base + ".next", next);
         guided.add(item);

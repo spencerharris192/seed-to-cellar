@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:malting",
+  "ingredient": "#c:crops/barley",
+  "result": {
+    "id": "seedtocellar:green_barley_malt"
+  }
+}

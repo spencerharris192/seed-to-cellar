@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "#c:crops/rye",
+  "result": {
+    "id": "seedtocellar:rye_flour"
+  }
+}

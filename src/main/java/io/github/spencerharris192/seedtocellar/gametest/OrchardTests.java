@@ -6,24 +6,17 @@ import io.github.spencerharris192.seedtocellar.farming.FruitSaplingBlock;
 import io.github.spencerharris192.seedtocellar.farming.FruitTree;
 import io.github.spencerharris192.seedtocellar.farming.FruitTrees;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
-import net.minecraft.gametest.framework.GameTestGenerator;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.gametest.framework.TestFunction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Fruit trees: saplings grow into their trees, and the leaves fruit, are picked, and drop ripe fruit. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class OrchardTests {
     private static final String EMPTY = "empty";
     private static final BlockPos TRUNK = new BlockPos(1, 1, 1);
@@ -69,7 +62,7 @@ public final class OrchardTests {
         FruitTree tree = FruitTrees.CHERRY;
         BlockState placed = tree.leaves().defaultBlockState().setValue(LeavesBlock.PERSISTENT, true);
         helper.assertFalse(placed.isRandomlyTicking(), "leaves a player placed don't grow fruit");
-        helper.assertFalse(((FruitLeavesBlock) tree.leaves()).isValidBonemealTarget(helper.getLevel(), helper.absolutePos(LEAVES), placed, false),
+        helper.assertFalse(((FruitLeavesBlock) tree.leaves()).isValidBonemealTarget(helper.getLevel(), helper.absolutePos(LEAVES), placed, net.minecraft.world.level.block.BonemealSource.INTERACTION),
                 "and bone meal does nothing on them");
         helper.assertTrue(treeLeaves(tree, FruitLeavesBlock.PLAIN).isRandomlyTicking(), "leaves on a tree do grow");
         helper.succeed();
@@ -78,11 +71,10 @@ public final class OrchardTests {
     // --- one test per tree: its sapling grows into it ---
 
     @GameTestGenerator
-    public static List<TestFunction> saplingsGrowIntoTheirTrees() {
-        List<TestFunction> tests = new ArrayList<>();
+    public static List<GameTestGenerator.Case> saplingsGrowIntoTheirTrees() {
+        List<GameTestGenerator.Case> tests = new ArrayList<>();
         for (FruitTree tree : FruitTrees.all()) {
-            tests.add(new TestFunction("defaultBatch", "orchardtests.sapling_grows_into_" + tree.name + "_tree",
-                    SeedToCellar.MOD_ID + ":empty_tree", Rotation.NONE, 100, 0, true, helper -> saplingGrows(helper, tree)));
+            tests.add(new GameTestGenerator.Case("sapling_grows_into_" + tree.name + "_tree", "empty_tree", 100, helper -> saplingGrows(helper, tree)));
         }
         return tests;
     }
@@ -96,7 +88,7 @@ public final class OrchardTests {
         BlockPos abs = helper.absolutePos(plant);
         FruitSaplingBlock sapling = (FruitSaplingBlock) tree.sapling();
         for (int i = 0; i < 2 && level.getBlockState(abs).is(tree.sapling()); i++) {
-            sapling.advanceTree(level, abs, level.getBlockState(abs), level.random);
+            sapling.advanceTree(level, abs, level.getBlockState(abs), level.getRandom());
         }
         helper.assertBlockPresent(tree.log.get(), plant);
         int leaves = 0;

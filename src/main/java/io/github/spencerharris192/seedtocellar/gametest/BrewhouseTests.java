@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.MaltType;
@@ -14,22 +15,16 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Map;
 import java.util.Optional;
 
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class BrewhouseTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -49,8 +44,8 @@ public final class BrewhouseTests {
         helper.setBlock(POS, Blocks.CAMPFIRE);
         BlockPos kettlePos = POS.above();
         helper.setBlock(kettlePos, ModBlocks.BREW_KETTLE.get());
-        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos);
-        kettle.tank().fill(new FluidStack(Fluids.WATER, 2000), IFluidHandler.FluidAction.EXECUTE);
+        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos, net.minecraft.world.level.block.entity.BlockEntity.class);
+        kettle.tank().fill(new FluidStack(Fluids.WATER, 2000), StationTank.Action.EXECUTE);
         kettle.items().setStackInSlot(0, new ItemStack(ModItems.PALE_GRIST.get(), 3));
         kettle.items().setStackInSlot(1, new ItemStack(ModItems.AMBER_GRIST.get(), 1));
         helper.succeedWhen(() -> {
@@ -69,7 +64,7 @@ public final class BrewhouseTests {
         helper.setBlock(POS, Blocks.MAGMA_BLOCK);
         BlockPos kettlePos = POS.above();
         helper.setBlock(kettlePos, ModBlocks.BREW_KETTLE.get());
-        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos);
+        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos, net.minecraft.world.level.block.entity.BlockEntity.class);
         kettle.tank().setFluid(wort(ModFluids.SWEET_WORT.get(), 2000, Map.of(MaltType.PALE, 1F), WortData.Strength.NORMAL));
         kettle.items().setStackInSlot(3, new ItemStack(ModItems.DRIED_HOPS.get(), 3));   // hops in any ingredient slot
         helper.succeedWhen(() -> {
@@ -82,7 +77,7 @@ public final class BrewhouseTests {
     @GameTest(template = EMPTY)
     public static void beerStylesFollowTheRules(GameTestHelper helper) {
         helper.setBlock(POS, ModBlocks.FERMENTING_VAT.get());
-        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS);
+        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
         Fluid hopped = ModFluids.HOPPED_WORT.get();
         var normal = WortData.Strength.NORMAL;
         expectStyle(helper, vat, wort(hopped, 1000, Map.of(MaltType.PALE, 1F), normal), ModFluids.PALE_ALE.get());
@@ -105,8 +100,8 @@ public final class BrewhouseTests {
     public static void cultivatedYeastEarnsYeastStarAndGivesMoreLees(GameTestHelper helper) {
         fast();
         helper.setBlock(POS, ModBlocks.FERMENTING_VAT.get());
-        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS);
-        vat.tank().fill(wort(ModFluids.HOPPED_WORT.get(), 2000, Map.of(MaltType.PALE, 1F), WortData.Strength.NORMAL), IFluidHandler.FluidAction.EXECUTE);
+        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        vat.tank().fill(wort(ModFluids.HOPPED_WORT.get(), 2000, Map.of(MaltType.PALE, 1F), WortData.Strength.NORMAL), StationTank.Action.EXECUTE);
         vat.items().setStackInSlot(FermentingVatBlockEntity.YEAST, new ItemStack(ModItems.ALE_YEAST.get()));
         boolean mild = Temperature.at(helper.getLevel(), helper.absolutePos(POS)) == Temperature.MILD;
         vat.setLid(false, null);
@@ -125,8 +120,8 @@ public final class BrewhouseTests {
     public static void wildFermentationWorksWithoutTheYeastStar(GameTestHelper helper) {
         fast();
         helper.setBlock(POS, ModBlocks.FERMENTING_VAT.get());
-        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS);
-        vat.tank().fill(wort(ModFluids.SWEET_WORT.get(), 1000, Map.of(MaltType.PALE, 1F), WortData.Strength.NORMAL), IFluidHandler.FluidAction.EXECUTE);
+        FermentingVatBlockEntity vat = (FermentingVatBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        vat.tank().fill(wort(ModFluids.SWEET_WORT.get(), 1000, Map.of(MaltType.PALE, 1F), WortData.Strength.NORMAL), StationTank.Action.EXECUTE);
         vat.setLid(false, null);
         helper.succeedWhen(() -> {
             helper.assertTrue(vat.tank().getFluid().getFluid() == ModFluids.PLAIN_ALE.get(), "sweet wort -> plain ale");
@@ -149,9 +144,9 @@ public final class BrewhouseTests {
     public static void jarMakesSourdoughStarter(GameTestHelper helper) {
         fast();
         helper.setBlock(POS, ModBlocks.PRESERVING_JAR.get());
-        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS);
+        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
         jar.items().setStackInSlot(0, new ItemStack(ModItems.WHEAT_FLOUR.get(), 2));
-        jar.tank().fill(new FluidStack(Fluids.WATER, 250), IFluidHandler.FluidAction.EXECUTE);
+        jar.tank().fill(new FluidStack(Fluids.WATER, 250), StationTank.Action.EXECUTE);
         jar.setLid(false, null);
         helper.assertTrue(jar.isWorking(), "closing the lid on flour + water should start");
         helper.succeedWhen(() -> {

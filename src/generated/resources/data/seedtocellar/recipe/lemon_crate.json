@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "seedtocellar:lemon",
+    "C": "#minecraft:wooden_slabs"
+  },
+  "pattern": [
+    "###",
+    "#C#",
+    "###"
+  ],
+  "result": {
+    "id": "seedtocellar:lemon_crate"
+  }
+}

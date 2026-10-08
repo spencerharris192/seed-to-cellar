@@ -11,7 +11,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -22,19 +21,13 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.DispenserBlock;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.items.IItemHandler;
 
 /** Compost Bin, Compost, Fertile Farmland and climates (GDD section 6.5). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SoilTests {
     private static final String EMPTY = "empty";
     private static final BlockPos GROUND = new BlockPos(1, 1, 1);
@@ -44,8 +37,8 @@ public final class SoilTests {
     public static void compostBinFillsThenTurnsLeftoversIntoCompost(GameTestHelper helper) {
         ModConfigs.SERVER.processTimeMultiplier.set(0.01);   // a day becomes 240 ticks
         helper.setBlock(GROUND, ModBlocks.COMPOST_BIN.get());
-        CompostBinBlockEntity bin = (CompostBinBlockEntity) helper.getBlockEntity(GROUND);
-        IItemHandler items = bin.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElseThrow(IllegalStateException::new);
+        CompostBinBlockEntity bin = (CompostBinBlockEntity) helper.getBlockEntity(GROUND, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Handlers.Items items = Handlers.items(bin, Direction.UP);
 
         helper.assertTrue(items.insertItem(0, new ItemStack(Items.STONE), false).getCount() == 1, "stone isn't compostable");
         helper.assertTrue(items.insertItem(0, new ItemStack(Items.WHEAT_SEEDS, 10), false).isEmpty(), "takes seeds");
@@ -58,7 +51,7 @@ public final class SoilTests {
 
         helper.succeedWhen(() -> {
             helper.assertBlockProperty(GROUND, CompostBinBlock.READY, true);
-            Player player = helper.makeMockPlayer();
+            Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
             helper.useBlock(GROUND, player);
             helper.assertTrue(player.getInventory().countItem(ModItems.COMPOST.get()) == CompostBinBlockEntity.YIELD,
                     "right-clicking a ready bin gives 4 compost");
@@ -69,7 +62,7 @@ public final class SoilTests {
 
     @GameTest(template = EMPTY)
     public static void compostMakesFarmlandFertileAndTopsItUp(GameTestHelper helper) {
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.COMPOST.get(), 3));
 
         helper.setBlock(GROUND, Blocks.DIRT);
@@ -77,11 +70,11 @@ public final class SoilTests {
         helper.assertBlockPresent(Blocks.DIRT, GROUND);
         helper.assertTrue(player.getMainHandItem().getCount() == 3, "nothing used on plain dirt");
 
-        helper.setBlock(GROUND, Blocks.FARMLAND.defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        helper.setBlock(GROUND, Blocks.FARMLAND.defaultBlockState().setValue(FarmlandBlock.MOISTURE, 7));
         useOnTop(helper, player, GROUND);
         helper.assertBlockPresent(ModBlocks.FERTILE_FARMLAND.get(), GROUND);
         helper.assertBlockProperty(GROUND, FertileFarmlandBlock.FERTILITY, 3);
-        helper.assertBlockProperty(GROUND, FarmBlock.MOISTURE, 7);   // stays wet
+        helper.assertBlockProperty(GROUND, FarmlandBlock.MOISTURE, 7);   // stays wet
         helper.assertTrue(player.getMainHandItem().getCount() == 2, "one compost used");
 
         useOnTop(helper, player, GROUND);   // already full
@@ -109,10 +102,10 @@ public final class SoilTests {
         helper.assertTrue(wheat > harvests + 5, "fertile soil should add extra wheat (got " + wheat + " from " + harvests + ")");
 
         // Used up: harvesting without topping up ends as ordinary (still wet) farmland.
-        helper.setBlock(GROUND, ModBlocks.FERTILE_FARMLAND.get().defaultBlockState().setValue(FarmBlock.MOISTURE, 7));
+        helper.setBlock(GROUND, ModBlocks.FERTILE_FARMLAND.get().defaultBlockState().setValue(FarmlandBlock.MOISTURE, 7));
         for (int i = 0; i < 100 && helper.getBlockState(GROUND).is(ModBlocks.FERTILE_FARMLAND.get()); i++) harvestRipeWheat(helper);
         helper.assertBlockPresent(Blocks.FARMLAND, GROUND);
-        helper.assertBlockProperty(GROUND, FarmBlock.MOISTURE, 7);
+        helper.assertBlockProperty(GROUND, FarmlandBlock.MOISTURE, 7);
         helper.succeed();
     }
 
@@ -121,12 +114,12 @@ public final class SoilTests {
         BlockPos dispenser = GROUND;
         BlockPos soil = GROUND.east();
         helper.setBlock(dispenser, Blocks.DISPENSER.defaultBlockState().setValue(DispenserBlock.FACING, Direction.EAST));
-        ((DispenserBlockEntity) helper.getBlockEntity(dispenser)).setItem(0, new ItemStack(ModItems.COMPOST.get()));
+        ((DispenserBlockEntity) helper.getBlockEntity(dispenser, net.minecraft.world.level.block.entity.BlockEntity.class)).setItem(0, new ItemStack(ModItems.COMPOST.get()));
         helper.setBlock(soil, Blocks.FARMLAND);
         helper.setBlock(dispenser.west(), Blocks.REDSTONE_BLOCK);
         helper.succeedWhen(() -> {
             helper.assertBlockPresent(ModBlocks.FERTILE_FARMLAND.get(), soil);
-            helper.assertTrue(((DispenserBlockEntity) helper.getBlockEntity(dispenser)).isEmpty(), "the compost was used");
+            helper.assertTrue(((DispenserBlockEntity) helper.getBlockEntity(dispenser, net.minecraft.world.level.block.entity.BlockEntity.class)).isEmpty(), "the compost was used");
         });
     }
 
@@ -141,8 +134,8 @@ public final class SoilTests {
         int cold = 0;
         int warm = 0;
         for (int i = 0; i < 1000; i++) {
-            cold += ClimateRules.growthAttempts(Climate.COLD, helper.getLevel(), crop, helper.getLevel().random);
-            warm += ClimateRules.growthAttempts(Climate.WARM, helper.getLevel(), crop, helper.getLevel().random);
+            cold += ClimateRules.growthAttempts(Climate.COLD, helper.getLevel(), crop, helper.getLevel().getRandom());
+            warm += ClimateRules.growthAttempts(Climate.WARM, helper.getLevel(), crop, helper.getLevel().getRandom());
         }
         helper.assertTrue(warm == 1000, "in its climate: one growth attempt every time (got " + warm + ")");
         if (ClimateRules.active()) {

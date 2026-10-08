@@ -1,0 +1,124 @@
+{
+  "parent": "seedtocellar:brewing/four_stars",
+  "criteria": {
+    "amber_ale": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:amber_ale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "lager": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:lager"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "old_ale": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:old_ale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "pale_ale": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:pale_ale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "plain_ale": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:plain_ale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "stout": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:stout"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "table_beer": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:table_beer"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "wheat_beer": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:wheat_beer"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.every_style.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "seedtocellar:stout"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.every_style.title"
+    }
+  },
+  "requirements": [
+    [
+      "pale_ale"
+    ],
+    [
+      "amber_ale"
+    ],
+    [
+      "stout"
+    ],
+    [
+      "old_ale"
+    ],
+    [
+      "plain_ale"
+    ],
+    [
+      "table_beer"
+    ],
+    [
+      "lager"
+    ],
+    [
+      "wheat_beer"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "N": "#c:nuggets/iron",
+    "P": "#minecraft:planks",
+    "T": "seedtocellar:tap"
+  },
+  "pattern": [
+    "PNP",
+    "P P",
+    "PTP"
+  ],
+  "result": {
+    "id": "seedtocellar:keg"
+  }
+}

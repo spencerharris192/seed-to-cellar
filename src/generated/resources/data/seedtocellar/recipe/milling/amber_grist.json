@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "seedtocellar:amber_malt",
+  "result": {
+    "id": "seedtocellar:amber_grist"
+  }
+}

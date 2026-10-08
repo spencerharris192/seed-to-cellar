@@ -344,7 +344,7 @@ WOOD_OAK = [
     "#cfae78",  # 5
 ]
 
-# The other nine cask woods, same layout as WOOD_OAK (0 deep shadow, 2-4 the body, 5 highlight), each tuned to
+# The other eleven cask woods, same layout as WOOD_OAK (0 deep shadow, 2-4 the body, 5 highlight), each tuned to
 # sit beside its vanilla planks: shadows run cooler and toward purple-brown, highlights warmer.
 WOOD_SPRUCE = [
     "#2a1b1c",  # 0
@@ -407,6 +407,25 @@ WOOD_CHERRY = [
     "#dc9a97",  # 3
     "#e9b7b0",  # 4
     "#f4d5cb",  # 5
+]
+
+# Pale oak's near-white with a blush of pink, and poplar's grey taupe (26.3's woods).
+WOOD_PALE_OAK = [
+    "#6a5a5e",  # 0
+    "#8f7f82",  # 1
+    "#b3a3a4",  # 2
+    "#cfc1c0",  # 3
+    "#e5dbd8",  # 4
+    "#f6f0ec",  # 5
+]
+
+WOOD_POPLAR = [
+    "#3e3232",  # 0
+    "#5a4b49",  # 1
+    "#776a66",  # 2
+    "#8f837b",  # 3
+    "#a59a8c",  # 4
+    "#bdb3a1",  # 5
 ]
 
 # Nether stems: crimson's plum-magenta and warped's teal.

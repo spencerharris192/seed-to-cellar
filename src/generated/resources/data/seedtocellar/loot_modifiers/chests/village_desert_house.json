@@ -1,12 +1,10 @@
 {
   "type": "seedtocellar:chest_loot",
   "chance": 0.6,
-  "conditions": [
-    {
-      "condition": "forge:loot_table_id",
-      "loot_table_id": "minecraft:chests/village/village_desert_house"
-    }
-  ],
+  "condition": {
+    "type": "neoforge:loot_table_id",
+    "loot_table_id": "minecraft:chests/village/village_desert_house"
+  },
   "entries": [
     {
       "item": "seedtocellar:agave_pup",

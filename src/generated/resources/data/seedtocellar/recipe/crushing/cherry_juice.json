@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/cherry",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:cherry_juice"
+  },
+  "stomps": 3
+}

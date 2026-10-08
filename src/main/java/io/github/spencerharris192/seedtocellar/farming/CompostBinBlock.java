@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
@@ -54,7 +55,7 @@ public class CompostBinBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -64,26 +65,26 @@ public class CompostBinBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof CompostBinBlockEntity bin)) return InteractionResult.PASS;
         if (bin.isReady()) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 ItemStack compost = bin.takeCompost();
                 if (!player.getInventory().add(compost)) popResource(level, pos.above(), compost);
                 level.playSound(null, pos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         ItemStack held = player.getItemInHand(hand);
         if (!CompostBinBlockEntity.accepts(held)) return InteractionResult.PASS;
         int wanted = player.isSecondaryUseActive() ? held.getCount() : 1;
         if (bin.add(wanted, true) <= 0) return InteractionResult.PASS;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             int taken = bin.add(wanted, false);
             if (!player.getAbilities().instabuild) held.shrink(taken);
             level.playSound(null, pos, SoundEvents.COMPOSTER_FILL, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -91,22 +92,15 @@ public class CompostBinBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof CompostBinBlockEntity bin) bin.checkFinished();
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && state.getValue(READY) && level.getBlockEntity(pos) instanceof CompostBinBlockEntity bin) {
-            popResource(level, pos, bin.takeCompost());   // finished compost isn't lost
-        }
-        super.onRemove(state, level, pos, newState, moved);
-    }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     /** Comparators read how full it is (and 15 when the compost is ready), like the vanilla composter. */
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return state.getValue(READY) ? 15 : state.getValue(LEVEL) * 3;
     }
 }

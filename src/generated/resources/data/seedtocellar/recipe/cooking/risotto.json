@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "fluid": "seedtocellar:white_wine"
+  },
+  "ingredients": [
+    "#c:crops/rice",
+    "#c:crops/onion",
+    "#c:mushrooms"
+  ],
+  "result": {
+    "id": "seedtocellar:risotto"
+  },
+  "time": 300
+}

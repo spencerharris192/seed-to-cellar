@@ -2,11 +2,12 @@ package io.github.spencerharris192.seedtocellar.world;
 
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.registry.ModStructures;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -16,11 +17,13 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.pools.SinglePoolElement;
 import net.minecraft.world.level.levelgen.structure.pools.StructurePoolElementType;
 import net.minecraft.world.level.levelgen.structure.pools.StructureTemplatePool;
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureProcessorList;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplateManager;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A village building with a cellar under it (the Brewhouse). A village fits each house inside the space of the street
@@ -29,34 +32,35 @@ import java.util.List;
  * clipped the same way: the cellar's x and z match the building's, and its top layer sits right under the floor.
  */
 public class CellarPoolElement extends SinglePoolElement {
-    public static final Codec<CellarPoolElement> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            templateCodec(), processorsCodec(), projectionCodec(),
-            ResourceLocation.CODEC.fieldOf("cellar").forGetter(element -> element.cellar),
+    public static final MapCodec<CellarPoolElement> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+            templateCodec(), processorsCodec(), projectionCodec(), overrideLiquidSettingsCodec(),
+            Identifier.CODEC.fieldOf("cellar").forGetter(element -> element.cellar),
             Codec.INT.fieldOf("cellar_depth").forGetter(element -> element.depth)
     ).apply(instance, CellarPoolElement::new));
 
-    private final ResourceLocation cellar;
+    private final Identifier cellar;
     private final int depth;
 
-    protected CellarPoolElement(Either<ResourceLocation, StructureTemplate> template, Holder<StructureProcessorList> processors,
-                                StructureTemplatePool.Projection projection, ResourceLocation cellar, int depth) {
-        super(template, processors, projection);
+    protected CellarPoolElement(Either<Identifier, StructureTemplate> template, Holder<StructureProcessorList> processors,
+                                StructureTemplatePool.Projection projection, Optional<LiquidSettings> liquids, Identifier cellar, int depth) {
+        super(template, processors, projection, liquids);
         this.cellar = cellar;
         this.depth = depth;
     }
 
     /** The building {@code template}, with {@code cellar} (a template {@code depth} blocks tall) under its floor. */
-    public static CellarPoolElement of(ResourceLocation template, ResourceLocation cellar, int depth) {
+    public static CellarPoolElement of(Identifier template, Identifier cellar, int depth) {
         return new CellarPoolElement(Either.left(template), Holder.direct(new StructureProcessorList(List.of())),
-                StructureTemplatePool.Projection.RIGID, cellar, depth);
+                StructureTemplatePool.Projection.RIGID, Optional.empty(), cellar, depth);
     }
 
     @Override
     public boolean place(StructureTemplateManager templates, WorldGenLevel level, StructureManager structures, ChunkGenerator generator,
-                         BlockPos offset, BlockPos pos, Rotation rotation, BoundingBox box, RandomSource random, boolean keepJigsaws) {
-        if (!super.place(templates, level, structures, generator, offset, pos, rotation, box, random, keepJigsaws)) return false;
+                         BlockPos offset, BlockPos pos, Rotation rotation, BoundingBox box, RandomSource random, LiquidSettings liquids,
+                         boolean keepJigsaws) {
+        if (!super.place(templates, level, structures, generator, offset, pos, rotation, box, random, liquids, keepJigsaws)) return false;
         // the turn is about the template's origin and leaves height alone, so the same turn lines the cellar up below
-        templates.getOrCreate(cellar).placeInWorld(level, offset.below(depth), pos, getSettings(rotation, box, keepJigsaws), random, 18);
+        templates.getOrCreate(cellar).placeInWorld(level, offset.below(depth), pos, getSettings(rotation, box, liquids, keepJigsaws), random, 18);
         return true;
     }
 

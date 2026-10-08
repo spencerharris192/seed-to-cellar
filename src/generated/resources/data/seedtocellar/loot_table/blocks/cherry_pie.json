@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "seedtocellar:cherry_pie",
+            "state": {
+              "bites": "0"
+            }
+          },
+          {
+            "type": "minecraft:survives_explosion"
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "seedtocellar:cherry_pie"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/cherry_pie"
+}

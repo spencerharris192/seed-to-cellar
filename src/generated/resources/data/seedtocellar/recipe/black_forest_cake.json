@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "minecraft:cocoa_beans",
+    "C": "#c:foods/fruit/cherry",
+    "E": "#c:eggs",
+    "F": "#c:flours/wheat",
+    "K": "seedtocellar:kirsch",
+    "M": "minecraft:milk_bucket"
+  },
+  "pattern": [
+    "CKC",
+    "BMB",
+    "FEF"
+  ],
+  "result": {
+    "id": "seedtocellar:black_forest_cake"
+  }
+}

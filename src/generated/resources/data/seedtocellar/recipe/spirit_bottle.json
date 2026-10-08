@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "#minecraft:wooden_buttons",
+    "G": "#c:glass_blocks/colorless"
+  },
+  "pattern": [
+    " B ",
+    "G G",
+    "GGG"
+  ],
+  "result": {
+    "count": 4,
+    "id": "seedtocellar:spirit_bottle"
+  }
+}

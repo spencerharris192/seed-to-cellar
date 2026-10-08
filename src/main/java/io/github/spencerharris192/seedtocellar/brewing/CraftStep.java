@@ -37,12 +37,12 @@ public enum CraftStep {
 
     /** Whether a spirit carrying this data has earned the star. */
     public boolean earned(@Nullable CompoundTag data) {
-        int runs = data == null ? 0 : data.getInt(RUNS);
+        int runs = data == null ? 0 : data.getIntOr(RUNS, 0);
         return switch (this) {
             case CONDITIONED -> false;   // decided by resting, not by the data
             case DOUBLE_DISTILLED -> runs >= 2;
-            case NEUTRAL -> runs >= 3 || data != null && data.getBoolean(FILTERED);
-            case BOTANICALS -> data != null && data.getInt(BOTANICAL_COUNT) >= GIN_BOTANICALS;
+            case NEUTRAL -> runs >= 3 || data != null && data.getBooleanOr(FILTERED, false);
+            case BOTANICALS -> data != null && data.getIntOr(BOTANICAL_COUNT, 0) >= GIN_BOTANICALS;
             case INFUSED -> false;   // carried over from the spirit
         };
     }

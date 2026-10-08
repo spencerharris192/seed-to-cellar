@@ -1,0 +1,12 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "seedtocellar:item/pear_leaves",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -8345771
+      }
+    ]
+  }
+}

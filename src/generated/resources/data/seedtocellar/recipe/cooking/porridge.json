@@ -1,0 +1,14 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "c:milk"
+  },
+  "ingredients": [
+    "seedtocellar:rolled_oats",
+    "minecraft:honey_bottle"
+  ],
+  "result": {
+    "id": "seedtocellar:porridge"
+  }
+}

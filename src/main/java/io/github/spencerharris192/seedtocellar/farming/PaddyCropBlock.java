@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import org.jspecify.annotations.Nullable;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,7 +23,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.function.Supplier;
 
@@ -87,15 +89,15 @@ public class PaddyCropBlock extends ModCropBlock implements SimpleWaterloggedBlo
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
-        if (state.getValue(WATERLOGGED)) level.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
+        if (state.getValue(WATERLOGGED)) ticks.scheduleTick(pos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     /** The water belongs to the paddy: a bucket can't take it while rice grows there. */
     @Override
-    public ItemStack pickupBlock(LevelAccessor level, BlockPos pos, BlockState state) {
+    public ItemStack pickupBlock(net.minecraft.world.entity.@Nullable LivingEntity user, LevelAccessor level, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 
@@ -107,9 +109,9 @@ public class PaddyCropBlock extends ModCropBlock implements SimpleWaterloggedBlo
 
     private void growTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (!level.isAreaLoaded(pos, 1) || level.getRawBrightness(pos, 0) < 9 || isMaxAge(state)) return;
-        if (ForgeHooks.onCropsGrowPre(level, pos, state, random.nextInt(GROWTH_CHANCE) == 0)) {
+        if (CommonHooks.canCropGrow(level, pos, state, random.nextInt(GROWTH_CHANCE) == 0)) {
             level.setBlock(pos, getStateForAge(getAge(state) + 1), Block.UPDATE_CLIENTS);
-            ForgeHooks.onCropsGrowPost(level, pos, state);
+            CommonHooks.fireCropGrowPost(level, pos, state);
         }
     }
 }

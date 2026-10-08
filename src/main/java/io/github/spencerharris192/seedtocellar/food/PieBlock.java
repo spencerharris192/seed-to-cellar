@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.food;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -73,10 +75,10 @@ public class PieBlock extends Block {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         ItemStack piece = new ItemStack(slice.get());
-        if (!player.getInventory().add(piece)) player.drop(piece, false);
+        io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity.give(player, piece);
         int bites = state.getValue(BITES);
         if (bites + 1 >= SLICES) {
             level.removeBlock(pos, false);
@@ -95,20 +97,20 @@ public class PieBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos,
-                                  BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+                : super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     /** Comparators read how much pie is left (like a cake). */
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return (SLICES - state.getValue(BITES)) * 3;
     }
 }

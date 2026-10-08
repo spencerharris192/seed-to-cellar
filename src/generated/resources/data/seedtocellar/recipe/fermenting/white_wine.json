@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:white_grape_juice",
+  "result": "seedtocellar:white_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

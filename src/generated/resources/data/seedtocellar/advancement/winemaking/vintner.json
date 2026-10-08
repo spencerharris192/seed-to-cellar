@@ -1,0 +1,59 @@
+{
+  "parent": "seedtocellar:winemaking/stomped",
+  "criteria": {
+    "red_wine": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:red_wine"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "rose": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:rose"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "white_wine": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:white_wine"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.vintner.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "seedtocellar:red_wine"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.vintner.title"
+    }
+  },
+  "requirements": [
+    [
+      "red_wine"
+    ],
+    [
+      "white_wine"
+    ],
+    [
+      "rose"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

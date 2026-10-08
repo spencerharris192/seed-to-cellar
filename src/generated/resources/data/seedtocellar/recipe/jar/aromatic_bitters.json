@@ -1,0 +1,12 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "seedtocellar:vodka",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:crops/wormwood",
+    "#c:crops/anise",
+    "seedtocellar:orange_peel"
+  ],
+  "result_fluid": "seedtocellar:aromatic_bitters",
+  "time": 48000
+}

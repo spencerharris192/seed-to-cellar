@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:honey_water",
+  "result": "seedtocellar:mead",
+  "time": 36000,
+  "yeast": "wine"
+}

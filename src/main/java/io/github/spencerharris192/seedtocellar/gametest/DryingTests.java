@@ -7,20 +7,13 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.items.IItemHandler;
 
 /** Drying Rack (GDD section 7), run 100x faster via the processing-time multiplier. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class DryingTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -29,8 +22,8 @@ public final class DryingTests {
     public static void rackDriesHopsAndMeatThenHoppersTakeThemOut(GameTestHelper helper) {
         ModConfigs.SERVER.processTimeMultiplier.set(0.01);
         helper.setBlock(POS, ModBlocks.DRYING_RACK.get());
-        DryingRackBlockEntity rack = (DryingRackBlockEntity) helper.getBlockEntity(POS);
-        Player player = helper.makeMockPlayer();
+        DryingRackBlockEntity rack = (DryingRackBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
 
         // Something that doesn't dry isn't hung.
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.STONE));
@@ -47,7 +40,7 @@ public final class DryingTests {
         helper.assertTrue(rack.contents().size() == DryingRackBlockEntity.SLOTS, "sneaking fills every free spot");
         helper.assertTrue(player.getMainHandItem().getCount() == 2, "three beef hung, two left");
 
-        IItemHandler items = rack.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.DOWN).orElseThrow(IllegalStateException::new);
+        Handlers.Items items = Handlers.items(rack, Direction.DOWN);
         helper.assertTrue(items.extractItem(0, 1, false).isEmpty(), "nothing comes out before it's dry");
 
         helper.succeedWhen(() -> {
@@ -65,8 +58,8 @@ public final class DryingTests {
     @GameTest(template = EMPTY)
     public static void sneakingTakesBackAnUndriedItem(GameTestHelper helper) {
         helper.setBlock(POS, ModBlocks.DRYING_RACK.get());
-        DryingRackBlockEntity rack = (DryingRackBlockEntity) helper.getBlockEntity(POS);
-        Player player = helper.makeMockPlayer();
+        DryingRackBlockEntity rack = (DryingRackBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.HOP_CONES.get()));
         helper.useBlock(POS, player);
         helper.assertTrue(player.getMainHandItem().isEmpty(), "hung");

@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "seedtocellar:chili_string"
+  ],
+  "result": {
+    "count": 9,
+    "id": "seedtocellar:chili"
+  }
+}

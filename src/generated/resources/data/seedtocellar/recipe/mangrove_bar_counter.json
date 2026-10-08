@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:mangrove_planks",
+    "S": "minecraft:mangrove_slab"
+  },
+  "pattern": [
+    "SSS",
+    "P P",
+    "PPP"
+  ],
+  "result": {
+    "count": 4,
+    "id": "seedtocellar:mangrove_bar_counter"
+  }
+}

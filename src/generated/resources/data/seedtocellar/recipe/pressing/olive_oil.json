@@ -1,0 +1,12 @@
+{
+  "type": "seedtocellar:pressing",
+  "byproduct": {
+    "id": "seedtocellar:olive_pomace"
+  },
+  "cranks": 6,
+  "ingredient": "#c:foods/fruit/olive",
+  "result": {
+    "amount": 250,
+    "fluid": "seedtocellar:olive_oil"
+  }
+}

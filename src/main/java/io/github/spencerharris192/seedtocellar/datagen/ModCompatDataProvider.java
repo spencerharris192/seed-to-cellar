@@ -7,7 +7,9 @@ import io.github.spencerharris192.seedtocellar.effect.ModEffects;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -41,7 +43,7 @@ public class ModCompatDataProvider implements DataProvider {
         players.add("minecraft:player");
         warmed.add("entities", players);
         JsonObject effects = new JsonObject();
-        effects.add(ForgeRegistries.MOB_EFFECTS.getKey(ModEffects.WARMTH.get()).toString(), new JsonObject());
+        effects.add(BuiltInRegistries.MOB_EFFECT.getKey(ModEffects.WARMTH.get()).toString(), new JsonObject());
         warmed.add("effects", effects);
 
         JsonObject json = new JsonObject();

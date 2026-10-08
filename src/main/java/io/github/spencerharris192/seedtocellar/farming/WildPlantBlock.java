@@ -5,7 +5,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -16,7 +16,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * itself. It grows on dirt, grass and farmland, and beach plants (sea beet, wild cabbage)
  * on sand too.
  */
-public class WildPlantBlock extends BushBlock {
+public class WildPlantBlock extends VegetationBlock {
     private static final VoxelShape SHAPE = box(2, 0, 2, 14, 13, 14);
     private final boolean onSand;
 
@@ -43,7 +43,7 @@ public class WildPlantBlock extends BushBlock {
 
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        Vec3 offset = state.getOffset(level, pos);
+        Vec3 offset = state.getOffset(pos);
         return SHAPE.move(offset.x, offset.y, offset.z);
     }
 }

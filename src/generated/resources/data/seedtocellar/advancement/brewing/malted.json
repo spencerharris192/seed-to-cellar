@@ -1,0 +1,32 @@
+{
+  "parent": "seedtocellar:brewing/root",
+  "criteria": {
+    "green_malt": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:green_barley_malt"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.malted.description"
+    },
+    "icon": {
+      "id": "seedtocellar:green_barley_malt"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.malted.title"
+    }
+  },
+  "requirements": [
+    [
+      "green_malt"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

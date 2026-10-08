@@ -1,12 +1,10 @@
 {
   "type": "seedtocellar:straw",
-  "conditions": [
-    {
-      "condition": "minecraft:match_tool",
-      "predicate": {
-        "tag": "forge:tools/sickles"
-      }
+  "condition": {
+    "type": "minecraft:match_tool",
+    "predicate": {
+      "items": "#c:tools/sickle"
     }
-  ],
+  },
   "item": "seedtocellar:straw"
 }

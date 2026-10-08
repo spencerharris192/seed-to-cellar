@@ -6,13 +6,13 @@ import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import io.github.spencerharris192.seedtocellar.recipe.KilningRecipe;
 import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
+import io.github.spencerharris192.seedtocellar.recipe.Recipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Containers;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -21,13 +21,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RangedWrapper;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,7 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
     public static final int OUTPUT = 2;
     public static final int MAX_BATCH = 16;
 
-    private final ItemStackHandler items = new ItemStackHandler(3) {
+    private final StationItems items = new StationItems(3) {
         @Override
         protected void onContentsChanged(int slot) {
             if (slot == FUEL) setChanged();
@@ -59,7 +58,7 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
         @Override
         public boolean isItemValid(int slot, ItemStack stack) {
             return switch (slot) {
-                case FUEL -> ForgeHooks.getBurnTime(stack, null) > 0;
+                case FUEL -> Fuel.isFuel(stack);
                 case OUTPUT -> false;
                 default -> true;
             };
@@ -102,15 +101,15 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
         }
     };
 
-    private final LazyOptional<IItemHandler> inputCap = LazyOptional.of(() -> new RangedWrapper(items, INPUT, INPUT + 1));
-    private final LazyOptional<IItemHandler> fuelCap = LazyOptional.of(() -> new RangedWrapper(items, FUEL, FUEL + 1));
-    private final LazyOptional<IItemHandler> outputCap = LazyOptional.of(() -> new RangedWrapper(items, OUTPUT, OUTPUT + 1));
+    private final ResourceHandler<ItemResource> inputSide = RangedResourceHandler.ofSingleIndex(items, INPUT);
+    private final ResourceHandler<ItemResource> fuelSide = RangedResourceHandler.ofSingleIndex(items, FUEL);
+    private final ResourceHandler<ItemResource> outputSide = RangedResourceHandler.ofSingleIndex(items, OUTPUT);
 
     public KilnBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.KILN.get(), pos, state);
     }
 
-    public ItemStackHandler items() {
+    public StationItems items() {
         return items;
     }
 
@@ -140,7 +139,7 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
 
         Optional<KilningRecipe> recipe = kiln.findRecipe();
         if (recipe.isPresent() && kiln.canOutput(recipe.get())) {
-            if (kiln.burnTime <= 0) kiln.consumeFuel();
+            if (kiln.burnTime <= 0) kiln.consumeFuel((ServerLevel) level);
             kiln.totalTime = ModConfigs.processTicks(recipe.get().time());
             if (kiln.burnTime > 0) {
                 if (++kiln.progress >= kiln.totalTime) {
@@ -164,9 +163,7 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
     public Optional<KilningRecipe> findRecipe() {
         ItemStack input = items.getStackInSlot(INPUT);
         if (level == null || input.isEmpty()) return Optional.empty();
-        SimpleContainer container = new SimpleContainer(input);
-        return level.getRecipeManager().getAllRecipesFor(ModRecipes.KILNING.get()).stream()
-                .filter(r -> r.matches(container, roast)).findFirst();
+        return Recipes.stream(level, ModRecipes.KILNING.get()).filter(r -> r.matches(input, roast)).findFirst();
     }
 
     private ItemStack batchResult(KilningRecipe recipe) {
@@ -179,16 +176,16 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
         ItemStack result = batchResult(recipe);
         ItemStack output = items.getStackInSlot(OUTPUT);
         if (output.isEmpty()) return result.getCount() <= result.getMaxStackSize();
-        return ItemStack.isSameItemSameTags(output, result) && output.getCount() + result.getCount() <= output.getMaxStackSize();
+        return ItemStack.isSameItemSameComponents(output, result) && output.getCount() + result.getCount() <= output.getMaxStackSize();
     }
 
-    private void consumeFuel() {
+    private void consumeFuel(ServerLevel level) {
         ItemStack fuel = items.getStackInSlot(FUEL);
-        int time = ForgeHooks.getBurnTime(fuel, null);
+        int time = Fuel.burnTicks(level, this, fuel);
         if (time <= 0) return;
         burnTime = burnDuration = time;
-        if (fuel.hasCraftingRemainingItem()) {
-            items.setStackInSlot(FUEL, fuel.getCraftingRemainingItem());
+        if (fuel.getItem().getCraftingRemainder() != null) {
+            items.setStackInSlot(FUEL, fuel.getItem().getCraftingRemainder().create());
         } else {
             fuel.shrink(1);
             items.setStackInSlot(FUEL, fuel);
@@ -219,10 +216,11 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
         return lines;
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < items.getSlots(); i++) {
-            Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), items.getStackInSlot(i));
+            Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), items.getStackInSlot(i));
         }
     }
 
@@ -241,44 +239,33 @@ public class KilnBlockEntity extends SyncedBlockEntity implements MenuProvider, 
     // --- save / load -----------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Items", items.serializeNBT());
-        tag.putInt("BurnTime", burnTime);
-        tag.putInt("BurnDuration", burnDuration);
-        tag.putInt("Progress", progress);
-        tag.putInt("TotalTime", totalTime);
-        tag.putString("Roast", roast.getSerializedName());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        items.serialize(output.child("Items"));
+        output.putInt("BurnTime", burnTime);
+        output.putInt("BurnDuration", burnDuration);
+        output.putInt("Progress", progress);
+        output.putInt("TotalTime", totalTime);
+        output.putString("Roast", roast.getSerializedName());
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        items.deserializeNBT(tag.getCompound("Items"));
-        burnTime = tag.getInt("BurnTime");
-        burnDuration = tag.getInt("BurnDuration");
-        progress = tag.getInt("Progress");
-        totalTime = tag.getInt("TotalTime");
-        roast = RoastLevel.byName(tag.getString("Roast"));
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        items.deserialize(input.childOrEmpty("Items"));
+        burnTime = input.getIntOr("BurnTime", 0);
+        burnDuration = input.getIntOr("BurnDuration", 0);
+        progress = input.getIntOr("Progress", 0);
+        totalTime = input.getIntOr("TotalTime", 0);
+        roast = RoastLevel.byName(input.getStringOr("Roast", ""));
     }
 
     // --- automation ------------------------------------------------------------------------
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) {
-            if (side == Direction.UP) return inputCap.cast();
-            if (side == Direction.DOWN) return outputCap.cast();
-            return fuelCap.cast();
-        }
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        inputCap.invalidate();
-        fuelCap.invalidate();
-        outputCap.invalidate();
+    /** Hoppers and pipes: input from above, output from below, fuel from the sides. */
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        if (side == Direction.UP) return inputSide;
+        if (side == Direction.DOWN) return outputSide;
+        return fuelSide;
     }
 }

@@ -6,7 +6,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.VegetationBlock;
 
 /**
  * Compost (GDD section 6.5): use it on farmland to make Fertile Farmland, or on fertile
@@ -23,12 +23,12 @@ public class CompostItem extends Item {
         Level level = context.getLevel();
         if (!spread(level, context.getClickedPos())) return InteractionResult.PASS;
         if (context.getPlayer() == null || !context.getPlayer().getAbilities().instabuild) context.getItemInHand().shrink(1);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     /** Works the compost into the soil at {@code pos}, or under the crop there. False if there's no farmland. */
     public static boolean spread(Level level, BlockPos pos) {
-        if (level.getBlockState(pos).getBlock() instanceof BushBlock) pos = pos.below();   // the crop: feed its soil
+        if (level.getBlockState(pos).getBlock() instanceof VegetationBlock) pos = pos.below();   // the crop: feed its soil
         return FertileFarmlandBlock.fertilize(level, pos, ModBlocks.FERTILE_FARMLAND.get());
     }
 }

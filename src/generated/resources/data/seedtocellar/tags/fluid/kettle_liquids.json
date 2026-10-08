@@ -1,0 +1,17 @@
+{
+  "values": [
+    "#minecraft:water",
+    "#c:milk",
+    "#seedtocellar:ales",
+    "#seedtocellar:lemon_juice",
+    "seedtocellar:sweet_wort",
+    "seedtocellar:hopped_wort",
+    "seedtocellar:honey_water",
+    "seedtocellar:red_wine",
+    "seedtocellar:white_wine",
+    "seedtocellar:lemonade",
+    "seedtocellar:sorghum_juice",
+    "seedtocellar:cane_juice",
+    "seedtocellar:agave_juice"
+  ]
+}

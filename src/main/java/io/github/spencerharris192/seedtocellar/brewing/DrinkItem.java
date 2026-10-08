@@ -4,6 +4,7 @@ import io.github.spencerharris192.seedtocellar.client.ClientHooks;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import io.github.spencerharris192.seedtocellar.effect.Intoxication;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -13,24 +14,24 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fml.DistExecutor;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.fluids.FluidStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
- * A served drink: a mug of beer or cider, a bottle of wine, a glass bottle of juice. Carries the same data
+ * A served drink: a mug of beer or cider, a bottle of wine, a glass bottle of juice. Carries the same {@link BrewData}
  * as its liquid: quality checks ("Brew") and, for drinks that age, "Age" in years and the cask "Wood". Drinking gives its
- * effect (longer at higher quality), adds to tipsiness if it's alcoholic, and gives the empty vessel back.
+ * effect (longer at higher quality) and adds to tipsiness if it's alcoholic; the empty vessel comes back (the item's
+ * properties say which, see Drinks).
  */
 public class DrinkItem extends Item {
     public static final String AGE = "Age";
@@ -65,27 +66,29 @@ public class DrinkItem extends Item {
     // --- data --------------------------------------------------------------------------------
 
     public static BrewQuality quality(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains(BrewQuality.TAG) ? BrewQuality.load(tag.getCompound(BrewQuality.TAG)) : BrewQuality.NONE;
+        return BrewQuality.of(stack);
     }
 
     public static int ageYears(ItemStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : tag.getInt(AGE);
+        return BrewData.get(stack).getIntOr(AGE, 0);
     }
 
     /** The serving of liquid this drink holds (same data travels with it). */
     public FluidStack asFluid(ItemStack stack) {
         FluidStack out = new FluidStack(fluid(), SERVING);
-        if (stack.getTag() != null) out.setTag(stack.getTag().copy());
+        BrewData.copy(stack, out);
         return out;
     }
 
-    /** A drink item holding this serving of liquid, or empty if the liquid isn't drinkable from a mug. */
+    /**
+     * A drink item holding this serving of liquid, or empty if the liquid isn't drinkable from a mug. A crowned whiskey's
+     * name shows its rarity, like an enchanted golden apple's.
+     */
     public static ItemStack fromFluid(FluidStack serving) {
         return Drinks.byFluid(serving.getFluid()).map(d -> {
             ItemStack stack = new ItemStack(d.item().get());
-            if (serving.getTag() != null && !serving.getTag().isEmpty()) stack.setTag(serving.getTag().copy());
+            BrewData.copy(serving, stack);
+            if (quality(stack).crowned()) stack.set(DataComponents.RARITY, Rarity.EPIC);
             return stack;
         }).orElse(ItemStack.EMPTY);
     }
@@ -93,7 +96,7 @@ public class DrinkItem extends Item {
     /** Spirits go by their age: New Make, White Dog, Eau-de-vie... */
     @Override
     public Component getName(ItemStack stack) {
-        String key = Drinks.nameKey(fluid(), stack.getTag());
+        String key = Drinks.nameKey(fluid(), BrewData.orNull(stack));
         return key != null ? Component.translatable(key) : super.getName(stack);
     }
 
@@ -115,90 +118,82 @@ public class DrinkItem extends Item {
                     .place(new net.minecraft.world.item.context.BlockPlaceContext(context), held);
         }
         if (!placed) return InteractionResult.PASS;
-        if (!level.isClientSide && !context.getPlayer().getAbilities().instabuild) held.shrink(1);
-        return InteractionResult.sidedSuccess(level.isClientSide);
-    }
-
-    @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.DRINK;
-    }
-
-    @Override
-    public int getUseDuration(ItemStack stack) {
-        return 32;
+        if (!level.isClientSide() && !context.getPlayer().getAbilities().instabuild) held.shrink(1);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        if (!level.isClientSide && entity instanceof Player player) {
+        if (!level.isClientSide() && entity instanceof Player player) {
             int stars = quality(stack).stars();
             if (ModConfigs.SERVER.drinkEffects.get()) {
-                player.addEffect(new MobEffectInstance(profile.effect().get(), profile.effectTicks(stars), 0, false, true, true));
+                player.addEffect(new MobEffectInstance(profile.effect(), profile.effectTicks(stars), 0, false, true, true));
                 if (quality(stack).crowned()) {   // a crowned whiskey drinks like the golden apple steeped in it
                     player.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.ABSORPTION, 2400, 0));
                     player.addEffect(new MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 100, 1));
                 }
             }
             Intoxication.drink(player, profile.units(), stars);
-            Drinks.byItem(this).ifPresent(d -> Drinks.cures(d).forEach(effect -> player.removeEffect(effect.get())));
+            Drinks.byItem(this).ifPresent(d -> Drinks.cures(d).forEach(player::removeEffect));
         }
-        boolean creative = entity instanceof Player p && p.getAbilities().instabuild;
-        ItemStack remaining = super.finishUsingItem(stack, level, entity); // food + shrink
-        if (creative) return remaining;
-        ItemStack empty = new ItemStack(vessel.empty());
-        if (remaining.isEmpty()) return empty;
-        if (entity instanceof Player player && !player.getInventory().add(empty)) player.drop(empty, false);
-        return remaining;
+        return super.finishUsingItem(stack, level, entity);   // food, and the empty vessel back
     }
 
     // --- tooltip -----------------------------------------------------------------------------
 
     @Override
-    public void appendHoverText(ItemStack stack, Level level, List<Component> tooltip, TooltipFlag flag) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag flag) {
         List<Component> quality = new java.util.ArrayList<>();
-        if (profile.graded()) addQualityLines(quality(stack), fluid(), stack.getTag(), quality);
-        if (!quality.isEmpty()) tooltip.add(quality.remove(0));   // the stars first, then what it does, then the rest
-        tooltip.addAll(effectLines(stack));
-        boolean shift = Boolean.TRUE.equals(DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientHooks::shiftDown));
-        if (shift) tooltip.add(Component.translatable("tooltip.seedtocellar.set_down").withStyle(ChatFormatting.DARK_GRAY));
+        if (profile.graded()) addQualityLines(quality(stack), fluid(), BrewData.orNull(stack), quality);
+        if (!quality.isEmpty()) tooltip.accept(quality.remove(0));   // the stars first, then what it does, then the rest
+        effectLines(stack, context.tickRate()).forEach(tooltip);
+        if (shiftDown()) tooltip.accept(Component.translatable("tooltip.seedtocellar.set_down").withStyle(ChatFormatting.DARK_GRAY));
         if (profile.alcoholic()) {
-            tooltip.add((profile.units() == 1 ? Component.translatable("tooltip.seedtocellar.units_one")
+            tooltip.accept((profile.units() == 1 ? Component.translatable("tooltip.seedtocellar.units_one")
                     : Component.translatable("tooltip.seedtocellar.units", unitsText(profile.units()))).withStyle(ChatFormatting.DARK_GRAY));
         }
-        tooltip.addAll(quality);
+        quality.forEach(tooltip);
+    }
+
+    /** Shift held, on a client (tooltips can be built on a server too, where nothing is held). */
+    private static boolean shiftDown() {
+        return FMLEnvironment.getDist().isClient() && ClientHooks.shiftDown();
+    }
+
+    public List<Component> effectLines(ItemStack stack) {
+        return effectLines(stack, 20F);
     }
 
     /**
      * What drinking it does, as potions show it: its effect for as long as its stars give (a crowned whiskey adds a golden
      * apple's), and what it cures.
      */
-    public List<Component> effectLines(ItemStack stack) {
+    public List<Component> effectLines(ItemStack stack, float tickRate) {
         List<Component> lines = new java.util.ArrayList<>();
         BrewQuality quality = quality(stack);
-        lines.add(effectLine(new MobEffectInstance(profile.effect().get(), profile.effectTicks(quality.stars()))));
+        lines.add(effectLine(new MobEffectInstance(profile.effect(), profile.effectTicks(quality.stars())), tickRate));
         if (quality.crowned()) {
-            lines.add(effectLine(new MobEffectInstance(net.minecraft.world.effect.MobEffects.ABSORPTION, 2400, 0)));
-            lines.add(effectLine(new MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 100, 1)));
+            lines.add(effectLine(new MobEffectInstance(net.minecraft.world.effect.MobEffects.ABSORPTION, 2400, 0), tickRate));
+            lines.add(effectLine(new MobEffectInstance(net.minecraft.world.effect.MobEffects.REGENERATION, 100, 1), tickRate));
         }
         Drinks.byItem(this).map(Drinks::cures).filter(cures -> !cures.isEmpty()).ifPresent(cures -> {
             MutableComponent names = Component.empty();
             for (int i = 0; i < cures.size(); i++) {
                 if (i > 0) names.append(i == cures.size() - 1 ? Component.translatable("tooltip.seedtocellar.list_and") : Component.literal(", "));
-                names.append(cures.get(i).get().getDisplayName());
+                names.append(cures.get(i).value().getDisplayName());
             }
             lines.add(Component.translatable("tooltip.seedtocellar.cures", names).withStyle(ChatFormatting.BLUE));
         });
         return lines;
     }
 
-    private static Component effectLine(MobEffectInstance effect) {
+    private static Component effectLine(MobEffectInstance effect, float tickRate) {
         MutableComponent name = Component.translatable(effect.getDescriptionId());
         if (effect.getAmplifier() > 0) {
             name = Component.translatable("potion.withAmplifier", name, Component.translatable("potion.potency." + effect.getAmplifier()));
         }
-        return Component.translatable("potion.withDuration", name, net.minecraft.world.effect.MobEffectUtil.formatDuration(effect, 1F))
-                .withStyle(effect.getEffect().getCategory().getTooltipFormatting());
+        return Component.translatable("potion.withDuration", name, net.minecraft.world.effect.MobEffectUtil.formatDuration(effect, 1F, tickRate))
+                .withStyle(effect.getEffect().value().getCategory().getTooltipFormatting());
     }
 
     /** "1", "1.5", "3". */
@@ -212,21 +207,20 @@ public class DrinkItem extends Item {
      */
     public static void addQualityLines(BrewQuality quality, Fluid fluid, @Nullable CompoundTag data, List<Component> tooltip) {
         tooltip.add(stars(quality.stars()));
-        int years = data == null ? 0 : data.getInt(AGE);
+        int years = data == null ? 0 : data.getIntOr(AGE, 0);
         if (years > 0) {
-            tooltip.add(CaskWood.byId(data.getString(WOOD))
-                    .map(wood -> Component.translatable("tooltip.seedtocellar.aged_years_in", years, woodName(wood, data.getBoolean(CHARRED))))
+            tooltip.add(CaskWood.byId(data.getStringOr(WOOD, ""))
+                    .map(wood -> Component.translatable("tooltip.seedtocellar.aged_years_in", years, woodName(wood, data.getBooleanOr(CHARRED, false))))
                     .orElseGet(() -> Component.translatable("tooltip.seedtocellar.aged_years", years)).withStyle(ChatFormatting.GRAY));
         }
         DrinkProfile profile = Drinks.byFluid(fluid).map(Drinks.Drink::profile).orElse(null);
         boolean ageable = profile != null && profile.ageable();
-        int runs = data == null ? 0 : data.getInt(CraftStep.RUNS);
+        int runs = data == null ? 0 : data.getIntOr(CraftStep.RUNS, 0);
         if (runs > 0) {
             tooltip.add(Component.translatable(runs == 1 ? "tooltip.seedtocellar.distilled_once" : "tooltip.seedtocellar.distilled_times", runs)
                     .withStyle(ChatFormatting.GRAY));
         }
-        boolean shift = Boolean.TRUE.equals(DistExecutor.unsafeCallWhenOn(Dist.CLIENT, () -> ClientHooks::shiftDown));
-        if (shift) {
+        if (shiftDown()) {
             tooltip.add(check(quality.yeast(), "tooltip.seedtocellar.check.yeast"));
             tooltip.add(check(quality.temperature(), "tooltip.seedtocellar.check.temperature"));
             tooltip.add(check(quality.craft(), (profile == null ? CraftStep.CONDITIONED : profile.craft()).checkKey()));
@@ -282,24 +276,14 @@ public class DrinkItem extends Item {
         return line;
     }
 
-    /** A crowned bottle shimmers like an enchanted golden apple, and its name shows it. */
+    /** A crowned bottle shimmers like an enchanted golden apple (and its name shows it: {@link #fromFluid}). */
     @Override
     public boolean isFoil(ItemStack stack) {
         return quality(stack).crowned() || super.isFoil(stack);
     }
 
-    @Override
-    public net.minecraft.world.item.Rarity getRarity(ItemStack stack) {
-        return quality(stack).crowned() ? net.minecraft.world.item.Rarity.EPIC : super.getRarity(stack);
-    }
-
     private static Component check(boolean ok, String key) {
         return Component.literal(ok ? "✔ " : "✘ ").withStyle(ok ? ChatFormatting.GREEN : ChatFormatting.RED)
                 .append(Component.translatable(key).withStyle(ChatFormatting.GRAY));
-    }
-
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt) {
-        return new VesselFluidHandler(stack);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.station.BrewKettleBlockEntity;
 import io.github.spencerharris192.seedtocellar.brewing.station.PreservingJarBlockEntity;
@@ -16,7 +17,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.SimpleContainer;
@@ -28,20 +28,17 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Optional;
 
 /** Kitchen (GDD section 15): flours, doughs, breads. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class KitchenTests {
     private static final String EMPTY = "empty";
     private static final BlockPos KETTLE = new BlockPos(1, 2, 1);
@@ -59,25 +56,25 @@ public final class KitchenTests {
         TransientCraftingContainer grid = new TransientCraftingContainer(new NoMenu(), 3, 3);
         grid.setItem(0, new ItemStack(ModItems.DOUGH.get()));
         grid.setItem(1, new ItemStack(ModItems.SOURDOUGH_STARTER.get()));
-        Optional<CraftingRecipe> recipe = helper.getLevel().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, helper.getLevel());
+        Optional<CraftingRecipe> recipe = helper.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), helper.getLevel()).map(RecipeHolder::value);
         helper.assertTrue(recipe.isPresent(), "dough + starter should craft");
-        helper.assertTrue(recipe.get().assemble(grid, helper.getLevel().registryAccess()).is(ModItems.SOURDOUGH_DOUGH.get()),
+        helper.assertTrue(recipe.get().assemble(grid.asCraftInput()).is(ModItems.SOURDOUGH_DOUGH.get()),
                 "dough + starter makes sourdough dough");
-        NonNullList<ItemStack> left = recipe.get().getRemainingItems(grid);
+        NonNullList<ItemStack> left = recipe.get().getRemainingItems(grid.asCraftInput());
         helper.assertTrue(left.stream().anyMatch(s -> s.is(ModItems.SOURDOUGH_STARTER.get())), "the starter comes back");
         helper.succeed();
     }
 
     @GameTest(template = EMPTY)
     public static void sourdoughBreadCuresAHangover(GameTestHelper helper) {
-        Player player = helper.makeMockPlayer();
-        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER.get(), 2400));
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER, 2400));
         ItemStack bread = new ItemStack(ModItems.SOURDOUGH_BREAD.get());
         bread.finishUsingItem(helper.getLevel(), player);
-        helper.assertFalse(player.hasEffect(ModEffects.HANGOVER.get()), "sourdough bread cures a hangover");
-        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER.get(), 2400));
+        helper.assertFalse(player.hasEffect(ModEffects.HANGOVER), "sourdough bread cures a hangover");
+        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER, 2400));
         new ItemStack(ModItems.RYE_BREAD.get()).finishUsingItem(helper.getLevel(), player);
-        helper.assertTrue(player.hasEffect(ModEffects.HANGOVER.get()), "ordinary bread doesn't");
+        helper.assertTrue(player.hasEffect(ModEffects.HANGOVER), "ordinary bread doesn't");
         helper.succeed();
     }
 
@@ -100,13 +97,13 @@ public final class KitchenTests {
         ModConfigs.SERVER.processTimeMultiplier.set(0.01);
         helper.setBlock(KETTLE.below(), Blocks.CAMPFIRE);
         helper.setBlock(KETTLE, ModBlocks.BREW_KETTLE.get());
-        return (BrewKettleBlockEntity) helper.getBlockEntity(KETTLE);
+        return (BrewKettleBlockEntity) helper.getBlockEntity(KETTLE, net.minecraft.world.level.block.entity.BlockEntity.class);
     }
 
     @GameTest(template = EMPTY, timeoutTicks = 100)
     public static void kettleCooksTomatoSoupIntoBowls(GameTestHelper helper) {
         BrewKettleBlockEntity kettle = heatedKettle(helper);
-        kettle.tank().fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+        kettle.tank().fill(new FluidStack(Fluids.WATER, 1000), StationTank.Action.EXECUTE);
         kettle.items().setStackInSlot(0, new ItemStack(Crops.TOMATO.produce(), 2));
         kettle.items().setStackInSlot(3, new ItemStack(Crops.ONION.produce(), 2));   // any slots, any order
         kettle.items().setStackInSlot(BrewKettleBlockEntity.CONTAINER, new ItemStack(Items.BOWL, 2));
@@ -121,7 +118,7 @@ public final class KitchenTests {
     @GameTest(template = EMPTY, timeoutTicks = 100)
     public static void kettleCooksPorridgeWithMilkAndGivesBackTheHoneyBottle(GameTestHelper helper) {
         BrewKettleBlockEntity kettle = heatedKettle(helper);
-        kettle.tank().fill(new FluidStack(ForgeMod.MILK.get(), 250), IFluidHandler.FluidAction.EXECUTE);
+        kettle.tank().fill(new FluidStack(NeoForgeMod.MILK.get(), 250), StationTank.Action.EXECUTE);
         helper.assertTrue(kettle.tank().getFluidAmount() == 250, "the kettle takes milk");
         kettle.items().setStackInSlot(1, new ItemStack(ModItems.ROLLED_OATS.get()));
         kettle.items().setStackInSlot(2, new ItemStack(Items.HONEY_BOTTLE));
@@ -136,7 +133,7 @@ public final class KitchenTests {
     @GameTest(template = EMPTY, timeoutTicks = 100)
     public static void kettleWontCookWithoutTheBowl(GameTestHelper helper) {
         BrewKettleBlockEntity kettle = heatedKettle(helper);
-        kettle.tank().fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+        kettle.tank().fill(new FluidStack(Fluids.WATER, 1000), StationTank.Action.EXECUTE);
         kettle.items().setStackInSlot(0, new ItemStack(Crops.TOMATO.produce()));
         kettle.items().setStackInSlot(1, new ItemStack(Crops.ONION.produce()));
         helper.assertTrue(kettle.matchingRecipe().isPresent(), "tomato + onion is tomato soup");
@@ -152,13 +149,13 @@ public final class KitchenTests {
     public static void riceBallsGiveTheBowlBack(GameTestHelper helper) {
         TransientCraftingContainer grid = new TransientCraftingContainer(new NoMenu(), 3, 3);
         grid.setItem(4, new ItemStack(ModItems.COOKED_RICE.get()));
-        helper.assertTrue(helper.getLevel().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, helper.getLevel()).isEmpty(),
+        helper.assertTrue(helper.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), helper.getLevel()).map(RecipeHolder::value).isEmpty(),
                 "rice alone isn't enough: it needs kelp");
         grid.setItem(5, new ItemStack(Items.DRIED_KELP));
-        Optional<CraftingRecipe> recipe = helper.getLevel().getRecipeManager().getRecipeFor(RecipeType.CRAFTING, grid, helper.getLevel());
-        helper.assertTrue(recipe.isPresent() && recipe.get().assemble(grid, helper.getLevel().registryAccess()).is(ModItems.RICE_BALL.get()),
+        Optional<CraftingRecipe> recipe = helper.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, grid.asCraftInput(), helper.getLevel()).map(RecipeHolder::value);
+        helper.assertTrue(recipe.isPresent() && recipe.get().assemble(grid.asCraftInput()).is(ModItems.RICE_BALL.get()),
                 "cooked rice + dried kelp makes rice balls");
-        helper.assertTrue(recipe.get().getRemainingItems(grid).stream().anyMatch(s -> s.is(Items.BOWL)), "the bowl comes back");
+        helper.assertTrue(recipe.get().getRemainingItems(grid.asCraftInput()).stream().anyMatch(s -> s.is(Items.BOWL)), "the bowl comes back");
         helper.succeed();
     }
 
@@ -167,13 +164,13 @@ public final class KitchenTests {
     private static PreservingJarBlockEntity jar(GameTestHelper helper) {
         ModConfigs.SERVER.fermentationTimeMultiplier.set(0.001);   // a day becomes 24 ticks
         helper.setBlock(KETTLE, ModBlocks.PRESERVING_JAR.get());
-        return (PreservingJarBlockEntity) helper.getBlockEntity(KETTLE);
+        return (PreservingJarBlockEntity) helper.getBlockEntity(KETTLE, net.minecraft.world.level.block.entity.BlockEntity.class);
     }
 
     @GameTest(template = EMPTY, timeoutTicks = 200)
     public static void openBeerSoursIntoVinegarAndGrowsAMother(GameTestHelper helper) {
         PreservingJarBlockEntity jar = jar(helper);
-        jar.tank().fill(new FluidStack(ModFluids.PALE_ALE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
+        jar.tank().fill(new FluidStack(ModFluids.PALE_ALE.get(), 1000), StationTank.Action.EXECUTE);
         helper.assertTrue(jar.isSouring(), "beer in an open, otherwise empty jar starts souring");
         helper.succeedWhen(() -> {
             helper.assertTrue(jar.tank().getFluid().getFluid() == ModFluids.VINEGAR.get(), "the beer became vinegar");
@@ -185,7 +182,7 @@ public final class KitchenTests {
     @GameTest(template = EMPTY)
     public static void beerDoesntSourWithTheLidOnOrWithOtherThingsInIt(GameTestHelper helper) {
         PreservingJarBlockEntity jar = jar(helper);
-        jar.tank().fill(new FluidStack(ModFluids.PALE_ALE.get(), 1000), IFluidHandler.FluidAction.EXECUTE);
+        jar.tank().fill(new FluidStack(ModFluids.PALE_ALE.get(), 1000), StationTank.Action.EXECUTE);
         jar.setLid(false, null);
         helper.assertFalse(jar.isSouring(), "a closed jar doesn't sour");
         jar.setLid(true, null);
@@ -198,7 +195,7 @@ public final class KitchenTests {
     @GameTest(template = EMPTY, timeoutTicks = 200)
     public static void cucumbersPickleInVinegar(GameTestHelper helper) {
         PreservingJarBlockEntity jar = jar(helper);
-        jar.tank().fill(new FluidStack(ModFluids.VINEGAR.get(), 250), IFluidHandler.FluidAction.EXECUTE);
+        jar.tank().fill(new FluidStack(ModFluids.VINEGAR.get(), 250), StationTank.Action.EXECUTE);
         jar.items().setStackInSlot(0, new ItemStack(Crops.CUCUMBER.produce(), 2));
         jar.items().setStackInSlot(1, new ItemStack(Crops.GARLIC.produce()));
         jar.items().setStackInSlot(2, new ItemStack(Crops.CORIANDER.produce()));
@@ -217,7 +214,7 @@ public final class KitchenTests {
     public static void aPlacedPieGivesFourSlicesThenIsGone(GameTestHelper helper) {
         helper.setBlock(KETTLE.below(), Blocks.STONE);
         helper.setBlock(KETTLE, Pies.BLUEBERRY.block().get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         for (int i = 0; i < PieBlock.SLICES - 1; i++) {
             helper.useBlock(KETTLE, player);
             helper.assertBlockProperty(KETTLE, PieBlock.BITES, i + 1);
@@ -232,7 +229,7 @@ public final class KitchenTests {
     public static void theHarvestFeastServesSixWithBowlsThenLeavesABone(GameTestHelper helper) {
         helper.setBlock(KETTLE.below(), Blocks.STONE);
         helper.setBlock(KETTLE, ModBlocks.HARVEST_FEAST.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         helper.useBlock(KETTLE, player);   // no bowl: nothing happens
         helper.assertBlockProperty(KETTLE, FeastBlock.SERVINGS, FeastBlock.SERVINGS_MAX);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BOWL, 8));
@@ -247,15 +244,15 @@ public final class KitchenTests {
     }
 
     private static void assertMills(GameTestHelper helper, Item input, Item output) {
-        Optional<MillingRecipe> recipe = helper.getLevel().getRecipeManager()
-                .getRecipeFor(ModRecipes.MILLING.get(), new SimpleContainer(new ItemStack(input)), helper.getLevel());
+        Optional<MillingRecipe> recipe = helper.getLevel().recipeAccess()
+                .getRecipeFor(ModRecipes.MILLING.get(), new SingleRecipeInput(new ItemStack(input)), helper.getLevel()).map(RecipeHolder::value);
         helper.assertTrue(recipe.isPresent() && recipe.get().result().is(output), input + " should mill into " + output);
     }
 
     private static void assertBakes(GameTestHelper helper, Item input, Item output) {
-        var recipe = helper.getLevel().getRecipeManager()
-                .getRecipeFor(RecipeType.SMELTING, new SimpleContainer(new ItemStack(input)), helper.getLevel());
-        helper.assertTrue(recipe.isPresent() && recipe.get().getResultItem(helper.getLevel().registryAccess()).is(output),
+        SingleRecipeInput in = new SingleRecipeInput(new ItemStack(input));
+        var recipe = helper.getLevel().recipeAccess().getRecipeFor(RecipeType.SMELTING, in, helper.getLevel());
+        helper.assertTrue(recipe.isPresent() && recipe.get().value().assemble(in).is(output),
                 input + " should bake into " + output);
     }
 

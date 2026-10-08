@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.decor;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -13,7 +15,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -24,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
  * and falls (dropping itself) without it. Purely decorative: you walk through it.
  */
 public class HangingBundleBlock extends Block {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     /** On a wall (from a nail, FACING away from the wall) rather than under a block. */
     public static final BooleanProperty WALL = BooleanProperty.create("wall");
     private static final VoxelShape CEILING = box(5, 0, 5, 11, 16, 11);
@@ -80,10 +82,10 @@ public class HangingBundleBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction, BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         Direction support = state.getValue(WALL) ? state.getValue(FACING).getOpposite() : Direction.UP;
         return direction == support && !canSurvive(state, level, pos) ? Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+                : super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override

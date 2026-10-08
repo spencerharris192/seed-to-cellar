@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:pomace_mash",
+  "result": "seedtocellar:pomace_wash",
+  "temperature": [
+    "mild",
+    "warm"
+  ],
+  "yeast": "wine"
+}

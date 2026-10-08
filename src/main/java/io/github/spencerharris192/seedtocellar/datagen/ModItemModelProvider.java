@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.datagen;
 
+import net.neoforged.neoforge.registries.DeferredItem;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
 import io.github.spencerharris192.seedtocellar.farming.Crop;
 import io.github.spencerharris192.seedtocellar.farming.StorageBlocks;
@@ -15,18 +16,24 @@ import io.github.spencerharris192.seedtocellar.decor.CopperWeathering;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.client.model.generators.ItemModelProvider;
-import net.minecraftforge.client.model.generators.loaders.DynamicFluidContainerModelBuilder;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import io.github.spencerharris192.seedtocellar.brewing.BottleLook;
+import io.github.spencerharris192.seedtocellar.datagen.model.ItemModelProvider;
+import com.google.gson.JsonObject;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.FoliageColor;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
-/** Item models. The millstone item model is hand-written (base + runner together). */
+/**
+ * Item models, and what each item shows (its definition): drinks tinted with their liquid, spirits' labels in their colors,
+ * weathered copper and charred casks by the blockstate the item carries, the crowned whiskey by its crown. The millstone
+ * item model is hand-written (base + runner together).
+ */
 public class ModItemModelProvider extends ItemModelProvider {
-    public ModItemModelProvider(PackOutput output, ExistingFileHelper files) {
-        super(output, SeedToCellar.MOD_ID, files);
+    public ModItemModelProvider(PackOutput output) {
+        super(output);
     }
 
     @Override
@@ -43,10 +50,16 @@ public class ModItemModelProvider extends ItemModelProvider {
             flatBlockItem(tree.saplingItem(), tree.name + "_sapling");
             if (tree.ownFruit()) basicItem(tree.fruit());
             withExistingParent(tree.name + "_leaves", modLoc("block/" + tree.name + "_leaves"));
+            // in the hand, the leaves' base layer takes the default foliage green (birch's for pear), as the block does outside
+            switch (tree.tint) {
+                case FOLIAGE -> definition(tree.leavesItem(), model(modLoc("item/" + tree.name + "_leaves"), constantTint(FoliageColor.FOLIAGE_DEFAULT)));
+                case BIRCH -> definition(tree.leavesItem(), model(modLoc("item/" + tree.name + "_leaves"), constantTint(FruitTree.BIRCH_LEAF_COLOR)));
+                case NONE -> { }
+            }
         }
 
         // Flat items: textures/item/<id>.png, made by tools/texturegen.
-        for (RegistryObject<Item> item : List.of(ModItems.HOP_RHIZOME, ModItems.HOP_CONES,
+        for (DeferredItem<Item> item : List.of(ModItems.HOP_RHIZOME, ModItems.HOP_CONES,
                 ModItems.DRIED_HOPS, ModItems.GREEN_BARLEY_MALT, ModItems.PALE_MALT, ModItems.AMBER_MALT, ModItems.BLACK_MALT,
                 ModItems.PALE_GRIST, ModItems.AMBER_GRIST, ModItems.BLACK_GRIST, ModItems.WHEAT_FLOUR,
                 ModItems.SPENT_GRAIN, ModItems.SOURDOUGH_STARTER, ModItems.ALE_YEAST,
@@ -68,17 +81,24 @@ public class ModItemModelProvider extends ItemModelProvider {
             basicItem(item.get());
         }
 
-        // Drinks: the vessel, and the drink showing in it (layer 1, tinted per drink in game).
-        // Mugs add a foam head; wine bottles show the wine at the neck and on the label's band; spirit bottles add their
-        // label's paper and print (layers 2 and 3, in each spirit's BottleLook colors).
+        // Drinks: the vessel, and the drink showing in it (layer 1, tinted with the drink's liquid).
+        // Mugs add a foam head (a kettle drink's in its own color); wine bottles show the wine at the neck and on the label's
+        // band; spirit bottles add their label's paper and print (layers 2 and 3, in each spirit's BottleLook colors).
         for (Drinks.Drink drink : Drinks.all()) {
             var model = withExistingParent(drink.name(), mcLoc("item/generated"));
             if (drink == Drinks.APPLE_CROWN_WHISKEY) {   // its own bottle, all one layer; crowned, its own icon (and a shimmer)
-                var crowned = withExistingParent(drink.name() + "_crowned", mcLoc("item/generated"))
+                withExistingParent(drink.name() + "_crowned", mcLoc("item/generated"))
                         .texture("layer0", modLoc("item/" + drink.name() + "_crowned"));
-                model.texture("layer0", modLoc("item/" + drink.name())).override().predicate(SeedToCellar.id("crowned"), 1).model(crowned).end();
+                model.texture("layer0", modLoc("item/" + drink.name()));
+                definition(drink.item().get(), hasComponent(SeedToCellar.id("quality_crowned"),
+                        model(modLoc("item/" + drink.name() + "_crowned")), model(modLoc("item/" + drink.name()))));
                 continue;
             }
+            BottleLook look = BottleLook.of(drink);
+            JsonObject[] tints = look != null ? new JsonObject[]{noTint(), fluidTint(), constantTint(look.paper()), constantTint(look.accent())}
+                    : drink.profile().graded() ? new JsonObject[]{noTint(), fluidTint()}
+                    : new JsonObject[]{noTint(), fluidTint(), fluidTint()};
+            definition(drink.item().get(), model(modLoc("item/" + drink.name()), tints));
             switch (drink.vessel()) {
                 case MUG -> model.texture("layer0", modLoc("item/mug")).texture("layer1", modLoc("item/mug_liquid"))
                         .texture("layer2", modLoc("item/mug_foam"));
@@ -90,17 +110,17 @@ public class ModItemModelProvider extends ItemModelProvider {
         }
         basicItem(ModItems.WINE_BOTTLE.get());
         basicItem(ModItems.SPIRIT_BOTTLE.get());
-        // The Pot Still's icon, weathered as the item's blockstate says (the "weathering" property: the stage, 0-3).
-        var still = basicItem(ModItems.POT_STILL.get());
+        // The Pot Still's icon, weathered as the item's blockstate says (its "weathering" property).
+        basicItem(ModItems.POT_STILL.get());
+        Map<String, JsonObject> stills = new LinkedHashMap<>();
         for (CopperWeathering.Stage stage : CopperWeathering.Stage.values()) {
             if (stage == CopperWeathering.Stage.UNAFFECTED) continue;
             String id = "pot_still_" + stage.getSerializedName();
-            getBuilder(id).parent(new net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile("item/generated"))
-                    .texture("layer0", modLoc("item/" + id));
-            still.override().predicate(SeedToCellar.id("weathering"), stage.ordinal())
-                    .model(new net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile(modLoc("item/" + id))).end();
+            withExistingParent(id, mcLoc("item/generated")).texture("layer0", modLoc("item/" + id));
+            stills.put(stage.getSerializedName(), model(modLoc("item/" + id)));
         }
-        for (RegistryObject<Item> item : List.of(ModItems.MOLASSES, ModItems.AGAVE_SYRUP, ModItems.ROASTED_AGAVE, ModItems.AGAVE_FIBER,
+        definition(ModItems.POT_STILL.get(), byBlockState(CopperWeathering.STAGE.getName(), stills, model(modLoc("item/pot_still"))));
+        for (DeferredItem<Item> item : List.of(ModItems.MOLASSES, ModItems.AGAVE_SYRUP, ModItems.ROASTED_AGAVE, ModItems.AGAVE_FIBER,
                 ModItems.GIN_BASKET, ModItems.LEMON_PEEL, ModItems.ORANGE_PEEL, ModItems.VANILLA_POD, ModItems.CURED_VANILLA,
                 ModItems.BLACK_FOREST_CAKE, ModItems.BLACK_FOREST_CAKE_SLICE, ModItems.LAGER_YEAST, ModItems.GREEN_WHEAT_MALT,
                 ModItems.WHEAT_MALT, ModItems.WHEAT_GRIST, ModItems.POLISHED_RICE, ModItems.RICE_BRAN, ModItems.STEAMED_RICE,
@@ -117,7 +137,7 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("malting_tub", modLoc("block/malting_tub"));
         withExistingParent("compost_bin", modLoc("block/compost_bin_3"));
         basicItem(ModItems.COMPOST.get());
-        for (RegistryObject<Item> sickle : ModItems.SICKLES) {
+        for (DeferredItem<Item> sickle : ModItems.SICKLES) {
             withExistingParent(sickle.getId().getPath(), mcLoc("item/handheld")).texture("layer0", modLoc("item/" + sickle.getId().getPath()));
         }
         basicItem(ModItems.STRAW.get());
@@ -138,20 +158,20 @@ public class ModItemModelProvider extends ItemModelProvider {
             withExistingParent(id, modLoc("block/" + id));
         }
         withExistingParent("kiln", modLoc("block/kiln"));
-        var kettle = withExistingParent("brew_kettle", modLoc("block/brew_kettle"));
+        withExistingParent("brew_kettle", modLoc("block/brew_kettle"));
+        Map<String, JsonObject> kettles = new LinkedHashMap<>();
         for (CopperWeathering.Stage stage : CopperWeathering.Stage.values()) {
             if (stage == CopperWeathering.Stage.UNAFFECTED) continue;
-            kettle.override().predicate(SeedToCellar.id("weathering"), stage.ordinal()).model(new net.minecraftforge.client.model.generators
-                    .ModelFile.UncheckedModelFile(modLoc("block/brew_kettle_" + stage.getSerializedName()))).end();
+            kettles.put(stage.getSerializedName(), model(modLoc("block/brew_kettle_" + stage.getSerializedName())));
         }
+        definition(ModItems.BREW_KETTLE.get(), byBlockState(CopperWeathering.STAGE.getName(), kettles, model(modLoc("item/brew_kettle"))));
         withExistingParent("fermenting_vat", modLoc("block/fermenting_vat_closed"));
         withExistingParent("preserving_jar", modLoc("block/preserving_jar_closed"));
         for (CaskWood wood : CaskWood.values()) {
-            var cask = withExistingParent(wood.id() + "_cask", modLoc("block/" + wood.id() + "_cask_tapped"));
+            withExistingParent(wood.id() + "_cask", modLoc("block/" + wood.id() + "_cask_tapped"));
             if (!wood.nether()) {   // a charred cask item shows its char (the "charred" property, from its blockstate)
-                cask.override().predicate(SeedToCellar.id("charred"), 1)
-                        .model(new net.minecraftforge.client.model.generators.ModelFile.UncheckedModelFile(
-                                modLoc("block/" + wood.id() + "_cask_charred_tapped"))).end();
+                definition(ModBlocks.CASKS.get(wood).get().asItem(), byBlockState("charred",
+                        Map.of("true", model(modLoc("block/" + wood.id() + "_cask_charred_tapped"))), model(modLoc("item/" + wood.id() + "_cask"))));
             }
         }
         withExistingParent("keg", modLoc("block/keg"));
@@ -168,19 +188,16 @@ public class ModItemModelProvider extends ItemModelProvider {
         withExistingParent("wine_display", modLoc("block/wine_display"));
         withExistingParent("crushing_tub", modLoc("block/crushing_tub"));
         withExistingParent("fruit_press", modLoc("block/fruit_press"));
-        for (RegistryObject<Item> item : List.of(ModItems.GRAPE_POMACE, ModItems.FRUIT_POMACE, ModItems.OLIVE_POMACE, ModItems.BAGASSE)) {
+        for (DeferredItem<Item> item : List.of(ModItems.GRAPE_POMACE, ModItems.FRUIT_POMACE, ModItems.OLIVE_POMACE, ModItems.BAGASSE)) {
             basicItem(item.get());
         }
 
-        // Buckets: Forge draws the vanilla bucket with the fluid's texture and color.
-        for (ModFluids.Entry fluid : ModFluids.all()) {
-            withExistingParent(fluid.name + "_bucket", SeedToCellar.rl("forge", "item/bucket"))
-                    .customLoader(DynamicFluidContainerModelBuilder::begin).fluid(fluid.get());
-        }
+        // Buckets: NeoForge draws the vanilla bucket with the fluid's texture and color.
+        for (ModFluids.Entry fluid : ModFluids.all()) definition(fluid.bucket.get(), bucket(fluid.get()));
     }
 
     private void flatBlockItem(Item item, String blockTexture) {
-        withExistingParent(ForgeRegistries.ITEMS.getKey(item).getPath(), mcLoc("item/generated"))
+        withExistingParent(BuiltInRegistries.ITEM.getKey(item).getPath(), mcLoc("item/generated"))
                 .texture("layer0", modLoc("block/" + blockTexture));
     }
 }

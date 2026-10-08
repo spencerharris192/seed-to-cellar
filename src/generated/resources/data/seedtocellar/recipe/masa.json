@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:flours/corn",
+    "#c:flours/corn",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "count": 2,
+    "id": "seedtocellar:masa"
+  }
+}

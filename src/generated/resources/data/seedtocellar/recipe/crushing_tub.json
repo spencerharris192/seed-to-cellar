@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "#c:nuggets/iron",
+    "P": "#minecraft:planks",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "pattern": [
+    "P P",
+    "PSP",
+    "III"
+  ],
+  "result": {
+    "id": "seedtocellar:crushing_tub"
+  }
+}

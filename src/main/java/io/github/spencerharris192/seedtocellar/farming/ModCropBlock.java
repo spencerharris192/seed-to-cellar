@@ -57,10 +57,10 @@ public class ModCropBlock extends CropBlock implements ClimateCrop {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!isMaxAge(state) || !ModConfigs.COMMON.rightClickHarvest.get()) return InteractionResult.PASS;
         if (level instanceof ServerLevel server) harvest(server, pos, state, player, getStateForAge(0));
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     /**
@@ -70,7 +70,7 @@ public class ModCropBlock extends CropBlock implements ClimateCrop {
     public static void harvest(ServerLevel level, BlockPos pos, BlockState state, Player player, BlockState replanted) {
         ItemStack tool = player.getMainHandItem();
         List<ItemStack> drops = Block.getDrops(state, level, pos, null, player, tool);
-        Item replant = state.getBlock().getCloneItemStack(level, pos, state).getItem();
+        Item replant = state.getCloneItemStack(level, pos, false).getItem();
         for (ItemStack drop : drops) {
             if (drop.is(replant)) {
                 drop.shrink(1);
@@ -79,7 +79,7 @@ public class ModCropBlock extends CropBlock implements ClimateCrop {
         }
         drops.forEach(drop -> popResource(level, pos, drop));
         level.setBlock(pos, replanted, Block.UPDATE_CLIENTS);
-        level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 0.9F + level.random.nextFloat() * 0.2F);
+        level.playSound(null, pos, SoundEvents.CROP_BREAK, SoundSource.BLOCKS, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);
         level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, replanted));
     }
 }

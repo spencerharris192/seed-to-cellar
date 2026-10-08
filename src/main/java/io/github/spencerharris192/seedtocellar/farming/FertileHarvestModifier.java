@@ -1,7 +1,9 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
-import com.google.common.base.Suppliers;
+import java.util.Optional;
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import io.github.spencerharris192.seedtocellar.registry.ModTags;
@@ -15,12 +17,11 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
 
 /**
  * The harvest side of Fertile Farmland, for any crop (ours or vanilla's, broken by hand, by a
@@ -30,17 +31,16 @@ import java.util.function.Supplier;
  * Rich Soil Farmland) gives the extra harvests and never wears out.
  */
 public class FertileHarvestModifier extends LootModifier {
-    public static final Supplier<Codec<FertileHarvestModifier>> CODEC = Suppliers.memoize(() ->
-            RecordCodecBuilder.create(inst -> codecStart(inst).apply(inst, FertileHarvestModifier::new)));
+    public static final MapCodec<FertileHarvestModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).apply(inst, FertileHarvestModifier::new));
 
-    public FertileHarvestModifier(LootItemCondition[] conditions) {
-        super(conditions);
+    public FertileHarvestModifier(Optional<Holder<LootItemCondition>> condition, int priority) {
+        super(condition, priority);
     }
 
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> loot, LootContext context) {
-        BlockState state = context.getParamOrNull(LootContextParams.BLOCK_STATE);
-        Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+        BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+        Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
         if (state == null || origin == null || !(state.getBlock() instanceof CropBlock crop) || !crop.isMaxAge(state)) return loot;
         BlockPos soilPos = BlockPos.containing(origin).below();
         BlockState soil = context.getLevel().getBlockState(soilPos);
@@ -48,7 +48,7 @@ public class FertileHarvestModifier extends LootModifier {
         if (!always && !(soil.getBlock() instanceof FertileFarmlandBlock)) return loot;
 
         if (context.getRandom().nextDouble() < ModConfigs.COMMON.fertileExtraHarvestChance.get()) {
-            Item harvest = harvestOf(loot, crop.getCloneItemStack(context.getLevel(), soilPos.above(), state).getItem());
+            Item harvest = harvestOf(loot, state.getCloneItemStack(context.getLevel(), soilPos.above(), false).getItem());
             if (harvest != null) loot.add(new ItemStack(harvest));
         }
         if (!always && context.getRandom().nextDouble() < ModConfigs.COMMON.fertileUseChance.get()) {
@@ -66,7 +66,7 @@ public class FertileHarvestModifier extends LootModifier {
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
     }
 }

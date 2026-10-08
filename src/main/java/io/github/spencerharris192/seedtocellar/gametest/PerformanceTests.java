@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.Drinks;
 import io.github.spencerharris192.seedtocellar.brewing.station.BrewKettleBlockEntity;
@@ -8,7 +9,6 @@ import io.github.spencerharris192.seedtocellar.distillery.PotStillBlock;
 import io.github.spencerharris192.seedtocellar.distillery.PotStillBlockEntity;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -16,18 +16,13 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * The performance check (final phase): our only stations that tick every game tick (Brew Kettle, Kiln, Pot Still) cost
  * little even left heated and idle, as a village's Brewhouse leaves its kettle; and the drink lookup the shelves' renderers
  * use every frame is quick. Times go to the log as "[benchmark]", beside a vanilla furnace's for scale.
  */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class PerformanceTests {
     private static final String EMPTY = "empty";
     private static final int WARMUP = 2_000;
@@ -43,7 +38,7 @@ public final class PerformanceTests {
         helper.setBlock(new BlockPos(0, 1, 0), ModBlocks.BREW_KETTLE.get());
         BlockPos kettlePos = helper.absolutePos(new BlockPos(0, 1, 0));
         var kettle = (BrewKettleBlockEntity) level.getBlockEntity(kettlePos);
-        kettle.tank().fill(new FluidStack(Fluids.WATER, 2000), IFluidHandler.FluidAction.EXECUTE);
+        kettle.tank().fill(new FluidStack(Fluids.WATER, 2000), StationTank.Action.EXECUTE);
         kettle.items().setStackInSlot(0, new ItemStack(Items.CARROT));
         // A still over a fire with water in the pot: nothing to distil.
         helper.setBlock(new BlockPos(2, 0, 0), Blocks.CAMPFIRE);
@@ -52,7 +47,7 @@ public final class PerformanceTests {
         helper.setBlock(new BlockPos(2, 2, 0), lower.setValue(PotStillBlock.HALF, DoubleBlockHalf.UPPER));
         BlockPos stillPos = helper.absolutePos(new BlockPos(2, 1, 0));
         var still = (PotStillBlockEntity) level.getBlockEntity(stillPos);
-        still.pot().fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+        still.pot().fill(new FluidStack(Fluids.WATER, 1000), StationTank.Action.EXECUTE);
         // A kiln with fuel and something it can't roast.
         helper.setBlock(new BlockPos(0, 0, 2), ModBlocks.KILN.get());
         BlockPos kilnPos = helper.absolutePos(new BlockPos(0, 0, 2));

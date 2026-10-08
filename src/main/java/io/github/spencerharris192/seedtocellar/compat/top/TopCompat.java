@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.compat.top;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.HydrometerItem;
 import mcjty.theoneprobe.api.IProbeHitData;
@@ -8,7 +9,7 @@ import mcjty.theoneprobe.api.IProbeInfoProvider;
 import mcjty.theoneprobe.api.ITheOneProbe;
 import mcjty.theoneprobe.api.ProbeMode;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -33,7 +34,7 @@ public final class TopCompat implements Function<ITheOneProbe, Void> {
 
     private static final class Readout implements IProbeInfoProvider {
         @Override
-        public ResourceLocation getID() {
+        public Identifier getID() {
             return SeedToCellar.id("readout");
         }
 
@@ -41,7 +42,7 @@ public final class TopCompat implements Function<ITheOneProbe, Void> {
         public void addProbeInfo(ProbeMode mode, IProbeInfo info, Player player, Level level, BlockState state, IProbeHitData data) {
             if (!io.github.spencerharris192.seedtocellar.config.ModConfigs.COMMON.theOneProbe.get()) return;
             // Ours only: The One Probe already describes vanilla's crops (the Hydrometer reads those too).
-            ResourceLocation id = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getKey(state.getBlock());
+            Identifier id = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(state.getBlock());
             if (id == null || !id.getNamespace().equals(SeedToCellar.MOD_ID)) return;
             for (Component line : HydrometerItem.readout(level, data.getPos(), state)) info.text(line);
         }

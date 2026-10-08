@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "minecraft:water",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:crops/cabbage",
+    "#seedtocellar:chilies",
+    "#c:crops/garlic",
+    "#c:crops/ginger"
+  ],
+  "result": {
+    "count": 3,
+    "id": "seedtocellar:kimchi"
+  }
+}

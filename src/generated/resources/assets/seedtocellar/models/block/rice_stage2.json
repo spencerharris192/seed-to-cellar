@@ -1,6 +1,5 @@
 {
   "parent": "seedtocellar:block/template_crop_tall",
-  "render_type": "minecraft:cutout",
   "textures": {
     "crop": "seedtocellar:block/rice_stage2",
     "top": "seedtocellar:block/rice_stage2_top"

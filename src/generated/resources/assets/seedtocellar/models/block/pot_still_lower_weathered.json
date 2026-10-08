@@ -1,6 +1,5 @@
 {
   "parent": "seedtocellar:block/pot_still_lower",
-  "render_type": "minecraft:cutout",
   "textures": {
     "copper": "seedtocellar:block/pot_still_copper_weathered",
     "particle": "seedtocellar:block/pot_still_copper_weathered",

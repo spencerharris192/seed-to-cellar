@@ -1,0 +1,36 @@
+{
+  "parent": "seedtocellar:brewing/four_stars",
+  "criteria": {
+    "old_ale": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_aged": {}
+            },
+            "items": "seedtocellar:old_ale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.aged_to_perfection.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "seedtocellar:oak_cask"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.aged_to_perfection.title"
+    }
+  },
+  "requirements": [
+    [
+      "old_ale"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,12 +1,13 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.InteractionResult;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.BushBlock;
+import net.minecraft.world.level.block.VegetationBlock;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -21,7 +22,7 @@ import net.minecraft.world.phys.Vec3;
 public final class Harvesting {
     /** Something a sickle works on (ripe or not): decides which layer a click aims at. */
     public static boolean isPlant(BlockState state) {
-        return state.getBlock() instanceof BushBlock || state.getBlock() instanceof TrellisVineBlock
+        return state.getBlock() instanceof VegetationBlock || state.getBlock() instanceof TrellisVineBlock
                 || state.getBlock() instanceof FruitLeavesBlock;
     }
 
@@ -52,7 +53,10 @@ public final class Harvesting {
             ModCropBlock.harvest(level, pos, state, player, crop.getStateForAge(0));
         } else {
             // Sweet berries and trellis vines: picked just as a right-click picks them.
-            state.use(level, player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false));
+            BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(pos), Direction.UP, pos, false);
+            if (state.useItemOn(player.getMainHandItem(), level, player, InteractionHand.MAIN_HAND, hit) instanceof InteractionResult.TryEmptyHandInteraction) {
+                state.useWithoutItem(level, player, hit);
+            }
         }
         return true;
     }

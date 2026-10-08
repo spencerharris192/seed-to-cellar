@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:cherry_juice",
+  "result": "seedtocellar:cherry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

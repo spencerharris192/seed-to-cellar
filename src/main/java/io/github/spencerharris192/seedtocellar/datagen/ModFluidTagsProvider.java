@@ -7,17 +7,17 @@ import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.FluidTagsProvider;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.tags.FluidTags;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-public class ModFluidTagsProvider extends FluidTagsProvider {
-    public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, ExistingFileHelper files) {
-        super(output, lookup, SeedToCellar.MOD_ID, files);
+public class ModFluidTagsProvider extends ValueTagsProvider<Fluid> {
+    public ModFluidTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
+        super(output, BuiltInRegistries.FLUID, lookup);
     }
 
     @Override

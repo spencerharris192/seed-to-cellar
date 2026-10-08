@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CraftStep;
@@ -11,7 +12,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -20,14 +20,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Gin: the Gin Basket on the Pot Still and its botanicals (GDD sections 9.4, 10.3, 11). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class GinTests {
     private static final String EMPTY = "empty";
     private static final BlockPos STILL = new BlockPos(1, 1, 1);
@@ -39,15 +34,15 @@ public final class GinTests {
         BlockState lower = ModBlocks.POT_STILL.get().defaultBlockState();
         helper.setBlock(STILL, lower);
         helper.setBlock(STILL.above(), lower.setValue(PotStillBlock.HALF, DoubleBlockHalf.UPPER));
-        PotStillBlockEntity still = (PotStillBlockEntity) helper.getBlockEntity(STILL);
-        Player player = helper.makeMockPlayer();
+        PotStillBlockEntity still = (PotStillBlockEntity) helper.getBlockEntity(STILL, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.GIN_BASKET.get()));
         helper.assertTrue(still.useHeldItem(player, InteractionHand.MAIN_HAND), "right-clicking with a Gin Basket fits it");
         helper.assertTrue(still.hasBasket(), "the still has its basket");
         helper.assertBlockProperty(STILL.above(), PotStillBlock.BASKET, true);
         FluidStack vodka = new BrewQuality(true, true, true, false).applyTo(new FluidStack(ModFluids.VODKA.get(), 2000));
-        vodka.getOrCreateTag().putInt(CraftStep.RUNS, 3);
-        still.pot().fill(vodka, IFluidHandler.FluidAction.EXECUTE);
+        io.github.spencerharris192.seedtocellar.brewing.BrewData.update(vodka, t -> t.putInt(CraftStep.RUNS, 3));
+        still.pot().fill(vodka, StationTank.Action.EXECUTE);
         return still;
     }
 

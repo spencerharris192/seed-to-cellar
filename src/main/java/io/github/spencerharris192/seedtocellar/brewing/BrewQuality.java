@@ -1,7 +1,8 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /**
  * The quality checks a drink earned (GDD section 11). Stars = 1 + checks passed, so 5 at most, except for one secret:
@@ -45,17 +46,22 @@ public record BrewQuality(boolean yeast, boolean temperature, boolean craft, boo
     }
 
     public static BrewQuality load(CompoundTag tag) {
-        return new BrewQuality(tag.getBoolean("Yeast"), tag.getBoolean("Temperature"), tag.getBoolean("Craft"), tag.getBoolean("Aged"),
-                tag.getBoolean("Crowned"));
+        return new BrewQuality(tag.getBooleanOr("Yeast", false), tag.getBooleanOr("Temperature", false), tag.getBooleanOr("Craft", false),
+                tag.getBooleanOr("Aged", false), tag.getBooleanOr("Crowned", false));
     }
 
-    public static BrewQuality of(FluidStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains(TAG) ? load(tag.getCompound(TAG)) : NONE;
+    /** The quality on a liquid or anything holding one (none if it has none). */
+    public static BrewQuality of(DataComponentGetter holder) {
+        CompoundTag tag = BrewData.get(holder);
+        return tag.contains(TAG) ? load(tag.getCompoundOrEmpty(TAG)) : NONE;
+    }
+
+    public static boolean has(DataComponentGetter holder) {
+        return BrewData.has(holder, TAG);
     }
 
     public FluidStack applyTo(FluidStack stack) {
-        stack.getOrCreateTag().put(TAG, save());
+        BrewData.update(stack, tag -> tag.put(TAG, save()));
         return stack;
     }
 }

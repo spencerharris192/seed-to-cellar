@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/red_grape",
+  "result": {
+    "amount": 125,
+    "fluid": "seedtocellar:red_grape_must"
+  }
+}

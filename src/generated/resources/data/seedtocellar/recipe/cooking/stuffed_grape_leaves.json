@@ -1,0 +1,17 @@
+{
+  "type": "seedtocellar:cooking",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "seedtocellar:grape_leaves",
+    "#c:crops/rice",
+    "#c:crops/onion",
+    "#c:crops/mint"
+  ],
+  "result": {
+    "count": 3,
+    "id": "seedtocellar:stuffed_grape_leaves"
+  },
+  "time": 240
+}

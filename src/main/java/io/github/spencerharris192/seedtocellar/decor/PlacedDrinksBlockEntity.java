@@ -1,5 +1,14 @@
 package io.github.spencerharris192.seedtocellar.decor;
 
+import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity;
 import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -45,24 +54,27 @@ public class PlacedDrinksBlockEntity extends SyncedBlockEntity {
         return taken;
     }
 
+    /** Broken, the spot gives its drinks back. */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, net.minecraft.world.level.block.state.BlockState state) {
+        if (level != null) for (ItemStack drink : drinks) net.minecraft.world.Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), drink);
+    }
+
     public ItemStack last() {
         return drinks.isEmpty() ? ItemStack.EMPTY : drinks.get(drinks.size() - 1);
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        ListTag list = new ListTag();
-        for (ItemStack drink : drinks) list.add(drink.save(new CompoundTag()));
-        tag.put("Drinks", list);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.store("Drinks", ItemStack.CODEC.listOf(), List.copyOf(drinks));
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
         drinks.clear();
-        for (Tag entry : tag.getList("Drinks", Tag.TAG_COMPOUND)) {
-            ItemStack drink = ItemStack.of((CompoundTag) entry);
+        for (ItemStack drink : input.read("Drinks", ItemStack.CODEC.listOf()).orElse(List.of())) {
             if (!drink.isEmpty() && drinks.size() < SLOTS) drinks.add(drink);
         }
     }

@@ -1,0 +1,39 @@
+{
+  "parent": "seedtocellar:distilling/angels_share",
+  "criteria": {
+    "spirit": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_aged": {},
+              "seedtocellar:quality_craft": {},
+              "seedtocellar:quality_temperature": {},
+              "seedtocellar:quality_yeast": {}
+            },
+            "items": "#seedtocellar:spirits"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.top_shelf.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "seedtocellar:brandy"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.top_shelf.title"
+    }
+  },
+  "requirements": [
+    [
+      "spirit"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

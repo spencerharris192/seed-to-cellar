@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BonemealSource;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -27,8 +29,8 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -101,13 +103,13 @@ public class TrellisVineBlock extends TrellisBlock implements BonemealableBlock,
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         // Unsupported: stay a vine so the collapse (scheduled by TrellisBlock) drops what's planted and ripe too.
         if (direction == Direction.DOWN && isSupported(level, pos) && !canSurvive(state, level, pos)) {
             return ModBlocks.TRELLIS.get().defaultBlockState().setValue(AXIS, state.getValue(AXIS));
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override
@@ -123,9 +125,9 @@ public class TrellisVineBlock extends TrellisBlock implements BonemealableBlock,
             BlockState now = level.getBlockState(pos);
             if (!now.is(this)) return;
             int age = now.getValue(AGE);
-            if (age < MAX_AGE && ForgeHooks.onCropsGrowPre(level, pos, now, random.nextInt(4) == 0)) {
+            if (age < MAX_AGE && CommonHooks.canCropGrow(level, pos, now, random.nextInt(4) == 0)) {
                 level.setBlock(pos, now.setValue(AGE, age + 1), Block.UPDATE_CLIENTS);
-                ForgeHooks.onCropsGrowPost(level, pos, now);
+                CommonHooks.fireCropGrowPost(level, pos, now);
             }
         }
         BlockState now = level.getBlockState(pos);
@@ -153,49 +155,49 @@ public class TrellisVineBlock extends TrellisBlock implements BonemealableBlock,
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getItemInHand(hand);
         // Holding a trellis means "stack one on top" (TrellisItem), even on a ripe vine.
         if (held.is(ModItems.TRELLIS.get())) return InteractionResult.PASS;
         int age = state.getValue(AGE);
-        if (harvest.prunings() != null && held.is(Tags.Items.SHEARS) && age >= LEAFY) {
-            if (!level.isClientSide) {
-                popResource(level, pos, new ItemStack(harvest.prunings().get(), 1 + level.random.nextInt(2)));
+        if (harvest.prunings() != null && held.is(Tags.Items.TOOLS_SHEAR) && age >= LEAFY) {
+            if (!level.isClientSide()) {
+                popResource(level, pos, new ItemStack(harvest.prunings().get(), 1 + level.getRandom().nextInt(2)));
                 level.playSound(null, pos, SoundEvents.GROWING_PLANT_CROP, SoundSource.BLOCKS, 1.0F, 1.0F);
                 level.setBlock(pos, state.setValue(AGE, YOUNG), Block.UPDATE_CLIENTS);
-                held.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
+                held.hurtAndBreak(1, player, hand);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (age != MAX_AGE) return InteractionResult.PASS;
-        if (!level.isClientSide) {
-            int count = harvest.min() + level.random.nextInt(harvest.max() - harvest.min() + 1);
+        if (!level.isClientSide()) {
+            int count = harvest.min() + level.getRandom().nextInt(harvest.max() - harvest.min() + 1);
             popResource(level, pos, new ItemStack(harvest.produce().get(), count));
-            level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.9F + level.random.nextFloat() * 0.2F);
+            level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);
             level.setBlock(pos, state.setValue(AGE, LEAFY), Block.UPDATE_CLIENTS);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return new ItemStack(harvest.plant().get());
     }
 
     // --- bone meal ---
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, BonemealSource source) {
         return state.getValue(AGE) < MAX_AGE;
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
+    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         int age = Math.min(MAX_AGE, state.getValue(AGE) + 1);
         level.setBlock(pos, state.setValue(AGE, age), Block.UPDATE_CLIENTS);
         if (age >= LEAFY) climb(level, pos, state);

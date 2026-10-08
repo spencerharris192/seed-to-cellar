@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "fluid": "seedtocellar:red_wine"
+  },
+  "ingredients": [
+    "minecraft:chicken",
+    "#c:crops/onion",
+    "#c:mushrooms"
+  ],
+  "result": {
+    "id": "seedtocellar:coq_au_vin"
+  },
+  "time": 300
+}

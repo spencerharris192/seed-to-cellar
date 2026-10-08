@@ -1,54 +1,51 @@
 package io.github.spencerharris192.seedtocellar.datagen;
 
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
-import net.minecraftforge.common.data.DatapackBuiltinEntriesProvider;
-import net.minecraftforge.common.data.ForgeAdvancementProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.core.RegistrySetBuilder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.data.advancements.AdvancementProvider;
+import net.minecraft.data.recipes.RecipeProvider;
+import net.minecraft.server.packs.PackType;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
-/** Wires up every data provider. Run with the Gradle task {@code runData}. */
-@Mod.EventBusSubscriber(modid = SeedToCellar.MOD_ID, bus = Mod.EventBusSubscriber.Bus.MOD)
+/**
+ * Wires up every data provider. Run with the Gradle task {@code runData} (client data: assets and data together).
+ * World registry entries (worldgen, trades) come first, then the reloadable ones (loot, recipes, advancements, burn times),
+ * so the tag providers after them can see our new entries.
+ */
+@EventBusSubscriber(modid = SeedToCellar.MOD_ID)
 public final class DataGenerators {
     @SubscribeEvent
-    public static void gatherData(GatherDataEvent event) {
-        DataGenerator generator = event.getGenerator();
-        PackOutput output = generator.getPackOutput();
-        ExistingFileHelper files = event.getExistingFileHelper();
-
-        // Worldgen entries (features, placements, biome modifiers) extend the registry lookup used by tags.
-        DatapackBuiltinEntriesProvider worldgen = generator.addProvider(event.includeServer(),
-                new DatapackBuiltinEntriesProvider(output, event.getLookupProvider(), ModWorldGen.BUILDER, Set.of(SeedToCellar.MOD_ID)));
-        CompletableFuture<HolderLookup.Provider> lookup = worldgen.getRegistryProvider();
+    public static void gatherData(GatherDataEvent.Client event) {
+        Set<String> ours = Set.of(SeedToCellar.MOD_ID);
+        event.createWorldRegistryObjects(ModWorldGen.BUILDER, ours);
+        event.createReloadableRegistryObjects(new RegistrySetBuilder()
+                .add(Registries.LOOT_TABLE, ModLootTableProvider.create())
+                .add(Registries.ADVANCEMENT, new AdvancementProvider(List.of(ModAdvancements::new)))
+                .add(Registries.CONTEXT_INT_PROVIDER, ModContextProviders::bootstrap)
+                .add(RecipeProvider.asBootstrap(ModRecipeProvider::new)), ours);
 
         // Client assets
-        generator.addProvider(event.includeClient(), new ModLanguageProvider(output));
-        generator.addProvider(event.includeClient(), new ModBlockStateProvider(output, files));
-        generator.addProvider(event.includeClient(), new ModItemModelProvider(output, files));
+        event.createProvider(ModLanguageProvider::new);
+        event.createProvider(ModBlockStateProvider::new);
+        event.createProvider(ModItemModelProvider::new);
 
         // Server data
-        ModBlockTagsProvider blockTags = generator.addProvider(event.includeServer(), new ModBlockTagsProvider(output, lookup, files));
-        generator.addProvider(event.includeServer(), new ModItemTagsProvider(output, lookup, blockTags.contentsGetter(), files));
-        generator.addProvider(event.includeServer(), new ModBiomeTagsProvider(output, lookup, files));
-        generator.addProvider(event.includeServer(), new ModFluidTagsProvider(output, lookup, files));
-        generator.addProvider(event.includeServer(), new ModPoiTypeTagsProvider(output, lookup, files));
-        generator.addProvider(event.includeServer(), new ModRecipeProvider(output));
-        generator.addProvider(event.includeServer(), ModLootTableProvider.create(output));
-        generator.addProvider(event.includeServer(), new ModLootModifierProvider(output));
-        generator.addProvider(event.includeClient() || event.includeServer(), new ModBookProvider(output));
-        generator.addProvider(event.includeServer(), new ModCompatDataProvider(output));
-        generator.addProvider(event.includeServer(), new ForgeAdvancementProvider(output, lookup, files, List.of(new ModAdvancements())));
+        event.createProvider(ModBlockTagsProvider::new);
+        event.createProvider(ModItemTagsProvider::new);
+        event.createProvider(ModBiomeTagsProvider::new);
+        event.createProvider(ModFluidTagsProvider::new);
+        event.createProvider(ModPoiTypeTagsProvider::new);
+        event.createProvider(ModTrades.Tags::new);
+        event.createProvider(ModLootModifierProvider::new);
 
         // Must stay last: providers run in order, and the audit checks what they wrote.
-        generator.addProvider(event.includeClient() && event.includeServer(), new AssetAuditProvider(output, files));
+        event.createProvider(output -> new AssetAuditProvider(output, event.getResourceManager(PackType.CLIENT_RESOURCES)));
     }
 
     private DataGenerators() {}

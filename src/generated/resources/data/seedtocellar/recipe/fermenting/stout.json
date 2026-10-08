@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:hopped_wort",
+  "malt_min": {
+    "black": 0.25
+  },
+  "min_strength": "normal",
+  "priority": 50,
+  "result": "seedtocellar:stout"
+}

@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "fluid": {
+    "fluid": "seedtocellar:sorghum_juice"
+  },
+  "result": {
+    "id": "seedtocellar:sorghum_syrup"
+  },
+  "time": 300
+}

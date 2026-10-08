@@ -8,4 +8,6 @@ OUT = TOOLS / "out"
 VANILLA = TOOLS / "vanilla"  # extracted reference textures; git-ignored, never shipped
 MOD_RESOURCES = PROJECT / "src" / "main" / "resources"
 MOD_TEXTURES = MOD_RESOURCES / "assets" / "seedtocellar" / "textures"
-GRADLE_CLIENT_JAR = Path.home() / ".gradle" / "caches" / "forge_gradle" / "minecraft_repo" / "versions" / "1.20.1" / "client.jar"
+# The game jar ModDevGradle sets up (26.3); `gradlew build` makes it
+GRADLE_CLIENT_JAR = next(iter(sorted((PROJECT / "build" / "moddev" / "artifacts").glob("minecraft-patched-*-merged.jar"))),
+                         PROJECT / "build" / "moddev" / "artifacts" / "minecraft-patched-merged.jar")

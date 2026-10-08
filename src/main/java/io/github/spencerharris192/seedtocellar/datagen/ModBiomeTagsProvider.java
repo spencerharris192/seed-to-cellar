@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.datagen;
 
+import net.minecraft.data.tags.TagAppender;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.farming.Crop;
 import io.github.spencerharris192.seedtocellar.farming.Crops;
@@ -12,8 +13,7 @@ import net.minecraft.data.tags.BiomeTagsProvider;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.Tags;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -21,8 +21,8 @@ import java.util.concurrent.CompletableFuture;
 
 /** Where wild plants grow. Using shared biome tags means modded biomes (BOP, Terralith, ...) join in. */
 public class ModBiomeTagsProvider extends BiomeTagsProvider {
-    public ModBiomeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, ExistingFileHelper files) {
-        super(output, lookup, SeedToCellar.MOD_ID, files);
+    public ModBiomeTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
+        super(output, lookup, SeedToCellar.MOD_ID);
     }
 
     private final Set<Crop> done = new HashSet<>();

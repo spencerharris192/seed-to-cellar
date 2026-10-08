@@ -38,15 +38,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CropBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import snownee.jade.api.BlockAccessor;
 import snownee.jade.api.IBlockComponentProvider;
-import snownee.jade.api.IServerDataProvider;
+import snownee.jade.api.StreamServerDataProvider;
 import snownee.jade.api.ITooltip;
 import snownee.jade.api.IWailaClientRegistration;
 import snownee.jade.api.IWailaCommonRegistration;
@@ -69,7 +73,7 @@ public class SeedToCellarJadePlugin implements IWailaPlugin {
                 FermentingVatBlockEntity.class, PreservingJarBlockEntity.class, CaskBlockEntity.class, CompostBinBlockEntity.class,
                 DryingRackBlockEntity.class, CrushingTubBlockEntity.class, FruitPressBlockEntity.class, WineRackBlockEntity.class,
                 io.github.spencerharris192.seedtocellar.distillery.PotStillBlockEntity.class)) {
-            registration.registerBlockDataProvider(StationInfo.INSTANCE, type);
+            registration.registerBlockDataProvider(StationData.INSTANCE, type);
         }
     }
 
@@ -102,31 +106,37 @@ public class SeedToCellarJadePlugin implements IWailaPlugin {
         }
     }
 
-    /** Server: gathers the station's read-out lines. Client: shows them. */
-    public enum StationInfo implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
+    /** Server: gathers the station's read-out lines (the Hydrometer's). */
+    public enum StationData implements StreamServerDataProvider<BlockAccessor, List<Component>> {
         INSTANCE;
 
-        private static final String KEY = "SeedToCellarLines";
+        @Override
+        public List<Component> streamData(BlockAccessor accessor) {
+            return accessor.getBlockEntity() instanceof HydrometerReadable readable ? readable.hydrometerLines() : List.of();
+        }
 
         @Override
-        public void appendServerData(CompoundTag data, BlockAccessor accessor) {
-            if (!(accessor.getBlockEntity() instanceof HydrometerReadable readable)) return;
-            ListTag lines = new ListTag();
-            for (Component line : readable.hydrometerLines()) lines.add(StringTag.valueOf(Component.Serializer.toJson(line)));
-            data.put(KEY, lines);
+        public StreamCodec<RegistryFriendlyByteBuf, List<Component>> streamCodec() {
+            return ComponentSerialization.STREAM_CODEC.apply(ByteBufCodecs.list());
         }
+
+        @Override
+        public Identifier getUid() {
+            return JadeIds.STATION;
+        }
+    }
+
+    /** Client: shows the lines {@link StationData} sent (Jade keeps the two apart since 1.21.6). */
+    public enum StationInfo implements IBlockComponentProvider {
+        INSTANCE;
 
         @Override
         public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig config) {
-            ListTag lines = accessor.getServerData().getList(KEY, 8);
-            for (int i = 0; i < lines.size(); i++) {
-                Component line = Component.Serializer.fromJson(lines.getString(i));
-                if (line != null) tooltip.add(line);
-            }
+            StationData.INSTANCE.decodeFromData(accessor).ifPresent(lines -> lines.forEach(tooltip::add));
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return JadeIds.STATION;
         }
     }
@@ -161,7 +171,7 @@ public class SeedToCellarJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return JadeIds.FARM;
         }
     }
@@ -187,7 +197,7 @@ public class SeedToCellarJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return JadeIds.TABLE_FOOD;
         }
     }
@@ -207,7 +217,7 @@ public class SeedToCellarJadePlugin implements IWailaPlugin {
         }
 
         @Override
-        public ResourceLocation getUid() {
+        public Identifier getUid() {
             return JadeIds.VINES;
         }
     }

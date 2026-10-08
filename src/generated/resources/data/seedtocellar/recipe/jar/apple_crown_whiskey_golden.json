@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:jar",
+  "crown": true,
+  "fluid": "seedtocellar:malt_whiskey",
+  "fluid_amount": 250,
+  "ingredients": [
+    "minecraft:golden_apple",
+    "minecraft:honey_bottle"
+  ],
+  "result_fluid": "seedtocellar:apple_crown_whiskey"
+}

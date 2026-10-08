@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:malting",
+  "ingredient": "#c:crops/wheat",
+  "result": {
+    "id": "seedtocellar:green_wheat_malt"
+  }
+}

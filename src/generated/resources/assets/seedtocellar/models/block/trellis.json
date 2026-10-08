@@ -1,6 +1,5 @@
 {
   "parent": "seedtocellar:block/template_trellis",
-  "render_type": "minecraft:cutout",
   "textures": {
     "trellis": "seedtocellar:block/trellis"
   }

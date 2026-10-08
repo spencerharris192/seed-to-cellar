@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "ingredients": [
+    "#c:crops/blackberry",
+    "#seedtocellar:sweeteners"
+  ],
+  "result": {
+    "id": "seedtocellar:blackberry_jam"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "ingredients": [
+    "#c:foods/fruit/peach",
+    "#seedtocellar:sweeteners"
+  ],
+  "result": {
+    "id": "seedtocellar:peach_jam"
+  }
+}

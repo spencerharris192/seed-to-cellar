@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_tap": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:tap"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:keg"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_tap"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:keg"
+    ]
+  }
+}

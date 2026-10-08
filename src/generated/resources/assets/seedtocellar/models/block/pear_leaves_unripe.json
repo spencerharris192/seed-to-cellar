@@ -84,7 +84,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout_mipped",
   "textures": {
     "all": "minecraft:block/birch_leaves",
     "overlay": "seedtocellar:block/pear_leaves_unripe",

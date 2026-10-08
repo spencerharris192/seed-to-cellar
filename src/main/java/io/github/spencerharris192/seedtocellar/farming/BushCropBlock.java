@@ -1,5 +1,9 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.entity.EntityTypes;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
+import net.minecraft.world.level.block.BonemealSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -34,7 +38,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.function.Supplier;
 
@@ -95,7 +99,7 @@ public class BushCropBlock extends BushBlock implements BonemealableBlock, Clima
     }
 
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
         return new ItemStack(planting.get());
     }
 
@@ -142,37 +146,37 @@ public class BushCropBlock extends BushBlock implements BonemealableBlock, Clima
     private void growTick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         int age = state.getValue(AGE);
         if (age < MAX_AGE && level.getRawBrightness(pos.above(), 0) >= 9
-                && ForgeHooks.onCropsGrowPre(level, pos, state, random.nextInt(5) == 0)) {
+                && CommonHooks.canCropGrow(level, pos, state, random.nextInt(5) == 0)) {
             BlockState grown = state.setValue(AGE, age + 1);
             level.setBlock(pos, grown, Block.UPDATE_CLIENTS);
             level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(grown));
-            ForgeHooks.onCropsGrowPost(level, pos, state);
+            CommonHooks.fireCropGrowPost(level, pos, state);
         }
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, BonemealSource source) {
         return state.getValue(AGE) < MAX_AGE;
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
+    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         level.setBlock(pos, state.setValue(AGE, Math.min(MAX_AGE, state.getValue(AGE) + 1)), Block.UPDATE_CLIENTS);
     }
 
     // --- picking -------------------------------------------------------------------------------
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int age = state.getValue(AGE);
         if (age != MAX_AGE && !(age == 2 && traits.flowers() != null)) return InteractionResult.PASS;
-        if (!level.isClientSide) pick(level, pos, state, player);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        if (!level.isClientSide()) pick(level, pos, state, player);
+        return InteractionResult.SUCCESS;
     }
 
     /**
@@ -184,10 +188,10 @@ public class BushCropBlock extends BushBlock implements BonemealableBlock, Clima
         Item picked = age == MAX_AGE ? harvest.get()
                 : age == 2 && traits.flowers() != null ? traits.flowers().get() : null;
         if (picked == null) return false;
-        int fortune = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, player.getMainHandItem());
-        int count = (age == MAX_AGE ? 2 + level.random.nextInt(2) : 1 + level.random.nextInt(2)) + level.random.nextInt(fortune + 1);
+        int fortune = EnchantmentHelper.getItemEnchantmentLevel(level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE), player.getMainHandItem());
+        int count = (age == MAX_AGE ? 2 + level.getRandom().nextInt(2) : 1 + level.getRandom().nextInt(2)) + level.getRandom().nextInt(fortune + 1);
         popResource(level, pos, new ItemStack(picked, count));
-        level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + level.random.nextFloat() * 0.4F);
+        level.playSound(null, pos, SoundEvents.SWEET_BERRY_BUSH_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.8F + level.getRandom().nextFloat() * 0.4F);
         BlockState cutBack = state.setValue(AGE, PICKED_AGE);
         level.setBlock(pos, cutBack, Block.UPDATE_CLIENTS);
         level.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(player, cutBack));
@@ -197,10 +201,10 @@ public class BushCropBlock extends BushBlock implements BonemealableBlock, Clima
     // --- thorns --------------------------------------------------------------------------------
 
     @Override
-    public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity) {
-        if (!traits.thorny() || !(entity instanceof LivingEntity) || entity.getType() == EntityType.FOX || entity.getType() == EntityType.BEE) return;
+    protected void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise) {
+        if (!traits.thorny() || !(entity instanceof LivingEntity) || entity.getType() == EntityTypes.FOX || entity.getType() == EntityTypes.BEE) return;
         entity.makeStuckInBlock(state, new Vec3(0.8F, 0.75D, 0.8F));
-        if (!level.isClientSide && state.getValue(AGE) > 0 && (entity.xOld != entity.getX() || entity.zOld != entity.getZ())) {
+        if (!level.isClientSide() && state.getValue(AGE) > 0 && (entity.xOld != entity.getX() || entity.zOld != entity.getZ())) {
             double dx = Math.abs(entity.getX() - entity.xOld), dz = Math.abs(entity.getZ() - entity.zOld);
             if (dx >= 0.003 || dz >= 0.003) entity.hurt(level.damageSources().sweetBerryBush(), 1.0F);
         }

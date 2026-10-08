@@ -1,7 +1,9 @@
 package io.github.spencerharris192.seedtocellar.world;
 
-import com.google.common.base.Suppliers;
+import java.util.Optional;
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
@@ -12,11 +14,12 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.loot.IGlobalLootModifier;
-import net.minecraftforge.common.loot.LootModifier;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.common.loot.IGlobalLootModifier;
+import net.neoforged.neoforge.common.loot.LootModifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
-import java.util.function.Supplier;
 
 /**
  * Adds a seed to grass drops when its conditions pass (set in the data file: which loot
@@ -29,19 +32,19 @@ public class GrassSeedsModifier extends LootModifier {
     /** Biome temperature at or below which a biome counts as cold (taiga 0.25, snowy plains 0). */
     public static final float COLD_BIOME = 0.3F;
 
-    public static final Supplier<Codec<GrassSeedsModifier>> CODEC = Suppliers.memoize(() -> RecordCodecBuilder.create(inst ->
+    public static final MapCodec<GrassSeedsModifier> CODEC = RecordCodecBuilder.mapCodec(inst ->
             codecStart(inst).and(inst.group(
-                            ForgeRegistries.ITEMS.getCodec().fieldOf("item").forGetter(m -> m.item),
+                            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(m -> m.item),
                             Codec.BOOL.optionalFieldOf("cold_biomes_only", false).forGetter(m -> m.coldOnly),
                             Codec.FLOAT.optionalFieldOf("chance", 1.0F).forGetter(m -> m.chance)))
-                    .apply(inst, GrassSeedsModifier::new)));
+                    .apply(inst, GrassSeedsModifier::new));
 
     private final Item item;
     private final boolean coldOnly;
     private final float chance;
 
-    public GrassSeedsModifier(LootItemCondition[] conditions, Item item, boolean coldOnly, float chance) {
-        super(conditions);
+    public GrassSeedsModifier(Optional<Holder<LootItemCondition>> condition, int priority, Item item, boolean coldOnly, float chance) {
+        super(condition, priority);
         this.item = item;
         this.coldOnly = coldOnly;
         this.chance = chance;
@@ -50,12 +53,12 @@ public class GrassSeedsModifier extends LootModifier {
     @Override
     protected ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
         if (!ModConfigs.COMMON.grassSeedDrops.get()) return generatedLoot;
-        var key = ForgeRegistries.ITEMS.getKey(item);
+        var key = BuiltInRegistries.ITEM.getKey(item);
         var setting = key == null || !key.getNamespace().equals(io.github.spencerharris192.seedtocellar.SeedToCellar.MOD_ID) ? null
                 : ModConfigs.COMMON.grassSeedChances.get(key.getPath());
         if (context.getRandom().nextFloat() >= (setting != null ? setting.get().floatValue() : chance)) return generatedLoot;
         if (coldOnly) {
-            Vec3 origin = context.getParamOrNull(LootContextParams.ORIGIN);
+            Vec3 origin = context.getOptional(LootContextParams.ORIGIN);
             if (origin == null) return generatedLoot;
             float temperature = context.getLevel().getBiome(BlockPos.containing(origin)).value().getBaseTemperature();
             if (temperature > COLD_BIOME) return generatedLoot;
@@ -65,7 +68,7 @@ public class GrassSeedsModifier extends LootModifier {
     }
 
     @Override
-    public Codec<? extends IGlobalLootModifier> codec() {
-        return CODEC.get();
+    public MapCodec<? extends IGlobalLootModifier> codec() {
+        return CODEC;
     }
 }

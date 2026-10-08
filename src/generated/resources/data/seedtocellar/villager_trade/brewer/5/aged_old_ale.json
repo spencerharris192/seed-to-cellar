@@ -1,0 +1,21 @@
+{
+  "gives": {
+    "components": {
+      "seedtocellar:brew": {
+        "Age": 2,
+        "Brew": {},
+        "Wood": "oak"
+      },
+      "seedtocellar:quality_craft": {},
+      "seedtocellar:quality_temperature": {},
+      "seedtocellar:quality_yeast": {}
+    },
+    "id": "seedtocellar:old_ale"
+  },
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 8,
+    "id": "minecraft:emerald"
+  },
+  "xp": 30
+}

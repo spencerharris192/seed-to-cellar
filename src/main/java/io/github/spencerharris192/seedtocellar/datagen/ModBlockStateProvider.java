@@ -31,26 +31,25 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.block.CropBlock;
-import net.minecraft.world.level.block.FarmBlock;
+import net.minecraft.world.level.block.FarmlandBlock;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
-import net.minecraftforge.client.model.generators.BlockModelBuilder;
-import net.minecraftforge.client.model.generators.ModelBuilder;
-import net.minecraftforge.client.model.generators.BlockStateProvider;
+import io.github.spencerharris192.seedtocellar.datagen.model.BlockModelBuilder;
+import io.github.spencerharris192.seedtocellar.datagen.model.ModelBuilder;
+import io.github.spencerharris192.seedtocellar.datagen.model.BlockStateProvider;
 import io.github.spencerharris192.seedtocellar.distillery.PotStillBlock;
 import io.github.spencerharris192.seedtocellar.food.LayerCakeBlock;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import net.minecraftforge.client.model.generators.ModelFile;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import io.github.spencerharris192.seedtocellar.datagen.model.ConfiguredModel;
+import io.github.spencerharris192.seedtocellar.datagen.model.ModelFile;
 
 /** Blockstates and block models. Templates with custom shapes live in src/main/resources/.../models/block/template_*.json. */
 public class ModBlockStateProvider extends BlockStateProvider {
-    public ModBlockStateProvider(PackOutput output, ExistingFileHelper files) {
-        super(output, SeedToCellar.MOD_ID, files);
+    public ModBlockStateProvider(PackOutput output) {
+        super(output);
     }
 
     @Override
@@ -83,7 +82,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         maltingTub();
 
         // Thatch, with stairs and a slab for roofs.
-        ResourceLocation thatch = modLoc("block/thatch");
+        Identifier thatch = modLoc("block/thatch");
         simpleBlock(ModBlocks.THATCH.get(), models().cubeAll("thatch", thatch));
         stairsBlock((StairBlock) ModBlocks.THATCH_STAIRS.get(), thatch);
         slabBlock((SlabBlock) ModBlocks.THATCH_SLAB.get(), thatch, thatch);
@@ -112,12 +111,12 @@ public class ModBlockStateProvider extends BlockStateProvider {
         harvestFeast();
 
         // Fertile Farmland: vanilla's farmland shape with our richer soil on top (dry and wet looks).
-        ModelFile fertileDry = models().withExistingParent("fertile_farmland", mcLoc("block/template_farmland"))
-                .texture("dirt", mcLoc("block/dirt")).texture("top", modLoc("block/fertile_farmland"));
-        ModelFile fertileWet = models().withExistingParent("fertile_farmland_moist", mcLoc("block/template_farmland"))
-                .texture("dirt", mcLoc("block/dirt")).texture("top", modLoc("block/fertile_farmland_moist"));
+        ModelFile fertileDry = models().withExistingParent("fertile_farmland", mcLoc("block/template_cube_bottom_top_indented"))
+                .texture("side", mcLoc("block/dirt")).texture("bottom", mcLoc("block/dirt")).texture("top", modLoc("block/fertile_farmland"));
+        ModelFile fertileWet = models().withExistingParent("fertile_farmland_moist", mcLoc("block/template_cube_bottom_top_indented"))
+                .texture("side", mcLoc("block/dirt")).texture("bottom", mcLoc("block/dirt")).texture("top", modLoc("block/fertile_farmland_moist"));
         getVariantBuilder(ModBlocks.FERTILE_FARMLAND.get()).forAllStates(state -> ConfiguredModel.builder()
-                .modelFile(state.getValue(FarmBlock.MOISTURE) == 7 ? fertileWet : fertileDry).build());
+                .modelFile(state.getValue(FarmlandBlock.MOISTURE) == 7 ? fertileWet : fertileDry).build());
 
         ModelFile kilnOff = models().orientableWithBottom("kiln", mcLoc("block/bricks"), modLoc("block/kiln_front"),
                 mcLoc("block/bricks"), modLoc("block/kiln_top"));
@@ -1071,7 +1070,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         });
     }
 
-    private net.minecraftforge.client.model.generators.BlockModelBuilder tubModel(String name, String template) {
+    private BlockModelBuilder tubModel(String name, String template) {
         return models().withExistingParent(name, modLoc(template))
                 .texture("side", modLoc("block/malting_tub_side"))
                 .texture("inner", modLoc("block/malting_tub_inner"))
@@ -1438,7 +1437,7 @@ public class ModBlockStateProvider extends BlockStateProvider {
         cross(tree.sapling(), tree.name + "_sapling");
         String[] layers = {null, "blossom", "unripe", "ripe"};
         ModelFile[] byAge = new ModelFile[layers.length];
-        ResourceLocation leafTexture = SeedToCellar.parse(tree.leafTexture);
+        Identifier leafTexture = SeedToCellar.parse(tree.leafTexture);
         byAge[0] = models().withExistingParent(tree.name + "_leaves", mcLoc("block/leaves")).texture("all", leafTexture)
                 .renderType("cutout_mipped");
         for (int age = 1; age < layers.length; age++) {

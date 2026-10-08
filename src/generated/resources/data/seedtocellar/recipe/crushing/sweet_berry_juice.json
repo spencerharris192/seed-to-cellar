@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "minecraft:sweet_berries",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:sweet_berry_juice"
+  }
+}

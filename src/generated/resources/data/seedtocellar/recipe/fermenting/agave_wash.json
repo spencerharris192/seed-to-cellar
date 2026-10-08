@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:agave_juice",
+  "result": "seedtocellar:agave_wash",
+  "temperature": [
+    "mild",
+    "warm"
+  ]
+}

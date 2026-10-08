@@ -4,13 +4,15 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
 import net.minecraftforge.common.crafting.conditions.ModLoadedCondition;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -153,7 +155,7 @@ public final class CompatRecipes {
     /** A Create fluid ingredient: a bucket of one fluid. */
     public static JsonObject fluidIn(Fluid fluid, @Nullable String nbt) {
         JsonObject json = new JsonObject();
-        json.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(fluid).toString());
+        json.addProperty("fluid", BuiltInRegistries.FLUID.getKey(fluid).toString());
         json.addProperty("amount", 1000);
         if (nbt != null) json.addProperty("nbt", nbt);
         return json;
@@ -172,7 +174,7 @@ public final class CompatRecipes {
             StringBuilder malts = new StringBuilder();
             grist.forEach((malt, n) -> {
                 if (!malts.isEmpty()) malts.append(',');
-                String key = ForgeRegistries.ITEMS.getKey(malt.asItem()).getPath().replace("_grist", "");
+                String key = BuiltInRegistries.ITEM.getKey(malt.asItem()).getPath().replace("_grist", "");
                 malts.append(key).append(':').append(Math.round(n * 20F / total) / 20F).append('f');
             });
             String strength = total >= 4 ? "STRONG" : "NORMAL";
@@ -210,7 +212,7 @@ public final class CompatRecipes {
             json.add("input", Ingredient.of(seed).toJson());
             JsonObject render = new JsonObject();
             render.addProperty("type", "crop");
-            render.addProperty("block", ForgeRegistries.BLOCKS.getKey(block).toString());
+            render.addProperty("block", BuiltInRegistries.BLOCK.getKey(block).toString());
             json.add("render", render);
             JsonArray array = new JsonArray();
             results.forEach(array::add);
@@ -236,7 +238,7 @@ public final class CompatRecipes {
             json.addProperty("growthTicks", ticks);
             JsonObject shown = new JsonObject();
             if (aging) shown.addProperty("type", "botanypots:aging");
-            shown.addProperty("block", ForgeRegistries.BLOCKS.getKey(display).toString());
+            shown.addProperty("block", BuiltInRegistries.BLOCK.getKey(display).toString());
             json.add("display", shown);
             JsonArray array = new JsonArray();
             drops.forEach(array::add);
@@ -261,7 +263,7 @@ public final class CompatRecipes {
 
     private static JsonObject fluid(Fluid fluid, int amount, @Nullable String nbt) {
         JsonObject json = new JsonObject();
-        json.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(fluid).toString());
+        json.addProperty("fluid", BuiltInRegistries.FLUID.getKey(fluid).toString());
         json.addProperty("amount", amount);
         if (nbt != null) json.addProperty("nbt", nbt);
         return json;
@@ -303,13 +305,13 @@ public final class CompatRecipes {
 
     private static JsonObject item(ItemLike item, int count) {
         JsonObject json = new JsonObject();
-        json.addProperty("item", ForgeRegistries.ITEMS.getKey(item.asItem()).toString());
+        json.addProperty("item", BuiltInRegistries.ITEM.getKey(item.asItem()).toString());
         if (count > 1) json.addProperty("count", count);
         return json;
     }
 
     /** A recipe of another mod's type: its "type" and body are written as-is. */
-    private record Foreign(ResourceLocation id, String type, Consumer<JsonObject> body) implements FinishedRecipe {
+    private record Foreign(Identifier id, String type, Consumer<JsonObject> body) implements FinishedRecipe {
         @Override
         public JsonObject serializeRecipe() {
             JsonObject json = new JsonObject();
@@ -324,7 +326,7 @@ public final class CompatRecipes {
         }
 
         @Override
-        public ResourceLocation getId() {
+        public Identifier getId() {
             return id;
         }
 
@@ -339,7 +341,7 @@ public final class CompatRecipes {
         }
 
         @Override
-        public ResourceLocation getAdvancementId() {
+        public Identifier getAdvancementId() {
             return null;
         }
     }

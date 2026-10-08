@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid_amount": 250,
+  "fluid_tag": "seedtocellar:liqueur_bases",
+  "ingredients": [
+    "seedtocellar:lemon_peel",
+    "seedtocellar:lemon_peel",
+    "#seedtocellar:sweeteners"
+  ],
+  "result_fluid": "seedtocellar:limoncello"
+}

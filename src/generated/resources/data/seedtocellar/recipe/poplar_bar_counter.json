@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:poplar_planks",
+    "S": "minecraft:poplar_slab"
+  },
+  "pattern": [
+    "SSS",
+    "P P",
+    "PPP"
+  ],
+  "result": {
+    "count": 4,
+    "id": "seedtocellar:poplar_bar_counter"
+  }
+}

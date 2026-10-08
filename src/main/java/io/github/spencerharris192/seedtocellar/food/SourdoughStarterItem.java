@@ -1,7 +1,8 @@
 package io.github.spencerharris192.seedtocellar.food;
 
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemInstance;
+import net.minecraft.world.item.ItemStackTemplate;
 
 /**
  * Sourdough Starter: a living culture. Mixing it into dough uses only a little, so crafting gives
@@ -14,12 +15,7 @@ public class SourdoughStarterItem extends Item {
     }
 
     @Override
-    public boolean hasCraftingRemainingItem(ItemStack stack) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getCraftingRemainingItem(ItemStack stack) {
-        return stack.copyWithCount(1);
+    public ItemStackTemplate getCraftingRemainder(ItemInstance instance) {
+        return new ItemStackTemplate(this);
     }
 }

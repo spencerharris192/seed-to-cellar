@@ -3,6 +3,6 @@
     "minecraft:plains",
     "minecraft:sunflower_plains",
     "minecraft:meadow",
-    "#forge:is_plains"
+    "#c:is_plains"
   ]
 }

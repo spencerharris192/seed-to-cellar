@@ -6,22 +6,19 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -63,14 +60,15 @@ public class AssetAuditProvider implements DataProvider {
     private final Path generated;
     private final Path existing;
     private final Path report;
-    private final ExistingFileHelper files;
+    /** Vanilla's (and our libraries') client resources, to check a model or texture we borrow exists. */
+    private final ResourceManager resources;
 
-    public AssetAuditProvider(PackOutput output, ExistingFileHelper files) {
+    public AssetAuditProvider(PackOutput output, ResourceManager resources) {
         this.generated = output.getOutputFolder();                       // <project>/src/generated/resources
         Path project = generated.getParent().getParent().getParent();
         this.existing = project.resolve("src/main/resources");
         this.report = project.resolve("build/reports/asset-audit.txt");
-        this.files = files;
+        this.resources = resources;
     }
 
     @Override
@@ -91,8 +89,8 @@ public class AssetAuditProvider implements DataProvider {
         int blockCount = 0;
         int itemCount = 0;
 
-        for (Map.Entry<net.minecraft.resources.ResourceKey<Block>, Block> entry : ForgeRegistries.BLOCKS.getEntries()) {
-            ResourceLocation id = entry.getKey().location();
+        for (Map.Entry<net.minecraft.resources.ResourceKey<Block>, Block> entry : BuiltInRegistries.BLOCK.entrySet()) {
+            Identifier id = entry.getKey().identifier();
             if (!id.getNamespace().equals(NS)) continue;
             blockCount++;
             Block block = entry.getValue();
@@ -105,21 +103,30 @@ public class AssetAuditProvider implements DataProvider {
             } else {
                 for (String model : blockstateModels(state.get())) checkModel(model, where, errors);
             }
-            if (!block.getLootTable().equals(BuiltInLootTables.EMPTY)) {
-                String loot = "data/" + NS + "/loot_tables/blocks/" + id.getPath() + ".json";
+            if (block.getLootTable().isPresent()) {
+                String loot = "data/" + NS + "/loot_table/blocks/" + id.getPath() + ".json";
                 if (find(loot).isEmpty()) errors.add(where + ": missing loot table " + loot);
             }
         }
 
-        for (Map.Entry<net.minecraft.resources.ResourceKey<Item>, Item> entry : ForgeRegistries.ITEMS.getEntries()) {
-            ResourceLocation id = entry.getKey().location();
+        for (Map.Entry<net.minecraft.resources.ResourceKey<Item>, Item> entry : BuiltInRegistries.ITEM.entrySet()) {
+            Identifier id = entry.getKey().identifier();
             if (!id.getNamespace().equals(NS)) continue;
             itemCount++;
             Item item = entry.getValue();
             String where = "item " + id;
             checkLang(lang, item.getDescriptionId(), where, errors);
             checkGuide(lang, id.getPath(), where, errors);
-            checkModel(NS + ":item/" + id.getPath(), where, errors);
+            // what the item shows: its definition, and every model that names
+            String definition = "assets/" + NS + "/items/" + id.getPath() + ".json";
+            Optional<JsonObject> shown = readJson(definition);
+            if (shown.isEmpty()) {
+                errors.add(where + ": missing item definition " + definition);
+            } else {
+                Set<String> models = new HashSet<>();
+                collectItemModels(shown.get(), models);
+                for (String model : models) checkModel(model, where, errors);
+            }
             // Buckets, drinks and bottled liquids (olive oil) are filled from any vessel holding their liquid.
             boolean filledFromVessels = item instanceof BucketItem || item instanceof DrinkItem || item instanceof BottledLiquidItem;
             boolean madeByStation = MADE_BY_STATIONS.containsKey(id.getPath());
@@ -136,8 +143,8 @@ public class AssetAuditProvider implements DataProvider {
         }
 
         // Effects: a name, and an icon for the inventory and the top-right of the screen.
-        for (Map.Entry<net.minecraft.resources.ResourceKey<MobEffect>, MobEffect> entry : ForgeRegistries.MOB_EFFECTS.getEntries()) {
-            ResourceLocation id = entry.getKey().location();
+        for (Map.Entry<net.minecraft.resources.ResourceKey<MobEffect>, MobEffect> entry : BuiltInRegistries.MOB_EFFECT.entrySet()) {
+            Identifier id = entry.getKey().identifier();
             if (!id.getNamespace().equals(NS)) continue;
             String where = "effect " + id;
             checkLang(lang, entry.getValue().getDescriptionId(), where, errors);
@@ -146,10 +153,10 @@ public class AssetAuditProvider implements DataProvider {
         }
 
         BuiltInRegistries.CREATIVE_MODE_TAB.entrySet().stream()
-                .filter(e -> e.getKey().location().getNamespace().equals(NS))
+                .filter(e -> e.getKey().identifier().getNamespace().equals(NS))
                 .forEach(e -> {
                     if (e.getValue().getDisplayName().getContents() instanceof TranslatableContents t) {
-                        checkLang(lang, t.getKey(), "creative tab " + e.getKey().location(), errors);
+                        checkLang(lang, t.getKey(), "creative tab " + e.getKey().identifier(), errors);
                     }
                 });
 
@@ -179,9 +186,9 @@ public class AssetAuditProvider implements DataProvider {
 
     /** Checks a model exists (ours, or vanilla) and that every texture it names exists. */
     private void checkModel(String modelRef, String where, List<String> errors) {
-        ResourceLocation model = SeedToCellar.parse(modelRef);
+        Identifier model = SeedToCellar.parse(modelRef);
         if (!model.getNamespace().equals(NS)) {
-            if (!files.exists(model, PackType.CLIENT_RESOURCES, ".json", "models")) {
+            if (resources.getResource(model.withPath(p -> "models/" + p + ".json")).isEmpty()) {
                 errors.add(where + ": missing model " + model);
             }
             return;
@@ -196,10 +203,10 @@ public class AssetAuditProvider implements DataProvider {
             for (Map.Entry<String, JsonElement> texture : json.get().getAsJsonObject("textures").entrySet()) {
                 String value = texture.getValue().getAsString();
                 if (value.startsWith("#")) continue;
-                ResourceLocation tex = SeedToCellar.parse(value);
+                Identifier tex = SeedToCellar.parse(value);
                 boolean found = tex.getNamespace().equals(NS)
                         ? find("assets/" + NS + "/textures/" + tex.getPath() + ".png").isPresent()
-                        : files.exists(tex, PackType.CLIENT_RESOURCES, ".png", "textures");
+                        : resources.getResource(tex.withPath(p -> "textures/" + p + ".png")).isPresent();
                 if (!found) errors.add(where + ": model " + model + " uses missing texture " + tex);
             }
         }
@@ -255,6 +262,17 @@ public class AssetAuditProvider implements DataProvider {
         };
     }
 
+    /** Every "model" an item definition can show (in its switches and conditions too). */
+    private static void collectItemModels(JsonElement element, Set<String> models) {
+        if (element.isJsonObject()) {
+            JsonObject obj = element.getAsJsonObject();
+            if (obj.has("type") && obj.get("type").getAsString().equals("minecraft:model")) models.add(obj.get("model").getAsString());
+            obj.entrySet().forEach(e -> collectItemModels(e.getValue(), models));
+        } else if (element.isJsonArray()) {
+            element.getAsJsonArray().forEach(e -> collectItemModels(e, models));
+        }
+    }
+
     private static Set<String> blockstateModels(JsonObject state) {
         Set<String> models = new HashSet<>();
         if (state.has("variants")) {
@@ -290,20 +308,20 @@ public class AssetAuditProvider implements DataProvider {
                 paths.filter(p -> p.toString().endsWith(".json")).forEach(p -> {
                     String rel = data.relativize(p).toString().replace('\\', '/');
                     JsonElement json = parse(p);
-                    if (rel.contains("/recipes/") && json.isJsonObject() && json.getAsJsonObject().has("result")) {
+                    if (rel.contains("/recipe/") && json.isJsonObject() && json.getAsJsonObject().has("result")) {
                         collectRecipeResult(json.getAsJsonObject().get("result"), ids);
                         // station recipes that leave something behind (the press's pomace)
                         if (json.getAsJsonObject().has("byproduct")) collectRecipeResult(json.getAsJsonObject().get("byproduct"), ids);
-                    } else if (rel.contains("/loot_tables/")) {
+                    } else if (rel.contains("/loot_table/")) {
                         Set<String> drops = new HashSet<>();
                         collectLootItems(json, drops);
-                        // data/<ns>/loot_tables/blocks/<name>.json dropping <ns>:<name> is not a source
+                        // data/<ns>/loot_table/blocks/<name>.json dropping <ns>:<name> is not a source
                         String[] parts = rel.split("/");
                         if (parts.length == 4 && parts[2].equals("blocks")) {
                             drops.remove(parts[0] + ":" + parts[3].replace(".json", ""));
                         }
                         ids.addAll(drops);
-                    } else if (rel.contains("/worldgen/configured_feature/")) {
+                    } else if (rel.contains("/worldgen/feature/")) {
                         collectBlockNames(json, ids);
                     } else if (rel.contains("/loot_modifiers/") && json.isJsonObject() && json.getAsJsonObject().has("item")) {
                         ids.add(json.getAsJsonObject().get("item").getAsString());   // our modifiers name what they add
@@ -316,11 +334,16 @@ public class AssetAuditProvider implements DataProvider {
         return ids;
     }
 
-    /** Block state "Name" entries in worldgen features. Our block items share their block's ID. */
+    /**
+     * Block states in worldgen features: {"id": ..., "properties": ...}, or just the block's ID where the state is its
+     * default (as a weighted entry's "data"). Our block items share their block's ID.
+     */
     private static void collectBlockNames(JsonElement element, Set<String> ids) {
         if (element.isJsonObject()) {
             JsonObject obj = element.getAsJsonObject();
-            if (obj.has("Name") && obj.get("Name").isJsonPrimitive()) ids.add(obj.get("Name").getAsString());
+            for (String key : List.of("id", "data")) {
+                if (obj.has(key) && obj.get(key).isJsonPrimitive()) ids.add(obj.get(key).getAsString());
+            }
             obj.entrySet().forEach(e -> collectBlockNames(e.getValue(), ids));
         } else if (element.isJsonArray()) {
             element.getAsJsonArray().forEach(e -> collectBlockNames(e, ids));

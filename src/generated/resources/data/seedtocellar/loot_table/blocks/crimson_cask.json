@@ -1,0 +1,57 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": [
+            {
+              "type": "minecraft:copy_components",
+              "include": [
+                "seedtocellar:cask_contents"
+              ],
+              "source": "block_entity"
+            },
+            {
+              "type": "minecraft:copy_state",
+              "block": "seedtocellar:crimson_cask",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "seedtocellar:crimson_cask",
+                "state": {
+                  "charred": "true"
+                }
+              },
+              "properties": [
+                "charred"
+              ]
+            }
+          ],
+          "name": "seedtocellar:crimson_cask"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "seedtocellar:crimson_cask",
+        "state": {
+          "tap": "true"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "seedtocellar:tap"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/crimson_cask"
+}

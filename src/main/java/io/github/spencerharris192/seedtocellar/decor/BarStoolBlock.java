@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.decor;
 
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -32,9 +33,9 @@ public class BarStoolBlock extends Block {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (player.isSecondaryUseActive() || player.isPassenger() || !player.getItemInHand(hand).isEmpty()) return InteractionResult.PASS;
-        if (level.isClientSide) return InteractionResult.SUCCESS;
+        if (level.isClientSide()) return InteractionResult.SUCCESS;
         if (!level.getEntitiesOfClass(SeatEntity.class, new AABB(pos)).isEmpty()) return InteractionResult.PASS;   // taken
         SeatEntity seat = new SeatEntity(level, pos, SEAT);
         level.addFreshEntity(seat);

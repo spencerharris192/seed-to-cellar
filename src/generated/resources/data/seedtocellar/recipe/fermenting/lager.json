@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:fermenting",
+  "allow_wild": false,
+  "input": "seedtocellar:hopped_wort",
+  "malt_max": {
+    "amber": 0.2,
+    "black": 0.0
+  },
+  "min_strength": "normal",
+  "priority": 60,
+  "result": "seedtocellar:lager",
+  "temperature": "cold",
+  "time": 36000,
+  "yeast": "lager"
+}

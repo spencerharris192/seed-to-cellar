@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
 import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.function.Supplier;
 
 /**
  * Thatch (GDD section 17): straw roofing. Burns like a hay bale, and the full block softens a
@@ -26,7 +25,7 @@ public class ThatchBlock extends Block {
     }
 
     @Override
-    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, float distance) {
+    public void fallOn(Level level, BlockState state, BlockPos pos, Entity entity, double distance) {
         entity.causeFallDamage(distance, 0.2F, level.damageSources().fall());
     }
 
@@ -41,7 +40,7 @@ public class ThatchBlock extends Block {
     }
 
     public static class Stairs extends StairBlock {
-        public Stairs(Supplier<BlockState> base, Properties properties) {
+        public Stairs(BlockState base, Properties properties) {
             super(base, properties);
         }
 

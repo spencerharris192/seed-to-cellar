@@ -1,10 +1,18 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.decor.CopperWeathering;
 import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraftforge.common.ToolAction;
+import net.neoforged.neoforge.common.ItemAbility;
 import org.jetbrains.annotations.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
@@ -32,8 +40,6 @@ import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.network.NetworkHooks;
 
 /**
  * Brew Kettle (GDD section 7): a copper kettle that sits over heat (a lit campfire, fire,
@@ -66,20 +72,13 @@ public class BrewKettleBlock extends BaseEntityBlock {
         CopperWeathering.randomTick(state, level, pos, random);
     }
 
-    @Nullable
-    @Override
-    public BlockState getToolModifiedState(BlockState state, UseOnContext context, ToolAction action, boolean simulate) {
-        BlockState axed = CopperWeathering.axed(state, action);
-        return axed != null ? axed : super.getToolModifiedState(state, context, action, simulate);
-    }
-
     @Override
     public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -90,32 +89,25 @@ public class BrewKettleBlock extends BaseEntityBlock {
 
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide ? null : createTickerHelper(type, ModBlockEntities.BREW_KETTLE.get(), BrewKettleBlockEntity::serverTick);
+        return level.isClientSide() ? null : createTickerHelper(type, ModBlockEntities.BREW_KETTLE.get(), BrewKettleBlockEntity::serverTick);
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof BrewKettleBlockEntity kettle)) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
         InteractionResult waxed = CopperWeathering.wax(state, level, pos, player, held);
         if (waxed != null) return waxed;
-        if (CopperWeathering.axeWorks(state, held)) return InteractionResult.PASS;   // the axe scrapes it
-        if (FluidUtil.getFluidHandler(held).isPresent()) {
-            if (!level.isClientSide) FluidUtil.interactWithFluidHandler(player, hand, kettle.tank());
-            return InteractionResult.sidedSuccess(level.isClientSide);
+        InteractionResult axed = CopperWeathering.axe(state, level, pos, player, hand, held);
+        if (axed != null) return axed;
+        if (SyncedBlockEntity.holdsLiquidContainer(player, hand)) {
+            if (!level.isClientSide()) net.neoforged.neoforge.transfer.fluid.FluidUtil.interactWithFluidHandler(player, hand, pos, kettle.tank(), null);
+            return InteractionResult.SUCCESS;
         }
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, kettle, pos);
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(kettle, pos);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof BrewKettleBlockEntity kettle) {
-            kettle.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, moved);
+        return InteractionResult.SUCCESS;
     }
 
     @Override

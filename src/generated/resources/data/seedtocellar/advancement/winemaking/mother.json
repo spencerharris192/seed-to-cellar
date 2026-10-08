@@ -1,0 +1,32 @@
+{
+  "parent": "seedtocellar:winemaking/vintner",
+  "criteria": {
+    "mother": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:mother_of_vinegar"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.mother.description"
+    },
+    "icon": {
+      "id": "seedtocellar:mother_of_vinegar"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.mother.title"
+    }
+  },
+  "requirements": [
+    [
+      "mother"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

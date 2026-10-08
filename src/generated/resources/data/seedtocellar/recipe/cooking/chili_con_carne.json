@@ -1,0 +1,17 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "minecraft:beef",
+    "#c:crops/tomato",
+    "#seedtocellar:chilies",
+    "#c:crops/onion"
+  ],
+  "result": {
+    "id": "seedtocellar:chili_con_carne"
+  },
+  "time": 300
+}

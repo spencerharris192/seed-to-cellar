@@ -386,7 +386,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "cushion": "seedtocellar:block/bar_cushion",
     "particle": "seedtocellar:block/bar_acacia_planks",

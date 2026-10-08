@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_rye_bale": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:rye_bale"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:rye_from_rye_bale"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_rye_bale"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:rye_from_rye_bale"
+    ]
+  }
+}

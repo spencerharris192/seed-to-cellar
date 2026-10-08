@@ -1,7 +1,7 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import io.github.spencerharris192.seedtocellar.brewing.Drinks;
 import io.github.spencerharris192.seedtocellar.brewing.Temperature;
@@ -9,10 +9,10 @@ import io.github.spencerharris192.seedtocellar.compat.SereneSeasonsCompat;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.fml.ModList;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,8 +21,6 @@ import java.util.Optional;
  * Our recipes for other mods' machines (GDD section 22): each loads only with its mod, and with it, the mod reads it as
  * one of its own (a recipe it can't parse never loads). Run with -PwithCompat to load those mods.
  */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class CompatTests {
     private static final String EMPTY = "empty";
 
@@ -56,7 +54,7 @@ public final class CompatTests {
                 continue;
             }
             helper.assertTrue(recipe.isPresent(), expect.mod() + " couldn't read " + expect.recipe());
-            String type = String.valueOf(ForgeRegistries.RECIPE_TYPES.getKey(recipe.get().getType()));
+            String type = String.valueOf(BuiltInRegistries.RECIPE_TYPE.getKey(recipe.get().getType()));
             helper.assertTrue(type.equals(expect.type()), expect.recipe() + " is a " + type + ", not a " + expect.type());
         }
         helper.succeed();
@@ -99,21 +97,21 @@ public final class CompatTests {
         helper.assertTrue(milled.stream().anyMatch(s -> s instanceof ItemStack stack
                 && stack.is(io.github.spencerharris192.seedtocellar.registry.ModItems.PALE_GRIST.get())), "Create's mill grinds pale malt to grist");
         ItemStack mug = new ItemStack(io.github.spencerharris192.seedtocellar.registry.ModItems.MUG.get());
-        var handler = mug.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(IllegalStateException::new);
-        int filled = handler.fill(new net.minecraftforge.fluids.FluidStack(Drinks.PALE_ALE.fluid().get(), 250),
-                net.minecraftforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+        var handler = Handlers.fluids(mug);
+        int filled = handler.fill(new net.neoforged.neoforge.fluids.FluidStack(Drinks.PALE_ALE.fluid().get(), 250),
+                StationTank.Action.EXECUTE);
         helper.assertTrue(filled == 250 && handler.getContainer().is(Drinks.PALE_ALE.item().get()), "a spout fills a mug with a pint");
         helper.succeed();
     }
 
-    private static net.minecraftforge.fluids.FluidStack fluidResult(Recipe<?> recipe) {
-        return (net.minecraftforge.fluids.FluidStack) ((List<?>) invoke(recipe, "getFluidResults")).get(0);
+    private static net.neoforged.neoforge.fluids.FluidStack fluidResult(Recipe<?> recipe) {
+        return (net.neoforged.neoforge.fluids.FluidStack) ((List<?>) invoke(recipe, "getFluidResults")).get(0);
     }
 
     /** Create's FluidIngredient.test(FluidStack), without compiling against Create. */
-    private static boolean fluidTest(Object ingredient, net.minecraftforge.fluids.FluidStack stack) {
+    private static boolean fluidTest(Object ingredient, net.neoforged.neoforge.fluids.FluidStack stack) {
         try {
-            return (boolean) ingredient.getClass().getMethod("test", net.minecraftforge.fluids.FluidStack.class).invoke(ingredient, stack);
+            return (boolean) ingredient.getClass().getMethod("test", net.neoforged.neoforge.fluids.FluidStack.class).invoke(ingredient, stack);
         } catch (ReflectiveOperationException e) {
             return false;
         }
@@ -132,7 +130,7 @@ public final class CompatTests {
         var recipes = helper.getLevel().getRecipeManager().getRecipes();
         int checked = 0;
         for (String typeId : ONE_INPUT_TYPES) {
-            var type = ForgeRegistries.RECIPE_TYPES.getValue(SeedToCellar.parse(typeId));
+            var type = BuiltInRegistries.RECIPE_TYPE.getValue(SeedToCellar.parse(typeId));
             if (type == null) continue;   // that mod isn't installed
             List<Recipe<?>> ofType = recipes.stream().filter(r -> r.getType() == type).toList();
             java.util.Map<net.minecraft.world.item.Item, Recipe<?>> theirs = new java.util.HashMap<>();
@@ -191,7 +189,7 @@ public final class CompatTests {
             }
         }
         // Farmer's Delight's Cooking Pot: the same ingredients (in any order) make whichever recipe it finds first
-        var pot = ForgeRegistries.RECIPE_TYPES.getValue(SeedToCellar.parse("farmersdelight:cooking"));
+        var pot = BuiltInRegistries.RECIPE_TYPE.getValue(SeedToCellar.parse("farmersdelight:cooking"));
         if (pot != null) {
             List<Recipe<?>> all = helper.getLevel().getRecipeManager().getRecipes().stream().filter(r -> r.getType() == pot).toList();
             for (Recipe<?> ours : all) {

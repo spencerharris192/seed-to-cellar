@@ -6,14 +6,20 @@
         "north": {
           "texture": "#vine",
           "uv": [
-            14.0,
-            0.0,
-            2.0,
-            16.0
+            14,
+            0,
+            2,
+            16
           ]
         },
         "south": {
-          "texture": "#vine"
+          "texture": "#vine",
+          "uv": [
+            2,
+            0,
+            14,
+            16
+          ]
         }
       },
       "from": [
@@ -32,55 +38,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         }
       },
@@ -100,55 +106,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         }
       },
@@ -168,55 +174,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         }
       },
@@ -236,55 +242,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         }
       },
@@ -304,55 +310,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
-            2.0
+            0,
+            0,
+            2,
+            2
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            2.0,
+            0,
+            0,
+            2,
             1.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             1.5,
-            2.0
+            2
           ]
         }
       },
@@ -372,55 +378,55 @@
         "down": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "east": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         },
         "north": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "south": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
-            1.0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "up": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
-            1.0,
+            0,
+            0,
+            1,
             0.5
           ]
         },
         "west": {
           "texture": "#flower",
           "uv": [
-            0.0,
-            0.0,
+            0,
+            0,
             0.5,
-            1.0
+            1
           ]
         }
       },
@@ -436,7 +442,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "flower": "seedtocellar:block/vanilla_flower",
     "particle": "seedtocellar:block/vanilla_vine",

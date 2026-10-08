@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "seedtocellar:brandy",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:crops/mint",
+    "#c:crops/lavender",
+    "#c:crops/anise",
+    "minecraft:honey_bottle"
+  ],
+  "result_fluid": "seedtocellar:herbal_liqueur",
+  "time": 48000
+}

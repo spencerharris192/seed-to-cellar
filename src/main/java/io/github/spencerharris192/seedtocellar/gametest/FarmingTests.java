@@ -13,7 +13,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,11 +29,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class FarmingTests {
     private static final String EMPTY = "empty";
     private static final BlockPos GROUND = new BlockPos(1, 1, 1);
@@ -55,7 +50,7 @@ public final class FarmingTests {
     @GameTest(template = EMPTY)
     public static void everyRipeCropRightClickHarvestsAndReplants(GameTestHelper helper) {
         helper.setBlock(GROUND, Blocks.FARMLAND);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         for (Crop crop : Crops.all()) {
             helper.setBlock(PLANT, ripe(crop));
             helper.useBlock(PLANT, player);
@@ -130,7 +125,7 @@ public final class FarmingTests {
         helper.setBlock(GROUND, Blocks.FARMLAND);
         helper.setBlock(PLANT, Crops.CORN.block());
         grow(helper, PLANT);
-        helper.useBlock(PLANT.above(), helper.makeMockPlayer());
+        helper.useBlock(PLANT.above(), helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL));
         helper.assertBlockProperty(PLANT, CropBlock.AGE, 0);
         helper.assertBlockNotPresent(Crops.CORN.block(), PLANT.above());
         helper.assertItemEntityPresent(Crops.CORN.produce(), PLANT, 2.0);
@@ -141,7 +136,7 @@ public final class FarmingTests {
 
     @GameTest(template = EMPTY)
     public static void ricePlantsOnlyInShallowWater(GameTestHelper helper) {
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Crops.RICE.seeds(), 4));
         // Dry farmland: no.
         helper.setBlock(GROUND, Blocks.FARMLAND);
@@ -160,7 +155,7 @@ public final class FarmingTests {
     public static void riceHarvestKeepsTheWater(GameTestHelper helper) {
         helper.setBlock(GROUND, Blocks.DIRT);
         helper.setBlock(PLANT, ripe(Crops.RICE));
-        helper.useBlock(PLANT, helper.makeMockPlayer());
+        helper.useBlock(PLANT, helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL));
         helper.assertBlockProperty(PLANT, CropBlock.AGE, 0);
         helper.assertBlockProperty(PLANT, PaddyCropBlock.WATERLOGGED, true);
         helper.assertItemEntityPresent(Crops.RICE.produce(), PLANT, 2.0);
@@ -176,12 +171,12 @@ public final class FarmingTests {
     public static void elderberryFlowersCanBePickedInsteadOfBerries(GameTestHelper helper) {
         helper.setBlock(GROUND, Blocks.GRASS_BLOCK);
         helper.setBlock(PLANT, Crops.ELDERBERRY.block().defaultBlockState().setValue(BushCropBlock.AGE, 2));
-        helper.useBlock(PLANT, helper.makeMockPlayer());
+        helper.useBlock(PLANT, helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL));
         helper.assertItemEntityPresent(Crops.ELDERBERRY.flowers(), PLANT, 2.0);
         helper.assertBlockProperty(PLANT, BushCropBlock.AGE, BushCropBlock.PICKED_AGE);   // no berries this time
         // Other bushes have nothing to pick while flowering.
         helper.setBlock(PLANT, Crops.BLUEBERRY.block().defaultBlockState().setValue(BushCropBlock.AGE, 2));
-        helper.useBlock(PLANT, helper.makeMockPlayer());
+        helper.useBlock(PLANT, helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL));
         helper.assertBlockProperty(PLANT, BushCropBlock.AGE, 2);
         helper.succeed();
     }
@@ -201,8 +196,8 @@ public final class FarmingTests {
         BlockPos abs = helper.absolutePos(pos);
         for (int i = 0; i < 20; i++) {
             BlockState state = helper.getLevel().getBlockState(abs);
-            if (!(state.getBlock() instanceof CropBlock crop) || !crop.isValidBonemealTarget(helper.getLevel(), abs, state, false)) return;
-            crop.performBonemeal(helper.getLevel(), helper.getLevel().random, abs, state);
+            if (!(state.getBlock() instanceof CropBlock crop) || !crop.isValidBonemealTarget(helper.getLevel(), abs, state, net.minecraft.world.level.block.BonemealSource.INTERACTION)) return;
+            crop.performBonemeal(helper.getLevel(), helper.getLevel().getRandom(), abs, state, net.minecraft.world.level.block.BonemealSource.INTERACTION);
         }
     }
 
@@ -225,7 +220,7 @@ public final class FarmingTests {
     public static void grapeCuttingPlantsOnTrellisAndShearsCutLeaves(GameTestHelper helper) {
         helper.setBlock(GROUND, Blocks.DIRT);
         helper.setBlock(PLANT, ModBlocks.TRELLIS.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Crops.RED_GRAPE.seeds()));
         useOn(helper, player, PLANT);
         helper.assertBlockPresent(Crops.RED_GRAPE.block(), PLANT);
@@ -259,7 +254,7 @@ public final class FarmingTests {
         helper.setBlock(GROUND, Blocks.DIRT);
         helper.setBlock(PLANT, ModBlocks.TRELLIS.get());
         helper.setBlock(PLANT.above(), ModBlocks.TRELLIS.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.HOP_RHIZOME.get(), 2));
 
         useOn(helper, player, PLANT.above());   // not on soil: should do nothing
@@ -287,7 +282,7 @@ public final class FarmingTests {
         helper.setBlock(PLANT, hops(HopsBlock.LEAFY, true));
         helper.setBlock(PLANT.above(), ModBlocks.TRELLIS.get());
         BlockState state = helper.getBlockState(PLANT);
-        ((HopsBlock) state.getBlock()).performBonemeal(helper.getLevel(), helper.getLevel().random, helper.absolutePos(PLANT), state);
+        ((HopsBlock) state.getBlock()).performBonemeal(helper.getLevel(), helper.getLevel().getRandom(), helper.absolutePos(PLANT), state, net.minecraft.world.level.block.BonemealSource.INTERACTION);
         helper.assertBlockPresent(ModBlocks.HOPS.get(), PLANT.above());
         helper.assertBlockProperty(PLANT.above(), HopsBlock.ROOT, false);
         helper.succeed();
@@ -339,13 +334,13 @@ public final class FarmingTests {
         helper.setBlock(GROUND, Blocks.DIRT);
         helper.setBlock(PLANT, hops(HopsBlock.MAX_AGE, true).setValue(TrellisBlock.AXIS, Direction.Axis.Z));
         helper.setBlock(PLANT.above(), ModBlocks.TRELLIS.get().defaultBlockState().setValue(TrellisBlock.AXIS, Direction.Axis.Z));
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.TRELLIS.get(), 4));
 
         // Holding a trellis, ripe hops don't get picked: the click goes to stacking instead.
         BlockPos abs = helper.absolutePos(PLANT);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false);
-        helper.assertTrue(helper.getBlockState(PLANT).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS,
+        helper.assertTrue(Interact.use(helper.getBlockState(PLANT), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit) == InteractionResult.PASS,
                 "ripe hops should let a held trellis through");
         useOn(helper, player, PLANT); // the side of the bottom (hops) block
         helper.assertBlockPresent(ModBlocks.TRELLIS.get(), PLANT.above(2));
@@ -359,7 +354,7 @@ public final class FarmingTests {
         helper.setBlock(GROUND, Blocks.DIRT);
         helper.setBlock(GROUND.north(), Blocks.DIRT);
         helper.setBlock(PLANT, ModBlocks.TRELLIS.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.TRELLIS.get(), 4));
         player.setShiftKeyDown(true);
         useOn(helper, player, PLANT); // clicks the north face

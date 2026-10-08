@@ -1,9 +1,0 @@
-{
-  "type": "seedtocellar:mixing",
-  "liquid": {
-    "amount": 250,
-    "fluid": "seedtocellar:cane_juice"
-  },
-  "result": "seedtocellar:molasses",
-  "time": 600
-}

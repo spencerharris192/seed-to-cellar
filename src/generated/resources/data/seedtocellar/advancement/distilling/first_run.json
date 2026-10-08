@@ -1,0 +1,32 @@
+{
+  "parent": "seedtocellar:brewing/root",
+  "criteria": {
+    "spirit": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#seedtocellar:spirits"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.first_run.description"
+    },
+    "icon": {
+      "id": "seedtocellar:pot_still"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.first_run.title"
+    }
+  },
+  "requirements": [
+    [
+      "spirit"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

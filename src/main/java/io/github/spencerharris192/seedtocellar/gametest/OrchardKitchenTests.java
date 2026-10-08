@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.Component;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
@@ -12,45 +13,36 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandlerItem;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** The orchard kitchen: bottled olive oil, sorghum syrup, lemonade, and wine in the pot. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class OrchardKitchenTests {
     private static final String EMPTY = "empty";
     private static final BlockPos KETTLE = new BlockPos(1, 2, 1);
-    private static final IFluidHandler.FluidAction EXECUTE = IFluidHandler.FluidAction.EXECUTE;
+    private static final StationTank.Action EXECUTE = StationTank.Action.EXECUTE;
 
     private static BrewKettleBlockEntity heatedKettle(GameTestHelper helper) {
         ModConfigs.SERVER.processTimeMultiplier.set(0.01);
         helper.setBlock(KETTLE.below(), Blocks.CAMPFIRE);
         helper.setBlock(KETTLE, ModBlocks.BREW_KETTLE.get());
-        return (BrewKettleBlockEntity) helper.getBlockEntity(KETTLE);
+        return (BrewKettleBlockEntity) helper.getBlockEntity(KETTLE, net.minecraft.world.level.block.entity.BlockEntity.class);
     }
 
     @GameTest(template = EMPTY)
     public static void glassBottlesFillWithOliveOilAndPourItBack(GameTestHelper helper) {
-        IFluidHandlerItem glass = new ItemStack(Items.GLASS_BOTTLE).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-                .orElseThrow(() -> new IllegalStateException("a glass bottle should take olive oil"));
+        Handlers.Held glass = Handlers.fluids(new ItemStack(Items.GLASS_BOTTLE));
         helper.assertTrue(glass.fill(new FluidStack(ModFluids.OLIVE_OIL.get(), 1000), EXECUTE) == 250, "one bottle is 250 mB");
         helper.assertTrue(glass.getContainer().is(ModItems.OLIVE_OIL.get()), "a bottle of olive oil");
-        VesselFluidHandler bottle = new VesselFluidHandler(glass.getContainer());
+        Handlers.Held bottle = new Handlers.Held(glass.getContainer());
         FluidStack back = bottle.drain(250, EXECUTE);
         helper.assertTrue(back.getFluid() == ModFluids.OLIVE_OIL.get() && back.getAmount() == 250, "and pours back out");
         helper.assertTrue(bottle.getContainer().is(Items.GLASS_BOTTLE), "leaving the glass bottle");
-        VesselFluidHandler mug = new VesselFluidHandler(new ItemStack(ModItems.MUG.get()));
+        Handlers.Held mug = new Handlers.Held(new ItemStack(ModItems.MUG.get()));
         helper.assertTrue(mug.fill(new FluidStack(ModFluids.OLIVE_OIL.get(), 250), EXECUTE) == 0, "oil doesn't go in a mug");
         helper.succeed();
     }
@@ -86,8 +78,7 @@ public final class OrchardKitchenTests {
                     "a bucket of lemonade");
             helper.assertTrue(kettle.items().getStackInSlot(BrewKettleBlockEntity.CONTAINER).is(Items.GLASS_BOTTLE)
                     && kettle.items().getStackInSlot(BrewKettleBlockEntity.CONTAINER).getCount() == 2, "the syrup bottles come back");
-            IFluidHandlerItem glass = new ItemStack(Items.GLASS_BOTTLE).getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseThrow(
-                    IllegalStateException::new);
+            Handlers.Held glass = Handlers.fluids(new ItemStack(Items.GLASS_BOTTLE));
             glass.fill(kettle.tank().getFluid(), EXECUTE);
             helper.assertTrue(glass.getContainer().is(Drinks.LEMONADE.item().get()), "it bottles as a drink");
         });

@@ -1,14 +1,16 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.SaplingBlock;
-import net.minecraft.world.level.block.grower.AbstractTreeGrower;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+import net.minecraft.world.level.levelgen.feature.Feature;
 
 /**
  * A fruit tree sapling: grows like a vanilla sapling (light 9 or more, two steps), at the
@@ -17,8 +19,9 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 public class FruitSaplingBlock extends SaplingBlock implements ClimateCrop {
     private final Climate climate;
 
-    public FruitSaplingBlock(ResourceKey<ConfiguredFeature<?, ?>> tree, Climate climate, Properties properties) {
-        super(new Grower(tree), properties);
+    public FruitSaplingBlock(String name, Climate climate, Properties properties) {
+        super(new TreeGrower(SeedToCellar.MOD_ID + "_" + name, WeightedList.of(treeKey(name)), WeightedList.of(), WeightedList.of(),
+                treeKey(name)), properties);
         this.climate = climate;
     }
 
@@ -35,21 +38,8 @@ public class FruitSaplingBlock extends SaplingBlock implements ClimateCrop {
         }
     }
 
-    private static final class Grower extends AbstractTreeGrower {
-        private final ResourceKey<ConfiguredFeature<?, ?>> tree;
-
-        Grower(ResourceKey<ConfiguredFeature<?, ?>> tree) {
-            this.tree = tree;
-        }
-
-        @Override
-        protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource random, boolean hasFlowers) {
-            return tree;
-        }
-    }
-
-    /** The configured feature a tree grows from: seedtocellar:&lt;name&gt;_tree. */
-    public static ResourceKey<ConfiguredFeature<?, ?>> treeKey(String name) {
-        return ResourceKey.create(Registries.CONFIGURED_FEATURE, io.github.spencerharris192.seedtocellar.SeedToCellar.id(name + "_tree"));
+    /** The feature a tree grows from: seedtocellar:&lt;name&gt;_tree. */
+    public static ResourceKey<Feature> treeKey(String name) {
+        return ResourceKey.create(Registries.FEATURE, SeedToCellar.id(name + "_tree"));
     }
 }

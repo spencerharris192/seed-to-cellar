@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "#c:crops/wheat",
+  "result": {
+    "id": "seedtocellar:wheat_flour"
+  }
+}

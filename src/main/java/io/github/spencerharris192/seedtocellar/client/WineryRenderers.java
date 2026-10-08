@@ -1,48 +1,37 @@
 package io.github.spencerharris192.seedtocellar.client;
 
-import org.jetbrains.annotations.Nullable;
-import io.github.spencerharris192.seedtocellar.brewing.BottleLook;
-import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
-import io.github.spencerharris192.seedtocellar.brewing.Drinks;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.util.RandomSource;
 import com.mojang.math.Axis;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.winery.CrushingTubBlock;
 import io.github.spencerharris192.seedtocellar.winery.CrushingTubBlockEntity;
 import io.github.spencerharris192.seedtocellar.winery.FruitPressBlockEntity;
+import io.github.spencerharris192.seedtocellar.winery.RackLayout;
 import io.github.spencerharris192.seedtocellar.winery.WineRackBlock;
 import io.github.spencerharris192.seedtocellar.winery.WineRackBlockEntity;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.LevelRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.client.model.data.ModelData;
+import net.minecraft.world.phys.Vec3;
+import net.neoforged.neoforge.client.event.ModelEvent;
+import org.jspecify.annotations.Nullable;
 
 /** What you see inside the winery stations: the fruit and juice in the tub, the press's moving screw, the racked bottles. */
 public final class WineryRenderers {
     /** The press's screw with its plate, and the handle on top: drawn moving, not part of the block model. */
-    public static final ResourceLocation PRESS_SCREW = SeedToCellar.id("block/fruit_press_screw");
-    public static final ResourceLocation PRESS_HANDLE = SeedToCellar.id("block/fruit_press_handle");
-    /** A wine bottle lying in a rack hole, neck out; its foil (tint 0) takes the wine's color. */
-    public static final ResourceLocation RACK_BOTTLE = SeedToCellar.id("block/wine_rack_bottle");
-    /** The 3D drinks on the Bottle Shelf and Wine Display: upright, on y = 0 around x = z = 8; tint 0 is the drink's color. */
-    public static final ResourceLocation DRINK_BOTTLE = SeedToCellar.id("block/drink_wine_bottle");
-    public static final ResourceLocation DRINK_MUG = SeedToCellar.id("block/drink_mug");
-    public static final ResourceLocation DRINK_FLASK = SeedToCellar.id("block/drink_flask");
-    /** An empty mug, for the Mug Rack's pegs. */
-    public static final ResourceLocation MUG_EMPTY = SeedToCellar.id("block/drink_mug_empty");
+    public static final Identifier PRESS_SCREW = SeedToCellar.id("block/fruit_press_screw");
+    public static final Identifier PRESS_HANDLE = SeedToCellar.id("block/fruit_press_handle");
     /** The Mug Rack's pegs, left to right as you face it (x, in pixels, facing north), and how far out its mugs hang. */
     private static final float[] PEG_X = {14, 10, 6, 2};
     private static final float MUG_Z = 10, MUG_BOTTOM = 9, MUG_SCALE = 0.6F;
@@ -57,74 +46,115 @@ public final class WineryRenderers {
     /** The Wine Display: the tops of its three shelves (top first), depth, scale. */
     private static final float[] DISPLAY_SHELVES = {11, 6, 1};
     private static final float DISPLAY_Z = 6, DISPLAY_SCALE = 0.62F, DISPLAY_MODEL_SCALE = 0.58F;
-    /** How high a wine bottle's middle rests above a Wine Display shelf: its body is 5 pixels thick. */
-    private static final float WINE_BOTTLE_RADIUS = 2.65F;
     /** The room between a Wine Display shelf and the one above it, in pixels (a hair under the 4 there are). */
     private static final float DISPLAY_ROOM = 3.9F;
 
-    /** A spirit's own bottle on the shelves (datagen builds one from each drink's BottleLook). */
-    public static ResourceLocation spiritModel(Drinks.Drink drink) {
-        return SeedToCellar.id("block/display/" + drink.name());
+    public static void registerModels(ModelEvent.RegisterStandalone event) {
+        ClientModels.register(event, PRESS_SCREW);
+        ClientModels.register(event, PRESS_HANDLE);
+        DrinkModels.register(event);
     }
 
-    /** The crowned (six-star) Apple Crown Whiskey's bottle. */
-    public static ResourceLocation crownedModel(Drinks.Drink drink) {
-        return SeedToCellar.id("block/display/" + drink.name() + "_crowned");
+    /** A liquid, how full its vessel is, and the fruit lying in it (drawn several times over). */
+    public static class FruitState extends VesselRenderers.State {
+        public final ItemStackRenderState fruit = new ItemStackRenderState();
+        public int shown;
+        public float screwDepth, handleAngle;
     }
 
-    /** Only the Apple Crown's bottle has a crowned look. */
-    public static boolean canBeCrowned(BottleLook look) {
-        return look.shape() == BottleLook.Shape.APPLE;
-    }
+    public static class Tub implements BlockEntityRenderer<CrushingTubBlockEntity, FruitState> {
+        private final ItemModelResolver items;
 
-    public static class Tub implements BlockEntityRenderer<CrushingTubBlockEntity> {
         public Tub(BlockEntityRendererProvider.Context context) {
+            this.items = context.itemModelResolver();
         }
 
         @Override
-        public void render(CrushingTubBlockEntity tub, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            float floor = CrushingTubBlock.FLOOR / 16F;
-            float fill = tub.tank().getFluidAmount() / (float) CrushingTubBlockEntity.CAPACITY;
-            float surface = floor + fill * (CrushingTubBlock.RIM - CrushingTubBlock.FLOOR - 1) / 16F;
-            if (fill > 0) FluidRendering.surface(pose, buffers, tub.tank().getFluid(), 2 / 16F, 2 / 16F, 14 / 16F, 14 / 16F, surface, light);
-            // the fruit waiting to be stomped floats on the juice: up to six, lying about
+        public FruitState createRenderState() {
+            return new FruitState();
+        }
+
+        @Override
+        public void extractRenderState(CrushingTubBlockEntity tub, FruitState state, float partialTick, Vec3 camera,
+                                       ModelFeatureRenderer.@Nullable CrumblingOverlay breaking) {
+            BlockEntityRenderer.super.extractRenderState(tub, state, partialTick, camera, breaking);
+            state.fluid = tub.tank().getFluid().copy();
+            state.fill = tub.tank().getFluidAmount() / (float) CrushingTubBlockEntity.CAPACITY;
             ItemStack fruit = tub.fruit();
-            int shown = Math.min(6, fruit.getCount());
-            for (int i = 0; i < shown; i++) {
+            state.shown = Math.min(6, fruit.getCount());
+            items.updateForTopItem(state.fruit, fruit, ItemDisplayContext.FIXED, tub.getLevel(), null, (int) tub.getBlockPos().asLong());
+        }
+
+        @Override
+        public void submit(FruitState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
+            float floor = CrushingTubBlock.FLOOR / 16F;
+            float surface = floor + state.fill * (CrushingTubBlock.RIM - CrushingTubBlock.FLOOR - 1) / 16F;
+            if (state.fill > 0) FluidRendering.surface(pose, collector, state.fluid, 2 / 16F, 2 / 16F, 14 / 16F, 14 / 16F, surface, state.lightCoords);
+            // the fruit waiting to be stomped floats on the juice: up to six, lying about
+            for (int i = 0; i < state.shown; i++) {
                 double angle = i * Math.PI * 2 / 6 + 0.4;
                 double radius = i == 5 ? 0 : 0.2;
-                layFlat(tub, fruit, pose, buffers, light, 0.5 + Math.cos(angle) * radius, surface + 0.02 + i * 0.004,
-                        0.5 + Math.sin(angle) * radius, i * 67, i);
+                layFlat(state.fruit, pose, collector, state.lightCoords, 0.5 + Math.cos(angle) * radius, surface + 0.02 + i * 0.004,
+                        0.5 + Math.sin(angle) * radius, i * 67);
             }
         }
     }
 
-    public static class Press implements BlockEntityRenderer<FruitPressBlockEntity> {
+    public static class Press implements BlockEntityRenderer<FruitPressBlockEntity, FruitState> {
+        private final ItemModelResolver items;
+
         public Press(BlockEntityRendererProvider.Context context) {
+            this.items = context.itemModelResolver();
         }
 
         @Override
-        public void render(FruitPressBlockEntity press, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            // juice in the tray, around the cage
-            float fill = press.tank().getFluidAmount() / (float) FruitPressBlockEntity.CAPACITY;
-            if (fill > 0) FluidRendering.surface(pose, buffers, press.tank().getFluid(), 1 / 16F, 1 / 16F, 15 / 16F, 15 / 16F, (1 + 1.8F * fill) / 16F, light);
-            // fruit in the cage, under the plate
+        public FruitState createRenderState() {
+            return new FruitState();
+        }
+
+        @Override
+        public void extractRenderState(FruitPressBlockEntity press, FruitState state, float partialTick, Vec3 camera,
+                                       ModelFeatureRenderer.@Nullable CrumblingOverlay breaking) {
+            BlockEntityRenderer.super.extractRenderState(press, state, partialTick, camera, breaking);
+            state.fluid = press.tank().getFluid().copy();
+            state.fill = press.tank().getFluidAmount() / (float) FruitPressBlockEntity.CAPACITY;
             ItemStack fruit = press.input();
-            int shown = Math.min(4, (fruit.getCount() + 3) / 4);
-            for (int i = 0; i < shown; i++) {
-                layFlat(press, fruit, pose, buffers, light, 0.4 + (i % 2) * 0.2, 3.3 / 16 + i / 2 * 0.06, 0.4 + (i / 2) * 0.2, i * 80, i);
+            state.shown = Math.min(4, (fruit.getCount() + 3) / 4);
+            items.updateForTopItem(state.fruit, fruit, ItemDisplayContext.FIXED, press.getLevel(), null, (int) press.getBlockPos().asLong());
+            state.screwDepth = press.screwDepth();
+            state.handleAngle = press.handleAngle(partialTick);
+        }
+
+        @Override
+        public void submit(FruitState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
+            int light = state.lightCoords;
+            // juice in the tray, around the cage
+            if (state.fill > 0) FluidRendering.surface(pose, collector, state.fluid, 1 / 16F, 1 / 16F, 15 / 16F, 15 / 16F, (1 + 1.8F * state.fill) / 16F, light);
+            // fruit in the cage, under the plate
+            for (int i = 0; i < state.shown; i++) {
+                layFlat(state.fruit, pose, collector, light, 0.4 + (i % 2) * 0.2, 3.3 / 16 + i / 2 * 0.06, 0.4 + (i / 2) * 0.2, i * 80);
             }
             // the screw and plate come down as the batch is cranked; the handle swings round on top
-            float drop = press.screwDepth() * PLATE_TRAVEL / 16F;
+            float drop = state.screwDepth * PLATE_TRAVEL / 16F;
             pose.pushPose();
             pose.translate(0, -drop, 0);
-            renderPart(PRESS_SCREW, pose, buffers, light, overlay);
+            ClientModels.submit(PRESS_SCREW, pose, collector, light);
             pose.translate(0.5, 0, 0.5);
-            pose.mulPose(Axis.YP.rotationDegrees(press.handleAngle(partialTick)));
+            pose.rotateDegrees(Axis.YP, state.handleAngle);
             pose.translate(-0.5, 0, -0.5);
-            renderPart(PRESS_HANDLE, pose, buffers, light, overlay);
+            ClientModels.submit(PRESS_HANDLE, pose, collector, light);
             pose.popPose();
         }
+    }
+
+    /** The racks' contents: each slot's drink as the shelves show it, or (another mod's drink) as its item. */
+    public static class RackState extends BlockEntityRenderState {
+        public RackLayout layout = RackLayout.WINE_RACK;
+        public Direction facing = Direction.NORTH;
+        /** For the Wine Rack: the light in front of it (the rack is a solid block, so its own light is 0). */
+        public int frontLight;
+        public DrinkModels.@Nullable Shown[] shown = new DrinkModels.Shown[0];
+        public ItemStackRenderState[] items = new ItemStackRenderState[0];
     }
 
     /**
@@ -132,43 +162,69 @@ public final class WineryRenderers {
      * the wine); the Bottle Shelf's stand on its boards and the Wine Display's lie along its shelves as little 3D
      * bottles, mugs and flasks in each drink's color, every spirit in its own bottle with its own label.
      */
-    public static class Rack implements BlockEntityRenderer<WineRackBlockEntity> {
+    public static class Rack implements BlockEntityRenderer<WineRackBlockEntity, RackState> {
+        private final ItemModelResolver itemModels;
+
         public Rack(BlockEntityRendererProvider.Context context) {
+            this.itemModels = context.itemModelResolver();
         }
 
         @Override
-        public void render(WineRackBlockEntity rack, float partialTick, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            if (rack.getLevel() == null) return;
-            Direction facing = rack.getBlockState().getValue(WineRackBlock.FACING);
+        public RackState createRenderState() {
+            return new RackState();
+        }
+
+        @Override
+        public void extractRenderState(WineRackBlockEntity rack, RackState state, float partialTick, Vec3 camera,
+                                       ModelFeatureRenderer.@Nullable CrumblingOverlay breaking) {
+            BlockEntityRenderer.super.extractRenderState(rack, state, partialTick, camera, breaking);
+            state.layout = rack.layout();
+            state.facing = rack.getBlockState().getValue(WineRackBlock.FACING);
+            state.frontLight = rack.getLevel() == null ? state.lightCoords
+                    : LightCoordsUtil.getLightCoords(rack.getLevel(), rack.getBlockPos().relative(state.facing));
+            int slots = rack.bottles().getSlots();
+            if (state.shown.length != slots) {
+                state.shown = new DrinkModels.Shown[slots];
+                state.items = new ItemStackRenderState[slots];
+                for (int i = 0; i < slots; i++) state.items[i] = new ItemStackRenderState();
+            }
+            for (int slot = 0; slot < slots; slot++) {
+                ItemStack bottle = rack.bottle(slot);
+                Identifier model = switch (state.layout) {
+                    case WINE_RACK -> DrinkModels.RACK_BOTTLE;
+                    case MUG_RACK -> DrinkModels.MUG_EMPTY;   // cut out: clear glass
+                    default -> null;
+                };
+                state.shown[slot] = bottle.isEmpty() ? null : DrinkModels.shown(bottle, model);
+                boolean asItem = state.shown[slot] != null && state.shown[slot].model() == null;
+                itemModels.updateForTopItem(state.items[slot], asItem ? bottle : ItemStack.EMPTY, ItemDisplayContext.NONE, rack.getLevel(), null,
+                        (int) rack.getBlockPos().asLong() + slot);
+            }
+        }
+
+        @Override
+        public void submit(RackState state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
             pose.pushPose();
             pose.translate(0.5, 0, 0.5);
-            pose.mulPose(Axis.YP.rotationDegrees(-((int) facing.toYRot() + 180) % 360));
+            pose.rotateDegrees(Axis.YP, -((int) state.facing.toYRot() + 180) % 360);
             pose.translate(-0.5, 0, -0.5);
-            switch (rack.layout()) {
-                case WINE_RACK -> cubbies(rack, pose, buffers, facing, overlay);
-                case BOTTLE_SHELF -> shelf(rack, pose, buffers, light, overlay);
-                case WINE_DISPLAY -> display(rack, pose, buffers, light, overlay);
-                case MUG_RACK -> mugs(rack, pose, buffers, light, overlay);
+            switch (state.layout) {
+                case WINE_RACK -> cubbies(state, pose, collector);
+                case BOTTLE_SHELF -> shelf(state, pose, collector);
+                case WINE_DISPLAY -> display(state, pose, collector);
+                case MUG_RACK -> mugs(state, pose, collector);
             }
             pose.popPose();
         }
 
-        private static void cubbies(WineRackBlockEntity rack, PoseStack pose, MultiBufferSource buffers, Direction facing, int overlay) {
-            // The rack is a solid block, so its own light is 0: the bottles take the light in front of it.
-            int front = LevelRenderer.getLightColor(rack.getLevel(), rack.getBlockPos().relative(facing));
-            BakedModel model = Minecraft.getInstance().getModelManager().getModel(RACK_BOTTLE);
-            int columns = rack.layout().columns();
-            for (int slot = 0; slot < rack.bottles().getSlots(); slot++) {
-                ItemStack bottle = rack.bottle(slot);
-                if (bottle.isEmpty()) continue;
-                int color = Minecraft.getInstance().getItemColors().getColor(bottle, 1);
+        private static void cubbies(RackState state, PoseStack pose, SubmitNodeCollector collector) {
+            int columns = state.layout.columns();
+            for (int slot = 0; slot < state.shown.length; slot++) {
+                if (state.shown[slot] == null) continue;
                 pose.pushPose();
                 // the bottle model is centered on (8, 8): move it to its hole
                 pose.translate((RACK_X[slot % columns] - 8) / 16F, (RACK_Y[slot / columns] - 8) / 16F, 0);
-                Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(pose.last(),
-                        buffers.getBuffer(RenderType.solid()), null, model,
-                        (color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F,
-                        front, overlay, ModelData.EMPTY, RenderType.solid());
+                state.shown[slot].submit(pose, collector, state.frontLight);
                 pose.popPose();
             }
         }
@@ -177,164 +233,75 @@ public final class WineryRenderers {
          * Two boards of three: each drink stands on its board as a 3D bottle, mug or flask in its own color. Another mod's
          * drink (no model of ours) is drawn as its item, the sprite's lowest pixels 7/16 below its middle.
          */
-        private static void shelf(WineRackBlockEntity rack, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            for (int slot = 0; slot < rack.bottles().getSlots(); slot++) {
-                ItemStack drink = rack.bottle(slot);
-                if (drink.isEmpty()) continue;
+        private static void shelf(RackState state, PoseStack pose, SubmitNodeCollector collector) {
+            for (int slot = 0; slot < state.shown.length; slot++) {
+                DrinkModels.Shown drink = state.shown[slot];
+                if (drink == null) continue;
                 float board = slot / 3 == 0 ? SHELF_UPPER_BOARD : SHELF_LOWER_BOARD;
-                ResourceLocation model = drinkModel(drink);
                 pose.pushPose();
-                if (model != null) {
+                if (drink.model() != null) {
                     pose.translate(SHELF_X[slot % 3] / 16F, board / 16F, SHELF_Z / 16F);
                     pose.scale(SHELF_MODEL_SCALE, SHELF_MODEL_SCALE, SHELF_MODEL_SCALE);
                     pose.translate(-0.5, 0, -0.5);
-                    renderTinted(model, drink, pose, buffers, light, overlay);
+                    drink.submit(pose, collector, state.lightCoords);
                 } else {
                     pose.translate(SHELF_X[slot % 3] / 16F, board / 16F + 7F / 16F * SHELF_SCALE, SHELF_Z / 16F);
-                    pose.mulPose(Axis.YP.rotationDegrees(180));          // the drink's face toward the room
+                    pose.rotateDegrees(Axis.YP, 180);          // the drink's face toward the room
                     pose.scale(SHELF_SCALE, SHELF_SCALE, SHELF_SCALE);
-                    renderItem(rack, drink, slot, pose, buffers, light);
+                    state.items[slot].submit(pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                 }
                 pose.popPose();
             }
         }
 
         /** Four pegs: an empty mug hangs from each by its handle, the peg through the handle, the handle toward the wall. */
-        private static void mugs(WineRackBlockEntity rack, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            for (int slot = 0; slot < rack.bottles().getSlots(); slot++) {
-                if (rack.bottle(slot).isEmpty()) continue;
+        private static void mugs(RackState state, PoseStack pose, SubmitNodeCollector collector) {
+            for (int slot = 0; slot < state.shown.length; slot++) {
+                if (state.shown[slot] == null) continue;
                 pose.pushPose();
                 pose.translate(PEG_X[slot] / 16F, MUG_BOTTOM / 16F, MUG_Z / 16F);
-                pose.mulPose(Axis.YP.rotationDegrees(-90));                  // its handle toward the wall
+                pose.rotateDegrees(Axis.YP, -90);                  // its handle toward the wall
                 pose.scale(MUG_SCALE, MUG_SCALE, MUG_SCALE);
                 pose.translate(-0.5, 0, -0.5);
-                renderTinted(MUG_EMPTY, rack.bottle(slot), pose, buffers, light, overlay);   // cut out: clear glass
+                state.shown[slot].submit(pose, collector, state.lightCoords);
                 pose.popPose();
             }
         }
 
         /** Three shelves: a 3D bottle lies along each, neck to the right, resting on its body (5 pixels thick). */
-        private static void display(WineRackBlockEntity rack, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            for (int slot = 0; slot < rack.bottles().getSlots(); slot++) {
-                ItemStack bottle = rack.bottle(slot);
-                if (bottle.isEmpty()) continue;
-                ResourceLocation model = drinkModel(bottle);
+        private static void display(RackState state, PoseStack pose, SubmitNodeCollector collector) {
+            for (int slot = 0; slot < state.shown.length; slot++) {
+                DrinkModels.Shown bottle = state.shown[slot];
+                if (bottle == null) continue;
                 pose.pushPose();
-                if (model != null) {
-                    float scale = displayScale(bottle);
-                    pose.translate(0.5, DISPLAY_SHELVES[slot] / 16F + restingRadius(bottle) / 16F * scale, DISPLAY_Z / 16F);
-                    pose.mulPose(Axis.ZP.rotationDegrees(90));           // the neck toward the viewer's right
+                if (bottle.model() != null) {
+                    float scale = bottle.displayScale(DISPLAY_MODEL_SCALE, DISPLAY_ROOM);
+                    pose.translate(0.5, DISPLAY_SHELVES[slot] / 16F + bottle.restingRadius() / 16F * scale, DISPLAY_Z / 16F);
+                    pose.rotateDegrees(Axis.ZP, 90);           // the neck toward the viewer's right
                     pose.scale(scale, scale, scale);
                     pose.translate(-0.5, -7.5 / 16, -0.5);               // turn about the bottle's middle
-                    renderTinted(model, bottle, pose, buffers, light, overlay);
+                    bottle.submit(pose, collector, state.lightCoords);
                 } else {
                     pose.translate(0.5, DISPLAY_SHELVES[slot] / 16F + 3F / 16F * DISPLAY_SCALE, DISPLAY_Z / 16F);
-                    pose.mulPose(Axis.YP.rotationDegrees(180));
-                    pose.mulPose(Axis.ZP.rotationDegrees(-90));
+                    pose.rotateDegrees(Axis.YP, 180);
+                    pose.rotateDegrees(Axis.ZP, -90);
                     pose.scale(DISPLAY_SCALE, DISPLAY_SCALE, DISPLAY_SCALE);
-                    renderItem(rack, bottle, slot, pose, buffers, light);
+                    state.items[slot].submit(pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
                 }
                 pose.popPose();
             }
         }
-
-        /** Our 3D model for a drink, by what it's served in (each spirit its own); null for anything else. */
-        @Nullable
-        static ResourceLocation drinkModel(ItemStack stack) {
-            if (!(stack.getItem() instanceof DrinkItem drink)) return null;
-            return switch (drink.vessel()) {
-                case WINE_BOTTLE -> DRINK_BOTTLE;
-                case MUG -> DRINK_MUG;
-                case GLASS_BOTTLE -> DRINK_FLASK;
-                case SPIRIT_BOTTLE -> look(stack) == null ? null : Drinks.byFluid(drink.fluid())
-                        .map(d -> crowned(stack) ? crownedModel(d) : spiritModel(d)).orElse(null);
-            };
-        }
-
-        @Nullable
-        private static BottleLook look(ItemStack stack) {
-            return stack.getItem() instanceof DrinkItem drink ? Drinks.byFluid(drink.fluid()).map(BottleLook::of).orElse(null) : null;
-        }
-
-        /** A crowned Apple Crown Whiskey: its own look, and a shimmer. */
-        private static boolean crowned(ItemStack stack) {
-            BottleLook look = look(stack);
-            return look != null && canBeCrowned(look) && DrinkItem.quality(stack).crowned();
-        }
-
-        /** How high the bottle's middle rests above a Wine Display shelf when laid down. */
-        private static float restingRadius(ItemStack stack) {
-            BottleLook look = look(stack);
-            return look == null ? WINE_BOTTLE_RADIUS : look.shape().radius + 0.15F;
-        }
-
-        /** The Wine Display's usual scale, smaller for a bottle too stout to lie under the shelf above (the decanter, the Apple Crown). */
-        private static float displayScale(ItemStack stack) {
-            BottleLook look = look(stack);
-            if (look == null) return DISPLAY_MODEL_SCALE;
-            return Math.min(DISPLAY_MODEL_SCALE, DISPLAY_ROOM / (restingRadius(stack) + look.shape().reach));
-        }
-
-        /**
-         * A drink model, each tinted part in its color: tint 0 is the drink's (the color its item shows); a spirit's bottle
-         * adds its label's paper (1) and accent (2) and its glass (3), the spirit seen through tinted glass taking its tint.
-         * A crowned bottle swaps its label's colors and shimmers like an enchanted item.
-         */
-        static void renderTinted(ResourceLocation id, ItemStack stack, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-            int drink = Minecraft.getInstance().getItemColors().getColor(stack, 1);
-            BottleLook look = look(stack);
-            boolean crowned = crowned(stack);
-            int[] tints = look == null ? new int[]{drink}
-                    : crowned ? new int[]{multiply(drink, look.glass()), look.accent(), look.paper(), look.glass()}
-                    : new int[]{multiply(drink, look.glass()), look.paper(), look.accent(), look.glass()};
-            BakedModel model = Minecraft.getInstance().getModelManager().getModel(id);
-            VertexConsumer buffer = net.minecraft.client.renderer.entity.ItemRenderer.getFoilBufferDirect(buffers, RenderType.cutout(), true, crowned);
-            for (Direction side : SIDES) {
-                QUAD_RANDOM.setSeed(42L);
-                for (BakedQuad quad : model.getQuads(null, side, QUAD_RANDOM, ModelData.EMPTY, RenderType.cutout())) {
-                    int color = quad.isTinted() && quad.getTintIndex() < tints.length ? tints[quad.getTintIndex()] : 0xFFFFFF;
-                    buffer.putBulkData(pose.last(), quad, (color >> 16 & 255) / 255F, (color >> 8 & 255) / 255F, (color & 255) / 255F,
-                            light, overlay);
-                }
-            }
-        }
-
-        /** One random source for picking model quads, reused on the render thread (not a new one per bottle per frame). */
-        private static final RandomSource QUAD_RANDOM = RandomSource.create();
-
-        /** Every face list of a baked model: the unculled faces, then each side's. */
-        private static final Direction[] SIDES = {null, Direction.DOWN, Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.WEST, Direction.EAST};
-
-        private static int multiply(int a, int b) {
-            int out = 0;
-            for (int shift = 0; shift <= 16; shift += 8) {
-                out |= ((a >> shift & 255) * (b >> shift & 255) / 255) << shift;
-            }
-            return out;
-        }
-
-        private static void renderItem(WineRackBlockEntity rack, ItemStack stack, int slot, PoseStack pose, MultiBufferSource buffers, int light) {
-            Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.NONE, light, OverlayTexture.NO_OVERLAY,
-                    pose, buffers, rack.getLevel(), (int) rack.getBlockPos().asLong() + slot);
-        }
-    }
-
-    private static void renderPart(ResourceLocation id, PoseStack pose, MultiBufferSource buffers, int light, int overlay) {
-        BakedModel model = Minecraft.getInstance().getModelManager().getModel(id);
-        Minecraft.getInstance().getBlockRenderer().getModelRenderer().renderModel(pose.last(),
-                buffers.getBuffer(RenderType.solid()), null, model, 1F, 1F, 1F, light, overlay, ModelData.EMPTY, RenderType.solid());
     }
 
     /** One item lying flat at (x, y, z) in block units, turned `yaw` degrees. */
-    private static void layFlat(BlockEntity be, ItemStack stack, PoseStack pose, MultiBufferSource buffers, int light,
-                                double x, double y, double z, float yaw, int seed) {
+    private static void layFlat(ItemStackRenderState item, PoseStack pose, SubmitNodeCollector collector, int light,
+                                double x, double y, double z, float yaw) {
         pose.pushPose();
         pose.translate(x, y, z);
-        pose.mulPose(Axis.YP.rotationDegrees(yaw));
-        pose.mulPose(Axis.XP.rotationDegrees(90));
+        pose.rotateDegrees(Axis.YP, yaw);
+        pose.rotateDegrees(Axis.XP, 90);
         pose.scale(0.3F, 0.3F, 0.3F);
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemDisplayContext.FIXED, light, OverlayTexture.NO_OVERLAY,
-                pose, buffers, be.getLevel(), (int) be.getBlockPos().asLong() + seed);
+        item.submit(pose, collector, light, OverlayTexture.NO_OVERLAY, 0);
         pose.popPose();
     }
 

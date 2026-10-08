@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:blueberry_juice",
+  "result": "seedtocellar:blueberry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

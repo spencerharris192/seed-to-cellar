@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "C": "#c:ingots/copper",
+    "K": "seedtocellar:brew_kettle"
+  },
+  "pattern": [
+    " CC",
+    " C ",
+    "CKC"
+  ],
+  "result": {
+    "id": "seedtocellar:pot_still"
+  }
+}

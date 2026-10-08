@@ -1,5 +1,14 @@
 package io.github.spencerharris192.seedtocellar.distillery;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.decor.CopperWeathering;
 import io.github.spencerharris192.seedtocellar.registry.ModBlockEntities;
 import net.minecraft.core.BlockPos;
@@ -32,14 +41,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -53,7 +61,7 @@ import java.util.Map;
  */
 public class PotStillBlock extends BaseEntityBlock {
     public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty ACTIVE = BooleanProperty.create("active");
     /** A Gin Basket is fitted on the swan neck (both halves carry it; the head shows it). */
     public static final BooleanProperty BASKET = BooleanProperty.create("basket");
@@ -105,14 +113,6 @@ public class PotStillBlock extends BaseEntityBlock {
         CopperWeathering.randomTick(state, level, pos, random);
     }
 
-    @Nullable
-    @Override
-    public BlockState getToolModifiedState(BlockState state, net.minecraft.world.item.context.UseOnContext context,
-                                           net.minecraftforge.common.ToolAction action, boolean simulate) {
-        BlockState axed = CopperWeathering.axed(state, action);
-        return axed != null ? axed : super.getToolModifiedState(state, context, action, simulate);
-    }
-
     public static boolean isUpper(BlockState state) {
         return state.getValue(HALF) == DoubleBlockHalf.UPPER;
     }
@@ -128,7 +128,7 @@ public class PotStillBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -139,7 +139,7 @@ public class PotStillBlock extends BaseEntityBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         BlockPos pos = context.getClickedPos();
         Level level = context.getLevel();
-        if (pos.getY() >= level.getMaxBuildHeight() - 1 || !level.getBlockState(pos.above()).canBeReplaced(context)) return null;
+        if (pos.getY() >= level.getMaxY() || !level.getBlockState(pos.above()).canBeReplaced(context)) return null;
         return defaultBlockState().setValue(FACING, context.getHorizontalDirection().getOpposite());
     }
 
@@ -160,19 +160,19 @@ public class PotStillBlock extends BaseEntityBlock {
      * the other's weathering and wax, whichever half changed.
      */
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         boolean upper = isUpper(state);
         if (direction == (upper ? Direction.DOWN : Direction.UP)) {
             if (!(neighbor.is(this) && isUpper(neighbor) != upper)) return net.minecraft.world.level.block.Blocks.AIR.defaultBlockState();
             state = CopperWeathering.matching(state, neighbor);
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && player.isCreative() && isUpper(state)) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide() && player.isCreative() && isUpper(state)) {
             // In creative, breaking the head takes the pot without dropping a still.
             BlockPos lower = pos.below();
             BlockState pot = level.getBlockState(lower);
@@ -181,15 +181,7 @@ public class PotStillBlock extends BaseEntityBlock {
                 level.levelEvent(player, 2001, lower, Block.getId(pot));
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && !isUpper(state) && level.getBlockEntity(pos) instanceof PotStillBlockEntity still) {
-            still.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, moved);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     // --- the pot -----------------------------------------------------------------------------
@@ -203,22 +195,23 @@ public class PotStillBlock extends BaseEntityBlock {
     @Nullable
     @Override
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type) {
-        return level.isClientSide || isUpper(state) ? null
+        return level.isClientSide() || isUpper(state) ? null
                 : createTickerHelper(type, ModBlockEntities.POT_STILL.get(), PotStillBlockEntity::serverTick);
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         BlockPos lower = lowerPos(pos, state);
         if (!(level.getBlockEntity(lower) instanceof PotStillBlockEntity still)) return InteractionResult.PASS;
         InteractionResult waxed = CopperWeathering.wax(state, level, pos, player, player.getItemInHand(hand));
         if (waxed != null) return waxed;
-        if (CopperWeathering.axeWorks(state, player.getItemInHand(hand))) return InteractionResult.PASS;   // the axe scrapes it
-        if (still.useHeldItem(player, hand)) return InteractionResult.sidedSuccess(level.isClientSide);
-        if (!level.isClientSide && player instanceof ServerPlayer serverPlayer) {
-            NetworkHooks.openScreen(serverPlayer, still, lower);
+        InteractionResult axed = CopperWeathering.axe(state, level, pos, player, hand, player.getItemInHand(hand));
+        if (axed != null) return axed;
+        if (still.useHeldItem(player, hand)) return InteractionResult.SUCCESS;
+        if (!level.isClientSide() && player instanceof ServerPlayer serverPlayer) {
+            serverPlayer.openMenu(still, lower);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     /** While it runs: drips into the spirit safe and the odd bubble below, a wisp of vapor from the head above. */

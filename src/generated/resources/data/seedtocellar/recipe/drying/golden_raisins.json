@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/white_grape",
+  "result": {
+    "id": "seedtocellar:golden_raisins"
+  },
+  "time": 18000
+}

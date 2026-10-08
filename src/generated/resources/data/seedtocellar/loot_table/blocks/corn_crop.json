@@ -1,0 +1,87 @@
+{
+  "type": "minecraft:block",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  },
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "seedtocellar:corn_crop",
+        "state": {
+          "half": "lower"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:match_block",
+            "blocks": "seedtocellar:corn_crop",
+            "state": {
+              "age": "7"
+            }
+          },
+          "modifier": {
+            "type": "minecraft:set_count",
+            "count": 2
+          },
+          "name": "seedtocellar:corn"
+        },
+        {
+          "type": "minecraft:item",
+          "condition": {
+            "type": "minecraft:inverted",
+            "term": {
+              "type": "minecraft:match_block",
+              "blocks": "seedtocellar:corn_crop",
+              "state": {
+                "age": "7"
+              }
+            }
+          },
+          "name": "seedtocellar:corn_seeds"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "seedtocellar:corn_crop",
+            "state": {
+              "half": "lower"
+            }
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "seedtocellar:corn_crop",
+            "state": {
+              "age": "7"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": {
+            "type": "minecraft:apply_bonus",
+            "enchantment": "minecraft:fortune",
+            "formula": "minecraft:binomial_with_bonus_count",
+            "parameters": {
+              "extra": 3,
+              "probability": 0.5714286
+            }
+          },
+          "name": "seedtocellar:corn_seeds"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/corn_crop"
+}

@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:cranberry_juice",
+  "result": "seedtocellar:cranberry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

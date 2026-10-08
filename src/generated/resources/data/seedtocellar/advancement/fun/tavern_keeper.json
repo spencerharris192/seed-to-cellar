@@ -1,0 +1,26 @@
+{
+  "parent": "seedtocellar:fun/morning_after",
+  "criteria": {
+    "shelf": {
+      "trigger": "seedtocellar:tavern_keeper"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.tavern_keeper.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "seedtocellar:bottle_shelf"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.tavern_keeper.title"
+    }
+  },
+  "requirements": [
+    [
+      "shelf"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

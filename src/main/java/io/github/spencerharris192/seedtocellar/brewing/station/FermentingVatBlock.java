@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import org.jspecify.annotations.Nullable;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
@@ -24,8 +26,6 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.network.NetworkHooks;
 
 /**
  * Fermenting Vat (GDD section 7). Fill with wort (lid open), optionally add yeast, then close
@@ -54,7 +54,7 @@ public class FermentingVatBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -64,27 +64,27 @@ public class FermentingVatBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof FermentingVatBlockEntity vat)) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
-        boolean client = level.isClientSide;
-        if (FluidUtil.getFluidHandler(held).isPresent()) {
+        boolean client = level.isClientSide();
+        if (io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity.holdsLiquidContainer(player, hand)) {
             if (!client) vat.useFluidContainer(player, hand);
-            return InteractionResult.sidedSuccess(client);
+            return InteractionResult.SUCCESS;
         }
         if (held.isEmpty() && player.isShiftKeyDown()) {
             if (!client) vat.toggleLid(player);
-            return InteractionResult.sidedSuccess(client);
+            return InteractionResult.SUCCESS;
         }
         if (!client && vat.isYeast(held) && vat.insertYeast(player, hand)) {
             return InteractionResult.SUCCESS;
         }
-        if (!client && player instanceof ServerPlayer serverPlayer) NetworkHooks.openScreen(serverPlayer, vat, pos);
-        return InteractionResult.sidedSuccess(client);
+        if (!client && player instanceof ServerPlayer serverPlayer) serverPlayer.openMenu(vat, pos);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moving) {
         if (!(level.getBlockEntity(pos) instanceof FermentingVatBlockEntity vat)) return;
         vat.recheckTemperature();
         boolean powered = level.hasNeighborSignal(pos);
@@ -98,14 +98,6 @@ public class FermentingVatBlock extends BaseEntityBlock {
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (level.getBlockEntity(pos) instanceof FermentingVatBlockEntity vat) vat.advance();
-    }
-
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof FermentingVatBlockEntity vat) {
-            vat.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, moved);
     }
 
     @Override

@@ -1,0 +1,116 @@
+{
+  "parent": "seedtocellar:farming/fertile_ground",
+  "criteria": {
+    "apple": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:apple_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "cherry": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:cherry_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "lemon": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:lemon_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "olive": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:olive_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "orange": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:orange_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "peach": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:peach_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "pear": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:pear_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    },
+    "plum": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:match_block",
+          "blocks": "seedtocellar:plum_sapling"
+        }
+      },
+      "trigger": "minecraft:placed_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.orchardist.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "seedtocellar:cherry_sapling"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.orchardist.title"
+    }
+  },
+  "requirements": [
+    [
+      "apple"
+    ],
+    [
+      "cherry"
+    ],
+    [
+      "plum"
+    ],
+    [
+      "peach"
+    ],
+    [
+      "pear"
+    ],
+    [
+      "lemon"
+    ],
+    [
+      "orange"
+    ],
+    [
+      "olive"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

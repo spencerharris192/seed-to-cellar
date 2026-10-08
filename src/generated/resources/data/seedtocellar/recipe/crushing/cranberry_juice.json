@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/cranberry",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:cranberry_juice"
+  }
+}

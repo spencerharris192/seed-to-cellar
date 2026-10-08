@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_mug": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:mug"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:bottle_shelf"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_mug"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:bottle_shelf"
+    ]
+  }
+}

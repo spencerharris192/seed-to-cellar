@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/plum",
+  "result": {
+    "id": "seedtocellar:prunes"
+  },
+  "time": 18000
+}

@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/blueberry",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:blueberry_juice"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "parent": "seedtocellar:brewing/first_pint",
+  "criteria": {
+    "drink": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_craft": {},
+              "seedtocellar:quality_temperature": {},
+              "seedtocellar:quality_yeast": {}
+            },
+            "items": "#seedtocellar:drinks"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.four_stars.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "seedtocellar:amber_ale"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.four_stars.title"
+    }
+  },
+  "requirements": [
+    [
+      "drink"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

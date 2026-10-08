@@ -1,0 +1,25 @@
+{
+  "parent": "seedtocellar:fun/merry",
+  "criteria": {
+    "cured": {
+      "trigger": "seedtocellar:morning_after"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.morning_after.description"
+    },
+    "icon": {
+      "id": "seedtocellar:aromatic_bitters"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.morning_after.title"
+    }
+  },
+  "requirements": [
+    [
+      "cured"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

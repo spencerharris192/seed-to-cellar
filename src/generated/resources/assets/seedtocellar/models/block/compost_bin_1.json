@@ -5,10 +5,22 @@
       "faces": {
         "down": {
           "cullface": "down",
-          "texture": "#bottom"
+          "texture": "#bottom",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
         },
         "up": {
-          "texture": "#bottom"
+          "texture": "#bottom",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
         }
       },
       "from": [
@@ -157,7 +169,13 @@
     {
       "faces": {
         "up": {
-          "texture": "#content"
+          "texture": "#content",
+          "uv": [
+            2,
+            2,
+            14,
+            14
+          ]
         }
       },
       "from": [
@@ -172,7 +190,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "bottom": "seedtocellar:block/malting_tub_bottom",
     "content": "seedtocellar:block/compost_fill",

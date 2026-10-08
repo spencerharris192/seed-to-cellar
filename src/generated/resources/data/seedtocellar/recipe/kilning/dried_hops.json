@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "#c:crops/hops",
+  "result": {
+    "id": "seedtocellar:dried_hops"
+  },
+  "time": 400
+}

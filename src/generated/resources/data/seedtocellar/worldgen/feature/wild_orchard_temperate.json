@@ -1,0 +1,62 @@
+{
+  "type": "minecraft:random_selector",
+  "default": {
+    "feature": "seedtocellar:pear_tree",
+    "placement": [
+      {
+        "type": "minecraft:block_predicate_filter",
+        "predicate": {
+          "type": "minecraft:would_survive",
+          "state": "seedtocellar:pear_sapling"
+        }
+      }
+    ]
+  },
+  "features": [
+    {
+      "chance": 0.25,
+      "feature": {
+        "feature": "seedtocellar:apple_tree",
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:would_survive",
+              "state": "seedtocellar:apple_sapling"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "chance": 0.25,
+      "feature": {
+        "feature": "seedtocellar:cherry_tree",
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:would_survive",
+              "state": "seedtocellar:cherry_sapling"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "chance": 0.25,
+      "feature": {
+        "feature": "seedtocellar:plum_tree",
+        "placement": [
+          {
+            "type": "minecraft:block_predicate_filter",
+            "predicate": {
+              "type": "minecraft:would_survive",
+              "state": "seedtocellar:plum_sapling"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

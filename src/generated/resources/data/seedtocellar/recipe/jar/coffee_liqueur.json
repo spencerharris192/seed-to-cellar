@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid_amount": 250,
+  "fluid_tag": "seedtocellar:liqueur_bases",
+  "ingredients": [
+    "seedtocellar:ground_coffee",
+    "seedtocellar:ground_coffee",
+    "#seedtocellar:sweeteners"
+  ],
+  "result_fluid": "seedtocellar:coffee_liqueur"
+}

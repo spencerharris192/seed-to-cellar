@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_starter": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:sourdough_starter"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:sourdough_dough"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_starter"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:sourdough_dough"
+    ]
+  }
+}

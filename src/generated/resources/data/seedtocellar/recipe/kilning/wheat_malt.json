@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "seedtocellar:green_wheat_malt",
+  "result": {
+    "id": "seedtocellar:wheat_malt"
+  }
+}

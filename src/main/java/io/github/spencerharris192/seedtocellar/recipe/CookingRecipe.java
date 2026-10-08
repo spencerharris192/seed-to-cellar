@@ -1,34 +1,29 @@
 package io.github.spencerharris192.seedtocellar.recipe;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import io.github.spencerharris192.seedtocellar.SeedToCellar;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapedRecipe;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.util.RecipeMatcher;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
-import org.jetbrains.annotations.Nullable;
+import net.neoforged.neoforge.common.util.RecipeMatcher;
+import net.neoforged.neoforge.fluids.FluidStack;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Brew Kettle cooking (GDD sections 7 and 15): soups, stews, porridge, jams and the like. One
@@ -37,17 +32,32 @@ import java.util.List;
  * container (a bowl or bottle) from the container slot.
  * <pre>
  * {"type":"seedtocellar:cooking",
- *  "ingredients":[{...}, ...],
- *  "fluid":{"fluid":"minecraft:water" | "tag":"forge:milk", "amount":250},   (optional)
- *  "container":{"item":"minecraft:bowl"},                                  (optional)
- *  "result":{"item":"...", "count":1},
+ *  "ingredients":[..., ...],
+ *  "fluid":{"fluid":"minecraft:water" | "tag":"c:milk", "amount":250},   (optional)
+ *  "container":"minecraft:bowl",                                         (optional)
+ *  "result":{"id":"...", "count":1},
  *  "time":200}
  * </pre>
- * The kettle's container is its four ingredient slots.
  */
-public class CookingRecipe implements Recipe<Container> {
-    /** A liquid the recipe needs from the kettle's tank: one fluid, or any fluid in a tag. */
+public class CookingRecipe implements StationRecipe {
+    /** A liquid the recipe needs from a tank: one fluid, or any fluid in a tag; JSON {"fluid" or "tag", "amount"}. */
     public record Liquid(@Nullable Fluid fluid, @Nullable TagKey<Fluid> tag, int amount) {
+        public static final StreamCodec<RegistryFriendlyByteBuf, Liquid> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.optional(RecipeCodecs.FLUID_STREAM), l -> Optional.ofNullable(l.fluid),
+                ByteBufCodecs.optional(TagKey.streamCodec(Registries.FLUID)).<RegistryFriendlyByteBuf>cast(), l -> Optional.ofNullable(l.tag),
+                ByteBufCodecs.VAR_INT, Liquid::amount,
+                (fluid, tag, amount) -> new Liquid(fluid.orElse(null), tag.orElse(null), amount));
+
+        /** The JSON form, with this amount when "amount" is left out. */
+        public static MapCodec<Liquid> codec(int defaultAmount) {
+            return RecordCodecBuilder.<Liquid>mapCodec(i -> i.group(
+                    RecipeCodecs.FLUID.optionalFieldOf("fluid").forGetter(l -> Optional.ofNullable(l.fluid)),
+                    TagKey.codec(Registries.FLUID).optionalFieldOf("tag").forGetter(l -> Optional.ofNullable(l.tag)),
+                    Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("amount", defaultAmount).forGetter(Liquid::amount)
+            ).apply(i, (fluid, tag, amount) -> new Liquid(fluid.orElse(null), tag.orElse(null), amount))).validate(l ->
+                    (l.fluid == null) == (l.tag == null) ? DataResult.error(() -> "A liquid needs a \"fluid\" or a \"tag\" (not both)") : DataResult.success(l));
+        }
+
         public boolean test(FluidStack stack) {
             if (stack.isEmpty() || stack.getAmount() < amount) return false;
             return fluid != null ? stack.getFluid().isSame(fluid) : stack.getFluid().is(tag);
@@ -59,81 +69,68 @@ public class CookingRecipe implements Recipe<Container> {
             if (fluid != null) {
                 list.add(new FluidStack(fluid, amount));
             } else {
-                for (Fluid f : ForgeRegistries.FLUIDS) {
+                for (Fluid f : BuiltInRegistries.FLUID) {
                     if (f.is(tag) && f.isSource(f.defaultFluidState())) list.add(new FluidStack(f, amount));
                 }
             }
             return list;
         }
-
-        JsonObject toJson() {
-            JsonObject json = new JsonObject();
-            if (fluid != null) json.addProperty("fluid", ForgeRegistries.FLUIDS.getKey(fluid).toString());
-            else json.addProperty("tag", tag.location().toString());
-            json.addProperty("amount", amount);
-            return json;
-        }
-
-        static Liquid fromJson(JsonObject json) {
-            int amount = GsonHelper.getAsInt(json, "amount", 250);
-            if (json.has("tag")) {
-                return new Liquid(null, TagKey.create(Registries.FLUID, SeedToCellar.parse(GsonHelper.getAsString(json, "tag"))), amount);
-            }
-            ResourceLocation id = SeedToCellar.parse(GsonHelper.getAsString(json, "fluid"));
-            Fluid f = ForgeRegistries.FLUIDS.getValue(id);
-            if (f == null) throw new JsonParseException("Unknown fluid " + id);
-            return new Liquid(f, null, amount);
-        }
-
-        void toNetwork(FriendlyByteBuf buf) {
-            buf.writeBoolean(fluid != null);
-            buf.writeResourceLocation(fluid != null ? ForgeRegistries.FLUIDS.getKey(fluid) : tag.location());
-            buf.writeVarInt(amount);
-        }
-
-        static Liquid fromNetwork(FriendlyByteBuf buf) {
-            boolean single = buf.readBoolean();
-            ResourceLocation id = buf.readResourceLocation();
-            int amount = buf.readVarInt();
-            return single ? new Liquid(ForgeRegistries.FLUIDS.getValue(id), null, amount)
-                    : new Liquid(null, TagKey.create(Registries.FLUID, id), amount);
-        }
     }
 
     public static final int MAX_INGREDIENTS = 4;
 
-    private final ResourceLocation id;
-    private final NonNullList<Ingredient> ingredients;
-    @Nullable private final Liquid liquid;
-    private final Ingredient container;   // Ingredient.EMPTY = none
-    private final ItemStack result;
+    public static final MapCodec<CookingRecipe> MAP_CODEC = RecordCodecBuilder.<CookingRecipe>mapCodec(i -> i.group(
+            Ingredient.CODEC.listOf(0, MAX_INGREDIENTS).optionalFieldOf("ingredients", List.of()).forGetter(r -> r.ingredients),
+            Liquid.codec(250).codec().optionalFieldOf("fluid").forGetter(r -> Optional.ofNullable(r.liquid)),
+            Ingredient.CODEC.optionalFieldOf("container").forGetter(r -> r.container),
+            ItemStackTemplate.CODEC.fieldOf("result").forGetter(r -> r.result),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("time", 200).forGetter(r -> r.time)
+    ).apply(i, (ingredients, liquid, container, result, time) -> new CookingRecipe(ingredients, liquid.orElse(null), container, result, time)))
+            .validate(r -> r.ingredients.isEmpty() && r.liquid == null
+                    ? DataResult.error(() -> "A cooking recipe needs ingredients, a liquid, or both") : DataResult.success(r));
+    public static final StreamCodec<RegistryFriendlyByteBuf, CookingRecipe> STREAM_CODEC = StreamCodec.composite(
+            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list(MAX_INGREDIENTS)), r -> r.ingredients,
+            ByteBufCodecs.optional(Liquid.STREAM_CODEC), r -> Optional.ofNullable(r.liquid),
+            Ingredient.OPTIONAL_CONTENTS_STREAM_CODEC, r -> r.container,
+            ItemStackTemplate.STREAM_CODEC, r -> r.result,
+            ByteBufCodecs.VAR_INT, r -> r.time,
+            (ingredients, liquid, container, result, time) -> new CookingRecipe(ingredients, liquid.orElse(null), container, result, time));
+
+    private final List<Ingredient> ingredients;
+    private final @Nullable Liquid liquid;
+    private final Optional<Ingredient> container;
+    private final ItemStackTemplate result;
     private final int time;
 
-    public CookingRecipe(ResourceLocation id, NonNullList<Ingredient> ingredients, @Nullable Liquid liquid, Ingredient container,
-                         ItemStack result, int time) {
-        this.id = id;
-        this.ingredients = ingredients;
+    public CookingRecipe(List<Ingredient> ingredients, @Nullable Liquid liquid, Optional<Ingredient> container, ItemStackTemplate result,
+                         int time) {
+        this.ingredients = List.copyOf(ingredients);
         this.liquid = liquid;
         this.container = container;
         this.result = result;
         this.time = time;
     }
 
-    @Nullable
-    public Liquid liquid() {
+    public @Nullable Liquid liquid() {
         return liquid;
     }
 
-    public Ingredient container() {
+    /** The container it's served in (a bowl, a bottle), if any. */
+    public Optional<Ingredient> container() {
         return container;
     }
 
     public boolean needsContainer() {
-        return !container.isEmpty();
+        return container.isPresent();
     }
 
+    public List<Ingredient> ingredients() {
+        return ingredients;
+    }
+
+    /** A new stack of the result. */
     public ItemStack result() {
-        return result;
+        return result.create();
     }
 
     /** Ticks per serving before the processing-time multiplier. */
@@ -148,95 +145,12 @@ public class CookingRecipe implements Recipe<Container> {
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
-        List<ItemStack> stacks = new ArrayList<>();
-        for (int i = 0; i < container.getContainerSize(); i++) stacks.add(container.getItem(i));
-        return matchesItems(stacks);
-    }
-
-    @Override
-    public ItemStack assemble(Container container, RegistryAccess access) {
-        return result.copy();
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(RegistryAccess access) {
-        return result;
-    }
-
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return ingredients;
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public boolean isSpecial() {
-        return true; // keeps them out of the vanilla recipe book
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<CookingRecipe> getSerializer() {
         return ModRecipes.COOKING_SERIALIZER.get();
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<CookingRecipe> getType() {
         return ModRecipes.COOKING.get();
-    }
-
-    public static class Serializer implements RecipeSerializer<CookingRecipe> {
-        @Override
-        public CookingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            NonNullList<Ingredient> ingredients = NonNullList.create();
-            JsonArray array = GsonHelper.getAsJsonArray(json, "ingredients");
-            for (JsonElement element : array) ingredients.add(Ingredient.fromJson(element));
-            if (ingredients.size() > MAX_INGREDIENTS) {
-                throw new JsonParseException("A cooking recipe takes at most " + MAX_INGREDIENTS + " ingredients: " + id);
-            }
-            Liquid liquid = json.has("fluid") ? Liquid.fromJson(GsonHelper.getAsJsonObject(json, "fluid")) : null;
-            if (ingredients.isEmpty() && liquid == null) {
-                throw new JsonParseException("A cooking recipe needs ingredients, a liquid, or both: " + id);
-            }
-            Ingredient container = json.has("container") ? Ingredient.fromJson(json.get("container")) : Ingredient.EMPTY;
-            ItemStack result = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "result"));
-            return new CookingRecipe(id, ingredients, liquid, container, result, Math.max(1, GsonHelper.getAsInt(json, "time", 200)));
-        }
-
-        @Override
-        public CookingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
-            int count = buf.readVarInt();
-            NonNullList<Ingredient> ingredients = NonNullList.create();
-            for (int i = 0; i < count; i++) ingredients.add(Ingredient.fromNetwork(buf));
-            Liquid liquid = buf.readBoolean() ? Liquid.fromNetwork(buf) : null;
-            Ingredient container = buf.readBoolean() ? Ingredient.fromNetwork(buf) : Ingredient.EMPTY;
-            return new CookingRecipe(id, ingredients, liquid, container, buf.readItem(), buf.readVarInt());
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, CookingRecipe recipe) {
-            buf.writeVarInt(recipe.ingredients.size());
-            for (Ingredient ingredient : recipe.ingredients) ingredient.toNetwork(buf);
-            buf.writeBoolean(recipe.liquid != null);
-            if (recipe.liquid != null) recipe.liquid.toNetwork(buf);
-            buf.writeBoolean(recipe.needsContainer());
-            if (recipe.needsContainer()) recipe.container.toNetwork(buf);
-            buf.writeItem(recipe.result);
-            buf.writeVarInt(recipe.time);
-        }
-    }
-
-    /** For datagen: the JSON form of a liquid requirement. */
-    public static JsonObject liquidJson(Liquid liquid) {
-        return liquid.toJson();
     }
 }

@@ -3,12 +3,17 @@ package io.github.spencerharris192.seedtocellar.decor;
 import io.github.spencerharris192.seedtocellar.registry.ModEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.vehicle.DismountHelper;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -32,16 +37,17 @@ public class SeatEntity extends Entity {
     @Override
     public void tick() {
         super.tick();
-        if (!level().isClientSide && (getPassengers().isEmpty()
+        if (!level().isClientSide() && (getPassengers().isEmpty()
                 || !(level().getBlockState(blockPosition()).getBlock() instanceof BarStoolBlock))) {
             ejectPassengers();
             discard();
         }
     }
 
+    /** The rider's feet go where the seat is. */
     @Override
-    public double getPassengersRidingOffset() {
-        return 0;
+    protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+        return Vec3.ZERO;
     }
 
     /** Stands the rider up beside the stool, wherever they fit. */
@@ -61,14 +67,19 @@ public class SeatEntity extends Entity {
     }
 
     @Override
-    protected void defineSynchedData() {
+    public boolean hurtServer(ServerLevel level, DamageSource source, float damage) {
+        return false;
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundTag tag) {
+    protected void defineSynchedData(SynchedEntityData.Builder entityData) {
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundTag tag) {
+    protected void readAdditionalSaveData(ValueInput input) {
+    }
+
+    @Override
+    protected void addAdditionalSaveData(ValueOutput output) {
     }
 }

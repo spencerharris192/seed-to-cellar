@@ -9,16 +9,18 @@ import io.github.spencerharris192.seedtocellar.registry.ModTags;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.ComposterBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.SnapshotJournal;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +38,6 @@ public class CompostBinBlockEntity extends SyncedBlockEntity implements Hydromet
 
     private int count;
     private long startTime = -1;
-    private final LazyOptional<IItemHandler> items = LazyOptional.of(Handler::new);
 
     public CompostBinBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.COMPOST_BIN.get(), pos, state);
@@ -44,7 +45,7 @@ public class CompostBinBlockEntity extends SyncedBlockEntity implements Hydromet
 
     /** What the bin takes: anything the vanilla composter takes, plus our compostables tag (spent grain, rotten flesh...). */
     public static boolean accepts(ItemStack stack) {
-        return !stack.isEmpty() && (ComposterBlock.COMPOSTABLES.containsKey(stack.getItem()) || stack.is(ModTags.Items.COMPOSTABLES));
+        return !stack.isEmpty() && (stack.has(DataComponents.COMPOSTABLE) || stack.is(ModTags.Items.COMPOSTABLES));
     }
 
     public static int duration() {
@@ -59,23 +60,28 @@ public class CompostBinBlockEntity extends SyncedBlockEntity implements Hydromet
         return startTime >= 0 && !isReady();
     }
 
+    /** Done composting, and the compost not yet taken. */
     public boolean isReady() {
-        return getBlockState().getValue(CompostBinBlock.READY);
+        return startTime >= 0 && getBlockState().getValue(CompostBinBlock.READY);
+    }
+
+    private int room() {
+        return level == null || startTime >= 0 ? 0 : CAPACITY - count;
     }
 
     /** Puts up to `amount` leftovers in; returns how many it took. */
     public int add(int amount, boolean simulate) {
-        if (level == null || startTime >= 0 || isReady()) return 0;
-        int taken = Math.min(amount, CAPACITY - count);
-        if (taken <= 0 || simulate) return Math.max(0, taken);
-        count += taken;
-        if (count >= CAPACITY) {
-            startTime = level.getGameTime();
-            level.scheduleTick(worldPosition, getBlockState().getBlock(), duration());
-        }
-        level.setBlock(worldPosition, getBlockState().setValue(CompostBinBlock.LEVEL, levelFor(count)), Block.UPDATE_CLIENTS);
-        sync();
+        int taken = Math.max(0, Math.min(amount, room()));
+        if (taken <= 0 || simulate) return taken;
+        long startBefore = startTime;
+        fill(taken);
+        applyState(startBefore);
         return taken;
+    }
+
+    private void fill(int taken) {
+        count += taken;
+        if (count >= CAPACITY) startTime = level.getGameTime();
     }
 
     /** Called by the block's scheduled tick: done composting? */
@@ -92,11 +98,28 @@ public class CompostBinBlockEntity extends SyncedBlockEntity implements Hydromet
     /** Takes the finished compost out (empty if not ready) and resets the bin. */
     public ItemStack takeCompost() {
         if (level == null || !isReady()) return ItemStack.EMPTY;
+        long startBefore = startTime;
         count = 0;
         startTime = -1;
-        level.setBlock(worldPosition, getBlockState().setValue(CompostBinBlock.READY, false).setValue(CompostBinBlock.LEVEL, 0), Block.UPDATE_CLIENTS);
-        sync();
+        applyState(startBefore);
         return new ItemStack(ModItems.COMPOST.get(), YIELD);
+    }
+
+    /** Brings the blockstate (fill level, ready) in line with the contents, and starts the composting timer. */
+    private void applyState(long startBefore) {
+        if (level == null) return;
+        BlockState state = getBlockState();
+        BlockState next = state.setValue(CompostBinBlock.LEVEL, levelFor(count));
+        if (startTime < 0) next = next.setValue(CompostBinBlock.READY, false);
+        if (next != state) level.setBlock(worldPosition, next, Block.UPDATE_CLIENTS);
+        if (startTime >= 0 && startBefore < 0) level.scheduleTick(worldPosition, next.getBlock(), duration());
+        sync();
+    }
+
+    /** Broken, a bin of finished compost gives it up (compost still rotting is lost). */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        if (level != null && isReady()) Block.popResource(level, pos, new ItemStack(ModItems.COMPOST.get(), YIELD));
     }
 
     /** Blockstate fill level 0-4 for a count of leftovers. */
@@ -119,57 +142,76 @@ public class CompostBinBlockEntity extends SyncedBlockEntity implements Hydromet
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.putInt("Count", count);
-        tag.putLong("StartTime", startTime);
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        output.putInt("Count", count);
+        output.putLong("StartTime", startTime);
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        count = tag.getInt("Count");
-        startTime = tag.contains("StartTime") ? tag.getLong("StartTime") : -1;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        count = input.getIntOr("Count", 0);
+        startTime = input.getLongOr("StartTime", -1L);
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        return cap == ForgeCapabilities.ITEM_HANDLER ? items.cast() : super.getCapability(cap, side);
-    }
+    // --- automation ------------------------------------------------------------------------
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        items.invalidate();
-    }
+    private record Snapshot(int count, long startTime) {}
 
-    /** Slot 0 takes leftovers in; slot 1 gives compost out when it's ready. */
-    private class Handler implements IItemHandler {
-        @Override public int getSlots() { return 2; }
-
+    /** Hoppers' changes, held until their transaction commits (then the blockstate and timer follow). */
+    private final SnapshotJournal<Snapshot> journal = new SnapshotJournal<>() {
         @Override
-        public ItemStack getStackInSlot(int slot) {
-            return slot == 1 && isReady() ? new ItemStack(ModItems.COMPOST.get(), YIELD) : ItemStack.EMPTY;
+        protected Snapshot createSnapshot() {
+            return new Snapshot(count, startTime);
         }
 
         @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (slot != 0 || !accepts(stack)) return stack;
-            int taken = add(stack.getCount(), simulate);
-            if (taken <= 0) return stack;
-            ItemStack rest = stack.copy();
-            rest.shrink(taken);
-            return rest;
+        protected void revertToSnapshot(Snapshot snapshot) {
+            count = snapshot.count();
+            startTime = snapshot.startTime();
         }
 
         @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot != 1 || !isReady() || amount < YIELD) return ItemStack.EMPTY;
-            return simulate ? new ItemStack(ModItems.COMPOST.get(), YIELD) : takeCompost();
+        protected void onRootCommit(Snapshot original) {
+            applyState(original.startTime());
+        }
+    };
+
+    /** Index 0 takes leftovers in; index 1 gives the compost out when it's ready. */
+    private final ResourceHandler<ItemResource> handler = new ResourceHandler<>() {
+        @Override public int size() { return 2; }
+
+        @Override
+        public ItemResource getResource(int index) {
+            return index == 1 && isReady() ? ItemResource.of(ModItems.COMPOST.get()) : ItemResource.EMPTY;
         }
 
-        @Override public int getSlotLimit(int slot) { return slot == 0 ? 1 : YIELD; }
+        @Override public long getAmountAsLong(int index) { return index == 1 && isReady() ? YIELD : 0; }
+        @Override public long getCapacityAsLong(int index, ItemResource resource) { return index == 0 ? CAPACITY : YIELD; }
+        @Override public boolean isValid(int index, ItemResource resource) { return index == 0 && accepts(resource.toStack()); }
 
-        @Override public boolean isItemValid(int slot, ItemStack stack) { return slot == 0 && accepts(stack); }
+        @Override
+        public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            if (index != 0 || !accepts(resource.toStack())) return 0;
+            int taken = Math.min(amount, room());
+            if (taken <= 0) return 0;
+            journal.updateSnapshots(transaction);
+            fill(taken);
+            return taken;
+        }
+
+        @Override
+        public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            if (index != 1 || amount < YIELD || !isReady() || !resource.is(ModItems.COMPOST.get())) return 0;
+            journal.updateSnapshots(transaction);
+            count = 0;
+            startTime = -1;
+            return YIELD;
+        }
+    };
+
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return handler;
     }
 }

@@ -7,15 +7,17 @@ import io.github.spencerharris192.seedtocellar.farming.Crops;
 import io.github.spencerharris192.seedtocellar.farming.FruitTree;
 import io.github.spencerharris192.seedtocellar.farming.FruitTrees;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.resources.language.I18n;
+import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 import java.util.HashMap;
 import java.util.List;
@@ -26,16 +28,16 @@ import java.util.Map;
  * needs a wiki. The text lives in the language file:
  * tooltip.seedtocellar.&lt;item&gt;.desc and tooltip.seedtocellar.&lt;item&gt;.next (either is optional).
  */
-@Mod.EventBusSubscriber(modid = SeedToCellar.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = SeedToCellar.MOD_ID, value = Dist.CLIENT)
 public final class GuideTooltips {
     @SubscribeEvent
     public static void onTooltip(ItemTooltipEvent event) {
-        ResourceLocation id = ForgeRegistries.ITEMS.getKey(event.getItemStack().getItem());
+        Identifier id = BuiltInRegistries.ITEM.getKey(event.getItemStack().getItem());
         if (id == null || !id.getNamespace().equals(SeedToCellar.MOD_ID)) return;
         String base = "tooltip." + SeedToCellar.MOD_ID + "." + id.getPath();
         List<Component> lines = event.getToolTip();
         int at = Math.min(1, lines.size());
-        if (I18n.exists(base + ".desc")) {
+        if (Language.getInstance().has(base + ".desc")) {
             lines.add(at++, Component.translatable(base + ".desc").withStyle(ChatFormatting.GRAY));
         }
         Climate climate = climates().get(event.getItemStack().getItem());
@@ -43,7 +45,7 @@ public final class GuideTooltips {
             lines.add(at++, Component.translatable("tooltip." + SeedToCellar.MOD_ID + ".climate",
                     Component.translatable(climate.translationKey())).withStyle(ChatFormatting.DARK_GREEN));
         }
-        if (I18n.exists(base + ".next")) {
+        if (Language.getInstance().has(base + ".next")) {
             lines.add(at, Component.translatable("tooltip." + SeedToCellar.MOD_ID + ".next",
                     Component.translatable(base + ".next").withStyle(ChatFormatting.GRAY)).withStyle(ChatFormatting.DARK_AQUA));
         }

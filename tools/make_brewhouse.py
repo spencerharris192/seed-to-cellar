@@ -39,17 +39,20 @@ STYLES = {
 
 
 def shelf_of(items: list[str]) -> bytes:
-    """A Bottle Shelf's block entity, already holding these drinks (one per place, in order)."""
-    entries = [compound_payload(tag_int("Slot", i), tag_string("id", item), tag_byte("Count", 1)) for i, item in enumerate(items)]
-    bottles = compound_payload(tag_list("Items", TAG_COMPOUND, entries), tag_int("Size", 6))
+    """A Bottle Shelf's block entity, already holding these drinks (one per place, in order; 26.3's item handler format)."""
+    entries = [compound_payload(tag_string("id", item), tag_int("count", 1)) for item in items]
+    bottles = compound_payload(tag_list("stacks", TAG_COMPOUND, entries))
     return compound_payload(tag_string("id", "seedtocellar:wine_rack"), tag_compound("Bottles", bottles))
 
 
 def aged_old_ale() -> bytes:
-    """A cask of Old Ale (4 buckets, cultured yeast and the right temperature) that has rested two years."""
-    brew = compound_payload(tag_byte("Yeast", 1), tag_byte("Temperature", 1), tag_byte("Craft", 0), tag_byte("Aged", 0))
-    tank = compound_payload(tag_string("FluidName", "seedtocellar:old_ale"), tag_int("Amount", 4000), tag_compound("Tag", compound_payload(
-        tag_compound("Brew", brew))))
+    """A cask of Old Ale (4 buckets, cultured yeast and the right temperature) that has rested two years: its tank as the
+    cask saves it, and a relative age (AgeTicks) the cask turns into a fill time once it's in a world."""
+    unit = compound_payload()   # a quality check passed: a marker component with no value
+    fluid = compound_payload(tag_string("id", "seedtocellar:old_ale"), tag_int("amount", 4000), tag_compound("components", compound_payload(
+        tag_compound("seedtocellar:brew", compound_payload(tag_compound("Brew", compound_payload()))),
+        tag_compound("seedtocellar:quality_yeast", unit), tag_compound("seedtocellar:quality_temperature", unit))))
+    tank = compound_payload(tag_list("stacks", TAG_COMPOUND, [fluid]))
     return compound_payload(tag_string("id", "seedtocellar:cask"), tag_compound("Tank", tank), tag_long("AgeTicks", 2 * 24000))
 
 

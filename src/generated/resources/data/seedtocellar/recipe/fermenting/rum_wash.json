@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:molasses",
+  "result": "seedtocellar:rum_wash",
+  "temperature": [
+    "mild",
+    "warm"
+  ]
+}

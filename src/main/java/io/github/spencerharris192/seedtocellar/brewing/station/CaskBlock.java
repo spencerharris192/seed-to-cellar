@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import net.minecraft.world.level.LevelReader;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -72,38 +73,38 @@ public class CaskBlock extends AbstractCaskBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         ItemStack held = player.getItemInHand(hand);
         if (held.is(ModItems.TAP.get()) && !state.getValue(TAP)) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 level.setBlock(pos, state.setValue(TAP, true), Block.UPDATE_ALL);
                 level.playSound(null, pos, SoundEvents.WOOD_PLACE, SoundSource.BLOCKS, 1F, 1.2F);
                 if (!player.getAbilities().instabuild) held.shrink(1);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (held.is(net.minecraft.world.item.Items.FLINT_AND_STEEL)) {   // (never lights a fire beside the cask)
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 if (state.getValue(CHARRED)) {
-                    player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.seedtocellar.cask.already_charred"), true);
+                    player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable("message.seedtocellar.cask.already_charred"));
                 } else {
                     charWith(state, level, pos, player, hand);
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        return super.use(state, level, pos, player, hand, hit);
+        return super.useItemOn(heldStack, state, level, pos, player, hand, hit);
     }
 
     /** Flint and steel on an empty cask chars it inside, once. Nether wood won't take a char. */
     private void charWith(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
         String msg = "message.seedtocellar.cask.";
         if (wood.nether()) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(msg + "wont_char"), true);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(msg + "wont_char"));
             return;
         }
         if (level.getBlockEntity(pos) instanceof CaskBlockEntity cask && !cask.tank().isEmpty()) {
-            player.displayClientMessage(net.minecraft.network.chat.Component.translatable(msg + "char_empty"), true);
+            player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(msg + "char_empty"));
             return;
         }
         level.setBlock(pos, state.setValue(CHARRED, true), Block.UPDATE_ALL);
@@ -115,18 +116,17 @@ public class CaskBlock extends AbstractCaskBlock {
             server.sendParticles(net.minecraft.core.particles.ParticleTypes.SMOKE, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5,
                     8, 0.3, 0.2, 0.3, 0.02);
         }
-        player.getItemInHand(hand).hurtAndBreak(1, player, p -> p.broadcastBreakEvent(hand));
-        player.displayClientMessage(net.minecraft.network.chat.Component.translatable(msg + "charred"), true);
+        player.getItemInHand(hand).hurtAndBreak(1, player, hand);
+        player.sendOverlayMessage(net.minecraft.network.chat.Component.translatable(msg + "charred"));
     }
 
     /** Pick block on a charred cask gives a charred cask. */
     @Override
-    public ItemStack getCloneItemStack(BlockGetter level, BlockPos pos, BlockState state) {
-        ItemStack stack = super.getCloneItemStack(level, pos, state);
+    protected ItemStack getCloneItemStack(LevelReader level, BlockPos pos, BlockState state, boolean includeData) {
+        ItemStack stack = super.getCloneItemStack(level, pos, state, includeData);
         if (state.getValue(CHARRED)) {
-            net.minecraft.nbt.CompoundTag properties = new net.minecraft.nbt.CompoundTag();
-            properties.putString(CHARRED.getName(), "true");
-            stack.addTagElement(net.minecraft.world.item.BlockItem.BLOCK_STATE_TAG, properties);
+            stack.set(net.minecraft.core.component.DataComponents.BLOCK_STATE,
+                    net.minecraft.world.item.component.BlockItemStateProperties.EMPTY.with(CHARRED, true));
         }
         return stack;
     }

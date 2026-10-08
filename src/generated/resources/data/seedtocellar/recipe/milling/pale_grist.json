@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "seedtocellar:pale_malt",
+  "result": {
+    "id": "seedtocellar:pale_grist"
+  }
+}

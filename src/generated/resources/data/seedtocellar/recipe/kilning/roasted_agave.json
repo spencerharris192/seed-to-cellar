@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "#c:crops/agave",
+  "result": {
+    "id": "seedtocellar:roasted_agave"
+  },
+  "roast": "medium",
+  "time": 1200
+}

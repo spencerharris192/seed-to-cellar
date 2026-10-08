@@ -1,0 +1,23 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "seedtocellar:item/tequila",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "neoforge:fluid_contents_tint"
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15920868
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 12605482
+      }
+    ]
+  }
+}

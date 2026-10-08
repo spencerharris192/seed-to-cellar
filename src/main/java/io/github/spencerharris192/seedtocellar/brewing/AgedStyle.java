@@ -28,15 +28,15 @@ public record AgedStyle(List<Name> names, int young, int old, int fullYears) {
     }
 
     public static int years(@Nullable CompoundTag data) {
-        return data == null ? 0 : data.getInt(DrinkItem.AGE);
+        return data == null ? 0 : data.getIntOr(DrinkItem.AGE, 0);
     }
 
     /** The translation key this drink goes by now, or null for its own name. */
     @Nullable
     public String nameKey(@Nullable CompoundTag data) {
         int years = years(data);
-        String wood = data == null ? "" : data.getString(DrinkItem.WOOD);
-        boolean charred = data != null && data.getBoolean(DrinkItem.CHARRED);
+        String wood = data == null ? "" : data.getStringOr(DrinkItem.WOOD, "");
+        boolean charred = data != null && data.getBooleanOr(DrinkItem.CHARRED, false);
         for (Name name : names) {
             if (years < name.years()) continue;
             if (name.wood() != null && !name.wood().id().equals(wood)) continue;

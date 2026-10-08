@@ -84,7 +84,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout_mipped",
   "textures": {
     "all": "seedtocellar:block/olive_leaves",
     "overlay": "seedtocellar:block/olive_leaves_unripe",

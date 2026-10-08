@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:pressing",
+  "byproduct": {
+    "id": "seedtocellar:fruit_pomace"
+  },
+  "ingredient": "#c:foods/fruit/blueberry",
+  "result": {
+    "amount": 500,
+    "fluid": "seedtocellar:blueberry_juice"
+  }
+}

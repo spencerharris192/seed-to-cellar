@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "S": "#c:rods/wooden",
+    "T": "#c:strings"
+  },
+  "pattern": [
+    "SSS",
+    "T T",
+    "S S"
+  ],
+  "result": {
+    "id": "seedtocellar:drying_rack"
+  }
+}

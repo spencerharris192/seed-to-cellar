@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:crimson_cask"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    },
+    "has_vat": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:fermenting_vat"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_vat"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:crimson_cask"
+    ]
+  }
+}

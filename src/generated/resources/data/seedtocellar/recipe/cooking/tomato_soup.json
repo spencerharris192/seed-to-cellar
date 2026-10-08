@@ -1,0 +1,14 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "#c:crops/tomato",
+    "#c:crops/onion"
+  ],
+  "result": {
+    "id": "seedtocellar:tomato_soup"
+  }
+}

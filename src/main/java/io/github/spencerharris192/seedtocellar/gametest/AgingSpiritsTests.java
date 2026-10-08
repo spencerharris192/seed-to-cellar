@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
@@ -19,7 +20,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
@@ -31,16 +31,11 @@ import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Comparator;
 
 /** Spirits that age (GDD sections 10.3, 13): names and colors by age, charred casks, brandies and grappa. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class AgingSpiritsTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -49,31 +44,31 @@ public final class AgingSpiritsTests {
     /** A double-distilled spirit with yeast and temperature stars, as it leaves the still. */
     private static FluidStack spirit(Fluid fluid) {
         FluidStack stack = new BrewQuality(true, true, true, false).applyTo(new FluidStack(fluid, 1000));
-        stack.getOrCreateTag().putInt(CraftStep.RUNS, 2);
+        io.github.spencerharris192.seedtocellar.brewing.BrewData.update(stack, t -> t.putInt(CraftStep.RUNS, 2));
         return stack;
     }
 
     @GameTest(template = EMPTY)
     public static void whiskeyIsNewMakeUntilThreeYears(GameTestHelper helper) {
-        helper.assertTrue("drink.seedtocellar.new_make".equals(Drinks.nameKey(ModFluids.MALT_WHISKEY.get(), spirit(ModFluids.MALT_WHISKEY.get()).getTag())),
+        helper.assertTrue("drink.seedtocellar.new_make".equals(Drinks.nameKey(ModFluids.MALT_WHISKEY.get(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(spirit(ModFluids.MALT_WHISKEY.get())))),
                 "straight from the still it's New Make");
         FluidStack two = CaskBlockEntity.serving(spirit(ModFluids.MALT_WHISKEY.get()), 2 * DAY, CaskWood.OAK);
-        helper.assertTrue("drink.seedtocellar.new_make".equals(Drinks.nameKey(two.getFluid(), two.getTag())), "still New Make at 2 years");
+        helper.assertTrue("drink.seedtocellar.new_make".equals(Drinks.nameKey(two.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(two))), "still New Make at 2 years");
         FluidStack three = CaskBlockEntity.serving(spirit(ModFluids.MALT_WHISKEY.get()), 3 * DAY, CaskWood.OAK);
-        helper.assertTrue(Drinks.nameKey(three.getFluid(), three.getTag()) == null, "Malt Whiskey (its own name) at 3 years");
+        helper.assertTrue(Drinks.nameKey(three.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(three)) == null, "Malt Whiskey (its own name) at 3 years");
         helper.succeed();
     }
 
     @GameTest(template = EMPTY)
     public static void bourbonNeedsCharredOak(GameTestHelper helper) {
         FluidStack white = spirit(ModFluids.BOURBON.get());
-        helper.assertTrue("drink.seedtocellar.white_dog".equals(Drinks.nameKey(white.getFluid(), white.getTag())), "young bourbon is White Dog");
+        helper.assertTrue("drink.seedtocellar.white_dog".equals(Drinks.nameKey(white.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(white))), "young bourbon is White Dog");
         FluidStack charred = CaskBlockEntity.serving(white, 6 * DAY, CaskWood.OAK, true);
-        helper.assertTrue(Drinks.nameKey(charred.getFluid(), charred.getTag()) == null, "2+ years in charred oak: Bourbon");
+        helper.assertTrue(Drinks.nameKey(charred.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(charred)) == null, "2+ years in charred oak: Bourbon");
         helper.assertTrue(BrewQuality.of(charred).aged() && BrewQuality.of(charred).stars() == 5, "and its star at 6 years");
-        helper.assertTrue(charred.getTag().getBoolean(DrinkItem.CHARRED), "the label remembers the char");
+        helper.assertTrue(io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(charred).getBooleanOr(DrinkItem.CHARRED, false), "the label remembers the char");
         FluidStack plain = CaskBlockEntity.serving(white, 6 * DAY, CaskWood.OAK, false);
-        helper.assertTrue("drink.seedtocellar.corn_whiskey".equals(Drinks.nameKey(plain.getFluid(), plain.getTag())),
+        helper.assertTrue("drink.seedtocellar.corn_whiskey".equals(Drinks.nameKey(plain.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(plain))),
                 "aged in plain oak it's Corn Whiskey");
         helper.assertFalse(BrewQuality.of(plain).aged(), "and its star takes twice as long there");
         helper.assertTrue(BrewQuality.of(CaskBlockEntity.serving(white, 12 * DAY, CaskWood.OAK, false)).aged(), "12 years, then");
@@ -107,8 +102,8 @@ public final class AgingSpiritsTests {
         FluidStack young = spirit(ModFluids.MALT_WHISKEY.get());
         FluidStack old = CaskBlockEntity.serving(young, 12 * DAY, CaskWood.OAK);
         int base = ModFluids.MALT_WHISKEY.tint;
-        int now = Drinks.tint(young.getFluid(), young.getTag(), base);
-        int aged = Drinks.tint(old.getFluid(), old.getTag(), base);
+        int now = Drinks.tint(young.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(young), base);
+        int aged = Drinks.tint(old.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(old), base);
         helper.assertTrue(now == base, "new make keeps its pale color");
         helper.assertTrue((aged >> 8 & 255) < (now >> 8 & 255) && (aged & 255) < (now & 255), "12 years make it amber (less green and blue)");
         helper.assertTrue(Drinks.tint(ModFluids.PALE_ALE.get(), null, 7) == 7, "drinks without a style keep their color");
@@ -118,31 +113,30 @@ public final class AgingSpiritsTests {
     @GameTest(template = EMPTY)
     public static void flintAndSteelCharsAnEmptyCask(GameTestHelper helper) {
         helper.setBlock(POS, ModBlocks.OAK_CASK.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.FLINT_AND_STEEL));
         BlockPos at = helper.absolutePos(POS);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(at), Direction.NORTH, at, false);
         BlockState state = helper.getBlockState(POS);
-        state.use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(state, helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(POS, CaskBlock.CHARRED, true);
         // Again on a charred cask: the cask takes the click, so the flint and steel never lights a fire beside it.
-        helper.assertTrue(helper.getBlockState(POS).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit).consumesAction(),
+        helper.assertTrue(Interact.use(helper.getBlockState(POS), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit).consumesAction(),
                 "flint and steel on a charred cask does nothing else");
         helper.assertTrue(io.github.spencerharris192.seedtocellar.brewing.CaskItem.charred(
-                helper.getBlockState(POS).getCloneItemStack(new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(at), Direction.NORTH, at, false),
-                        helper.getLevel(), at, player)), "pick block on a charred cask gives a charred cask");
+                helper.getBlockState(POS).getCloneItemStack(at, helper.getLevel(), false, player)), "pick block on a charred cask gives a charred cask");
 
         helper.setBlock(POS.east(), ModBlocks.OAK_CASK.get());
-        CaskBlockEntity full = (CaskBlockEntity) helper.getBlockEntity(POS.east());
-        full.tank().fill(spirit(ModFluids.MALT_WHISKEY.get()), IFluidHandler.FluidAction.EXECUTE);
+        CaskBlockEntity full = (CaskBlockEntity) helper.getBlockEntity(POS.east(), net.minecraft.world.level.block.entity.BlockEntity.class);
+        full.tank().fill(spirit(ModFluids.MALT_WHISKEY.get()), StationTank.Action.EXECUTE);
         BlockPos east = helper.absolutePos(POS.east());
-        helper.getBlockState(POS.east()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND,
+        Interact.use(helper.getBlockState(POS.east()), helper.getLevel(), player, InteractionHand.MAIN_HAND,
                 new BlockHitResult(Vec3.atCenterOf(east), Direction.NORTH, east, false));
         helper.assertBlockProperty(POS.east(), CaskBlock.CHARRED, false);   // only an empty cask chars
 
         helper.setBlock(POS.west(), ModBlocks.CASKS.get(CaskWood.WARPED).get());
         BlockPos west = helper.absolutePos(POS.west());
-        helper.getBlockState(POS.west()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND,
+        Interact.use(helper.getBlockState(POS.west()), helper.getLevel(), player, InteractionHand.MAIN_HAND,
                 new BlockHitResult(Vec3.atCenterOf(west), Direction.NORTH, west, false));
         helper.assertBlockProperty(POS.west(), CaskBlock.CHARRED, false);   // nether wood won't char
         helper.succeed();
@@ -155,13 +149,13 @@ public final class AgingSpiritsTests {
         BlockState lower = ModBlocks.POT_STILL.get().defaultBlockState();
         helper.setBlock(POS, lower);
         helper.setBlock(POS.above(), lower.setValue(PotStillBlock.HALF, DoubleBlockHalf.UPPER));
-        PotStillBlockEntity still = (PotStillBlockEntity) helper.getBlockEntity(POS);
+        PotStillBlockEntity still = (PotStillBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
         still.pot().fill(new BrewQuality(true, true, true, true).applyTo(new FluidStack(ModFluids.WHITE_WINE.get(), 2000)),
-                IFluidHandler.FluidAction.EXECUTE);
+                StationTank.Action.EXECUTE);
         helper.succeedWhen(() -> {
             FluidStack out = still.receiver().getFluid();
             helper.assertTrue(out.getFluid() == ModFluids.BRANDY.get(), "white wine distils into brandy");
-            helper.assertTrue("drink.seedtocellar.eau_de_vie".equals(Drinks.nameKey(out.getFluid(), out.getTag())), "young brandy is Eau-de-vie");
+            helper.assertTrue("drink.seedtocellar.eau_de_vie".equals(Drinks.nameKey(out.getFluid(), io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(out))), "young brandy is Eau-de-vie");
             BrewQuality q = BrewQuality.of(out);
             helper.assertTrue(q.yeast() && q.temperature() && !q.craft() && !q.aged(), "only the wine's fermenting stars carry over");
         });
@@ -169,7 +163,7 @@ public final class AgingSpiritsTests {
 
     @GameTest(template = EMPTY)
     public static void fruitWinesHaveTheirBrandies(GameTestHelper helper) {
-        var recipes = helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipes.DISTILLING.get());
+        var recipes = io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.DISTILLING.get()).toList();
         for (var pair : java.util.List.of(java.util.List.of(ModFluids.CIDER, ModFluids.APPLE_BRANDY), java.util.List.of(ModFluids.PERRY, ModFluids.PEAR_BRANDY),
                 java.util.List.of(ModFluids.CHERRY_WINE, ModFluids.KIRSCH), java.util.List.of(ModFluids.PLUM_WINE, ModFluids.SLIVOVITZ),
                 java.util.List.of(ModFluids.PEACH_WINE, ModFluids.PEACH_BRANDY), java.util.List.of(ModFluids.POMACE_WASH, ModFluids.GRAPPA))) {
@@ -184,7 +178,7 @@ public final class AgingSpiritsTests {
     @GameTest(template = EMPTY)
     public static void pomaceMashFermentsWithWineYeast(GameTestHelper helper) {
         FluidStack mash = new FluidStack(ModFluids.POMACE_MASH.get(), 1000);
-        FermentingRecipe recipe = helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipes.FERMENTING.get()).stream()
+        FermentingRecipe recipe = io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.FERMENTING.get())
                 .filter(r -> r.matches(mash, YeastType.WINE)).findFirst().orElseThrow();
         helper.assertTrue(recipe.result() == ModFluids.POMACE_WASH.get() && recipe.suits(Temperature.WARM), "pomace mash ferments into pomace wash");
         helper.succeed();

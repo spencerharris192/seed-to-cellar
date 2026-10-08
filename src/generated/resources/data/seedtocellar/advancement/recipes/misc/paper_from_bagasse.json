@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_bagasse": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:bagasse"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:paper_from_bagasse"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_bagasse"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:paper_from_bagasse"
+    ]
+  }
+}

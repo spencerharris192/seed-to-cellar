@@ -1,30 +1,33 @@
 package io.github.spencerharris192.seedtocellar.registry;
 
+import net.neoforged.neoforge.registries.DeferredItem;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
+import io.github.spencerharris192.seedtocellar.brewing.BrewData;
 import io.github.spencerharris192.seedtocellar.brewing.VesselBucketItem;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.SoundActions;
-import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.common.SoundActions;
+import net.neoforged.neoforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 /**
- * Brewing liquids: real Forge fluids, so pipes from Create, Mekanism, Immersive Engineering
- * and others can move them. They have buckets but no world block: they live in vessels only.
+ * Brewing liquids: real fluids, so other mods' pipes can move them. They have buckets but no world block: they live in vessels only.
  * Details like malt bill or quality ride along as data on the fluid stack.
  */
 public final class ModFluids {
-    public static final DeferredRegister<FluidType> TYPES = DeferredRegister.create(ForgeRegistries.Keys.FLUID_TYPES, SeedToCellar.MOD_ID);
-    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(ForgeRegistries.FLUIDS, SeedToCellar.MOD_ID);
+    public static final DeferredRegister<FluidType> TYPES = DeferredRegister.create(NeoForgeRegistries.Keys.FLUID_TYPES, SeedToCellar.MOD_ID);
+    public static final DeferredRegister<Fluid> FLUIDS = DeferredRegister.create(Registries.FLUID, SeedToCellar.MOD_ID);
 
     private static final List<Entry> ALL = new ArrayList<>();
 
@@ -135,10 +138,10 @@ public final class ModFluids {
     public static final class Entry {
         public final String name;
         public final int tint;
-        public final RegistryObject<FluidType> type;
-        public final RegistryObject<ForgeFlowingFluid.Source> still;
-        public final RegistryObject<ForgeFlowingFluid.Flowing> flowing;
-        public final RegistryObject<Item> bucket;
+        public final DeferredHolder<FluidType, FluidType> type;
+        public final DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Source> still;
+        public final DeferredHolder<net.minecraft.world.level.material.Fluid, BaseFlowingFluid.Flowing> flowing;
+        public final DeferredItem<Item> bucket;
 
         private Entry(String name, int tint, int temperature) {
             this.name = name;
@@ -149,12 +152,11 @@ public final class ModFluids {
                     .canSwim(false).canDrown(false).canPushEntity(false)
                     .sound(SoundActions.BUCKET_FILL, SoundEvents.BUCKET_FILL)
                     .sound(SoundActions.BUCKET_EMPTY, SoundEvents.BUCKET_EMPTY), tint));
-            ForgeFlowingFluid.Properties[] props = new ForgeFlowingFluid.Properties[1];
-            this.still = FLUIDS.register(name, () -> new ForgeFlowingFluid.Source(props[0]));
-            this.flowing = FLUIDS.register(name + "_flowing", () -> new ForgeFlowingFluid.Flowing(props[0]));
-            this.bucket = ModItems.ITEMS.register(name + "_bucket", () -> new VesselBucketItem(still,
-                    new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1)));
-            props[0] = new ForgeFlowingFluid.Properties(type, still, flowing).bucket(bucket);
+            BaseFlowingFluid.Properties[] props = new BaseFlowingFluid.Properties[1];
+            this.still = FLUIDS.register(name, () -> new BaseFlowingFluid.Source(props[0]));
+            this.flowing = FLUIDS.register(name + "_flowing", () -> new BaseFlowingFluid.Flowing(props[0]));
+            this.bucket = ModItems.ITEMS.registerItem(name + "_bucket", p -> new VesselBucketItem(still.get(), p), () -> new Item.Properties().craftRemainder(Items.BUCKET).stacksTo(1));
+            props[0] = new BaseFlowingFluid.Properties(type, still, flowing).bucket(bucket);
         }
 
         public Fluid get() {
@@ -168,11 +170,7 @@ public final class ModFluids {
         return entry;
     }
 
-    /**
-     * Fluid type whose client look (shared texture + tint) is set up in client code.
-     * FluidType's constructor calls initializeClient before our fields are assigned,
-     * so the client side must read {@link #tint} when drawing, not when set up.
-     */
+    /** Fluid type with a tint over the shared liquid texture (its look is set up in client code: BrewFluidClient). */
     public static class BrewFluidType extends FluidType {
         public final int tint;
 
@@ -181,23 +179,18 @@ public final class ModFluids {
             this.tint = tint;
         }
 
-        @Override
-        public void initializeClient(java.util.function.Consumer<net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions> consumer) {
-            consumer.accept(io.github.spencerharris192.seedtocellar.client.BrewFluidClient.extensions(this));
-        }
-
         /** Spirits go by their age ("New Make", "White Dog") in tanks, JEI and read-outs too. */
         @Override
-        public String getDescriptionId(net.minecraftforge.fluids.FluidStack stack) {
-            String key = io.github.spencerharris192.seedtocellar.brewing.Drinks.nameKey(stack.getFluid(), stack.getTag());
+        public String getDescriptionId(net.neoforged.neoforge.fluids.FluidStack stack) {
+            String key = io.github.spencerharris192.seedtocellar.brewing.Drinks.nameKey(stack.getFluid(), BrewData.orNull(stack));
             return key != null ? key : super.getDescriptionId(stack);
         }
 
         /** Filled buckets keep the liquid's data (quality, malt bill) so nothing is lost in a bucket. */
         @Override
-        public net.minecraft.world.item.ItemStack getBucket(net.minecraftforge.fluids.FluidStack stack) {
+        public net.minecraft.world.item.ItemStack getBucket(net.neoforged.neoforge.fluids.FluidStack stack) {
             net.minecraft.world.item.ItemStack bucket = super.getBucket(stack);
-            if (stack.hasTag()) bucket.getOrCreateTag().put(VesselBucketItem.FLUID_TAG, stack.getTag().copy());
+            BrewData.copy(stack, bucket);
             return bucket;
         }
     }

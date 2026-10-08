@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
+import net.minecraft.core.Holder;
 import net.minecraft.world.effect.MobEffect;
 
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.function.Supplier;
  * @param charring      what a charred cask means to it (GDD section 13): nothing, ideal whatever the wood (whiskeys), or
  *                      the only way its woods are ideal (bourbon: charred oak)
  */
-public record DrinkProfile(Supplier<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears,
+public record DrinkProfile(Holder<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears,
                            boolean graded, List<CaskWood> woods, CraftStep craft, Charring charring) {
     public enum Charring { NONE, IDEAL, REQUIRED }
 

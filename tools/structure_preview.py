@@ -14,7 +14,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent
-STRUCTURES = ROOT.parent / "src/main/resources/data/seedtocellar/structures"
+STRUCTURES = ROOT.parent / "src/main/resources/data/seedtocellar/structure"
 TEXTURES = [ROOT / "vanilla/block", ROOT.parent / "src/main/resources/assets/seedtocellar/textures/block"]
 SKIP = {"minecraft:air", "minecraft:structure_void", "minecraft:jigsaw", "minecraft:cave_air"}
 # blocks whose texture name differs from their id, or that read better as a fixed colour

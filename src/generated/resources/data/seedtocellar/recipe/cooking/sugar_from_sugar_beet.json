@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:cooking",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "#c:crops/sugar_beet"
+  ],
+  "result": {
+    "count": 2,
+    "id": "minecraft:sugar"
+  }
+}

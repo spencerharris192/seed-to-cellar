@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "#c:crops/oats",
+  "result": {
+    "id": "seedtocellar:rolled_oats"
+  }
+}

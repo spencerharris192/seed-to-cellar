@@ -1,30 +1,28 @@
 package io.github.spencerharris192.seedtocellar.recipe;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.brewing.MaltType;
 import io.github.spencerharris192.seedtocellar.brewing.Temperature;
 import io.github.spencerharris192.seedtocellar.brewing.WortData;
 import io.github.spencerharris192.seedtocellar.brewing.YeastType;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
-import net.minecraft.core.RegistryAccess;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -37,8 +35,44 @@ import java.util.Map;
  *  "malt_min":{"amber":0.25},"malt_max":{"black":0.0},"time":24000,"priority":40}</pre>
  * "temperature" may also be a list of the temperatures that all count as right (distiller's washes: ["mild","warm"]).
  */
-public class FermentingRecipe implements Recipe<Container> {
-    private final ResourceLocation id;
+public class FermentingRecipe implements StationRecipe {
+    private static final Codec<YeastType> YEAST = RecipeCodecs.named(YeastType::byKey, y -> y.key);
+    private static final Codec<Temperature> TEMPERATURE = RecipeCodecs.named(Temperature::byName, Temperature::getSerializedName);
+    private static final Codec<WortData.Strength> STRENGTH = RecipeCodecs.named(
+            s -> WortData.Strength.valueOf(s.toUpperCase(Locale.ROOT)), s -> s.name().toLowerCase(Locale.ROOT));
+    private static final Codec<Map<MaltType, Float>> MALTS = Codec.unboundedMap(RecipeCodecs.named(MaltType::byKey, m -> m.key), Codec.FLOAT)
+            .xmap(m -> m.isEmpty() ? Map.of() : new EnumMap<>(m), m -> m);
+    private static final StreamCodec<ByteBuf, Map<MaltType, Float>> MALTS_STREAM = ByteBufCodecs.map(
+            n -> new EnumMap<>(MaltType.class), RecipeCodecs.ordinal(MaltType.class), ByteBufCodecs.FLOAT);
+
+    public static final MapCodec<FermentingRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+            RecipeCodecs.FLUID.fieldOf("input").forGetter(r -> r.input),
+            RecipeCodecs.FLUID.fieldOf("result").forGetter(r -> r.result),
+            YEAST.optionalFieldOf("yeast", YeastType.ALE).forGetter(r -> r.yeast),
+            Codec.BOOL.optionalFieldOf("allow_wild", true).forGetter(r -> r.allowWild),
+            ExtraCodecs.nonEmptyList(ExtraCodecs.compactListCodec(TEMPERATURE)).optionalFieldOf("temperature", List.of(Temperature.MILD))
+                    .forGetter(r -> r.temperatures),
+            STRENGTH.optionalFieldOf("min_strength", WortData.Strength.LIGHT).forGetter(r -> r.minStrength),
+            STRENGTH.optionalFieldOf("max_strength", WortData.Strength.STRONG).forGetter(r -> r.maxStrength),
+            MALTS.optionalFieldOf("malt_min", Map.of()).forGetter(r -> r.maltMin),
+            MALTS.optionalFieldOf("malt_max", Map.of()).forGetter(r -> r.maltMax),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("time", 24000).forGetter(r -> r.time),
+            Codec.INT.optionalFieldOf("priority", 0).forGetter(r -> r.priority)
+    ).apply(i, FermentingRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, FermentingRecipe> STREAM_CODEC = StreamCodec.composite(
+            RecipeCodecs.FLUID_STREAM, r -> r.input,
+            RecipeCodecs.FLUID_STREAM, r -> r.result,
+            RecipeCodecs.ordinal(YeastType.class), r -> r.yeast,
+            ByteBufCodecs.BOOL, r -> r.allowWild,
+            RecipeCodecs.ordinal(Temperature.class).apply(ByteBufCodecs.list()), r -> r.temperatures,
+            RecipeCodecs.ordinal(WortData.Strength.class), r -> r.minStrength,
+            RecipeCodecs.ordinal(WortData.Strength.class), r -> r.maxStrength,
+            MALTS_STREAM, r -> r.maltMin,
+            MALTS_STREAM, r -> r.maltMax,
+            ByteBufCodecs.VAR_INT, r -> r.time,
+            ByteBufCodecs.VAR_INT, r -> r.priority,
+            FermentingRecipe::new);
+
     private final Fluid input;
     private final Fluid result;
     private final YeastType yeast;
@@ -51,10 +85,9 @@ public class FermentingRecipe implements Recipe<Container> {
     private final int time;
     private final int priority;
 
-    public FermentingRecipe(ResourceLocation id, Fluid input, Fluid result, YeastType yeast, boolean allowWild, List<Temperature> temperatures,
+    public FermentingRecipe(Fluid input, Fluid result, YeastType yeast, boolean allowWild, List<Temperature> temperatures,
                             WortData.Strength minStrength, WortData.Strength maxStrength, Map<MaltType, Float> maltMin,
                             Map<MaltType, Float> maltMax, int time, int priority) {
-        this.id = id;
         this.input = input;
         this.result = result;
         this.yeast = yeast;
@@ -108,103 +141,6 @@ public class FermentingRecipe implements Recipe<Container> {
     public int time() { return time; }
     public int priority() { return priority; }
 
-    // Vanilla recipe plumbing: fermenting doesn't use item containers.
-    @Override public boolean matches(Container container, Level level) { return false; }
-    @Override public ItemStack assemble(Container container, RegistryAccess access) { return ItemStack.EMPTY; }
-    @Override public boolean canCraftInDimensions(int w, int h) { return true; }
-    @Override public ItemStack getResultItem(RegistryAccess access) { return ItemStack.EMPTY; }
-    @Override public ResourceLocation getId() { return id; }
-    @Override public boolean isSpecial() { return true; }
-    @Override public RecipeSerializer<?> getSerializer() { return ModRecipes.FERMENTING_SERIALIZER.get(); }
-    @Override public RecipeType<?> getType() { return ModRecipes.FERMENTING.get(); }
-
-    public static class Serializer implements RecipeSerializer<FermentingRecipe> {
-        @Override
-        public FermentingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            return new FermentingRecipe(id,
-                    fluid(GsonHelper.getAsString(json, "input")),
-                    fluid(GsonHelper.getAsString(json, "result")),
-                    YeastType.byKey(GsonHelper.getAsString(json, "yeast", "ale")),
-                    GsonHelper.getAsBoolean(json, "allow_wild", true),
-                    temperatures(json),
-                    strength(GsonHelper.getAsString(json, "min_strength", "light")),
-                    strength(GsonHelper.getAsString(json, "max_strength", "strong")),
-                    malts(GsonHelper.getAsJsonObject(json, "malt_min", new JsonObject())),
-                    malts(GsonHelper.getAsJsonObject(json, "malt_max", new JsonObject())),
-                    GsonHelper.getAsInt(json, "time", 24000),
-                    GsonHelper.getAsInt(json, "priority", 0));
-        }
-
-        private static List<Temperature> temperatures(JsonObject json) {
-            if (json.has("temperature") && json.get("temperature").isJsonArray()) {
-                List<Temperature> list = new ArrayList<>();
-                for (var element : json.getAsJsonArray("temperature")) list.add(Temperature.byName(element.getAsString()));
-                if (!list.isEmpty()) return list;
-            }
-            return List.of(Temperature.byName(GsonHelper.getAsString(json, "temperature", "mild")));
-        }
-
-        private static Fluid fluid(String id) {
-            Fluid fluid = ForgeRegistries.FLUIDS.getValue(ResourceLocation.tryParse(id));
-            if (fluid == null) throw new IllegalArgumentException("Unknown fluid " + id);
-            return fluid;
-        }
-
-        private static WortData.Strength strength(String name) {
-            return WortData.Strength.valueOf(name.toUpperCase(java.util.Locale.ROOT));
-        }
-
-        private static Map<MaltType, Float> malts(JsonObject obj) {
-            Map<MaltType, Float> map = new EnumMap<>(MaltType.class);
-            for (String key : obj.keySet()) {
-                MaltType type = MaltType.byKey(key);
-                if (type != null) map.put(type, obj.get(key).getAsFloat());
-            }
-            return map;
-        }
-
-        @Override
-        public FermentingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
-            Fluid input = buf.readRegistryIdUnsafe(ForgeRegistries.FLUIDS);
-            Fluid result = buf.readRegistryIdUnsafe(ForgeRegistries.FLUIDS);
-            YeastType yeast = buf.readEnum(YeastType.class);
-            boolean wild = buf.readBoolean();
-            List<Temperature> temps = buf.readList(b -> b.readEnum(Temperature.class));
-            WortData.Strength min = buf.readEnum(WortData.Strength.class);
-            WortData.Strength max = buf.readEnum(WortData.Strength.class);
-            Map<MaltType, Float> maltMin = readMalts(buf);
-            Map<MaltType, Float> maltMax = readMalts(buf);
-            return new FermentingRecipe(id, input, result, yeast, wild, temps, min, max, maltMin, maltMax, buf.readVarInt(), buf.readVarInt());
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, FermentingRecipe r) {
-            buf.writeRegistryIdUnsafe(ForgeRegistries.FLUIDS, r.input);
-            buf.writeRegistryIdUnsafe(ForgeRegistries.FLUIDS, r.result);
-            buf.writeEnum(r.yeast);
-            buf.writeBoolean(r.allowWild);
-            buf.writeCollection(r.temperatures, FriendlyByteBuf::writeEnum);
-            buf.writeEnum(r.minStrength);
-            buf.writeEnum(r.maxStrength);
-            writeMalts(buf, r.maltMin);
-            writeMalts(buf, r.maltMax);
-            buf.writeVarInt(r.time);
-            buf.writeVarInt(r.priority);
-        }
-
-        private static Map<MaltType, Float> readMalts(FriendlyByteBuf buf) {
-            Map<MaltType, Float> map = new EnumMap<>(MaltType.class);
-            int n = buf.readVarInt();
-            for (int i = 0; i < n; i++) map.put(buf.readEnum(MaltType.class), buf.readFloat());
-            return map;
-        }
-
-        private static void writeMalts(FriendlyByteBuf buf, Map<MaltType, Float> map) {
-            buf.writeVarInt(map.size());
-            map.forEach((type, value) -> {
-                buf.writeEnum(type);
-                buf.writeFloat(value);
-            });
-        }
-    }
+    @Override public RecipeSerializer<FermentingRecipe> getSerializer() { return ModRecipes.FERMENTING_SERIALIZER.get(); }
+    @Override public RecipeType<FermentingRecipe> getType() { return ModRecipes.FERMENTING.get(); }
 }

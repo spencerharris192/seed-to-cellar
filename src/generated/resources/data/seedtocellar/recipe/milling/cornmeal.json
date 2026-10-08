@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "#c:crops/corn",
+  "result": {
+    "id": "seedtocellar:cornmeal"
+  }
+}

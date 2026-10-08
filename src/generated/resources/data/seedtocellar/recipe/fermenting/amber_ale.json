@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:hopped_wort",
+  "malt_max": {
+    "black": 0.2
+  },
+  "malt_min": {
+    "amber": 0.25
+  },
+  "min_strength": "normal",
+  "priority": 30,
+  "result": "seedtocellar:amber_ale"
+}

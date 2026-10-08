@@ -35,7 +35,7 @@ public class TrellisPlantItem extends Item {
                 || !(vine.get() instanceof TrellisVineBlock block)) {
             return InteractionResult.PASS;
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             level.setBlock(pos, block.planted(trellis.getValue(TrellisBlock.AXIS)), Block.UPDATE_ALL);
             level.playSound(null, pos, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 1.0F);
             level.gameEvent(context.getPlayer(), GameEvent.BLOCK_PLACE, pos);
@@ -43,6 +43,6 @@ public class TrellisPlantItem extends Item {
                 context.getItemInHand().shrink(1);
             }
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 }

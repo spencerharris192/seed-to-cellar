@@ -2,7 +2,7 @@ package io.github.spencerharris192.seedtocellar.brewing.station;
 
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModMenus;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -11,9 +11,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 /** Kettle screen contents. The liquid gauge reads the (synced) block entity directly. */
 public class BrewKettleMenu extends AbstractContainerMenu {
@@ -21,9 +19,9 @@ public class BrewKettleMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final BrewKettleBlockEntity kettle;
 
-    public BrewKettleMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
+    public BrewKettleMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player.level().getBlockEntity(buf.readBlockPos()) instanceof BrewKettleBlockEntity k ? k : null,
-                new ItemStackHandler(BrewKettleBlockEntity.SLOTS), new SimpleContainerData(4));
+                new StationItems(BrewKettleBlockEntity.SLOTS), new SimpleContainerData(4));
     }
 
     // Slot positions (the item, one pixel inside each slot frame drawn by the GUI texture).
@@ -31,16 +29,16 @@ public class BrewKettleMenu extends AbstractContainerMenu {
     public static final int CONTAINER_X = 125, CONTAINER_Y = 13;
     public static final int OUTPUT_X = 125, OUTPUT_Y = 35;
 
-    public BrewKettleMenu(int id, Inventory inventory, BrewKettleBlockEntity kettle, IItemHandler items, ContainerData data) {
+    public BrewKettleMenu(int id, Inventory inventory, BrewKettleBlockEntity kettle, StationItems items, ContainerData data) {
         super(ModMenus.BREW_KETTLE.get(), id);
         this.kettle = kettle;
         this.data = data;
         this.access = kettle != null ? ContainerLevelAccess.create(kettle.getLevel(), kettle.getBlockPos()) : ContainerLevelAccess.NULL;
         for (int i = 0; i < BrewKettleBlockEntity.INGREDIENTS; i++) {
-            addSlot(new SlotItemHandler(items, i, INGREDIENT_XY[i][0], INGREDIENT_XY[i][1]));
+            addSlot(new ResourceHandlerSlot(items, items::set, i, INGREDIENT_XY[i][0], INGREDIENT_XY[i][1]));
         }
-        addSlot(new SlotItemHandler(items, BrewKettleBlockEntity.CONTAINER, CONTAINER_X, CONTAINER_Y));
-        addSlot(new SlotItemHandler(items, BrewKettleBlockEntity.OUTPUT, OUTPUT_X, OUTPUT_Y) {
+        addSlot(new ResourceHandlerSlot(items, items::set, BrewKettleBlockEntity.CONTAINER, CONTAINER_X, CONTAINER_Y));
+        addSlot(new ResourceHandlerSlot(items, items::set, BrewKettleBlockEntity.OUTPUT, OUTPUT_X, OUTPUT_Y) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;

@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "seedtocellar:sweet_wort",
+  "fluid_amount": 250,
+  "ingredients": [
+    "seedtocellar:sourdough_starter"
+  ],
+  "result": {
+    "count": 2,
+    "id": "seedtocellar:ale_yeast"
+  },
+  "time": 12000
+}

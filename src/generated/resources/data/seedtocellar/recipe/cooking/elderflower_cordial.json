@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:glass_bottle",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "seedtocellar:elderflowers",
+    "#seedtocellar:sweeteners",
+    "#c:foods/fruit/lemon"
+  ],
+  "result": {
+    "id": "seedtocellar:elderflower_cordial"
+  }
+}

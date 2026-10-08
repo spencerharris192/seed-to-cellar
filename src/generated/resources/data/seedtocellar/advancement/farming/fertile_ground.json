@@ -1,0 +1,42 @@
+{
+  "parent": "seedtocellar:farming/first_harvest",
+  "criteria": {
+    "compost": {
+      "conditions": {
+        "location": {
+          "type": "minecraft:all_of",
+          "terms": [
+            {
+              "type": "minecraft:location_check",
+              "predicate": {}
+            },
+            {
+              "type": "minecraft:match_tool",
+              "predicate": {
+                "items": "seedtocellar:compost"
+              }
+            }
+          ]
+        }
+      },
+      "trigger": "minecraft:item_used_on_block"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.fertile_ground.description"
+    },
+    "icon": {
+      "id": "seedtocellar:compost"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.fertile_ground.title"
+    }
+  },
+  "requirements": [
+    [
+      "compost"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

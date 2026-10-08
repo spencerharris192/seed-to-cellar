@@ -1,0 +1,18 @@
+{
+  "gives": {
+    "count": 6,
+    "id": "minecraft:emerald"
+  },
+  "max_uses": 12,
+  "reputation_discount": 0.05,
+  "wants": {
+    "components": {
+      "seedtocellar:quality_aged": {},
+      "seedtocellar:quality_craft": {},
+      "seedtocellar:quality_temperature": {},
+      "seedtocellar:quality_yeast": {}
+    },
+    "id": "seedtocellar:old_ale"
+  },
+  "xp": 30
+}

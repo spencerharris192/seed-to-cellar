@@ -1,0 +1,19 @@
+{
+  "gives": {
+    "components": {
+      "seedtocellar:brew": {
+        "Brew": {}
+      },
+      "seedtocellar:quality_temperature": {},
+      "seedtocellar:quality_yeast": {}
+    },
+    "id": "seedtocellar:pale_ale"
+  },
+  "max_uses": 8,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 2,
+    "id": "minecraft:emerald"
+  },
+  "xp": 10
+}

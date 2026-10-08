@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.level.block.BonemealSource;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
@@ -28,7 +30,7 @@ import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
@@ -102,11 +104,11 @@ public class VanillaVineBlock extends HorizontalDirectionalBlock implements Bone
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         return direction == state.getValue(FACING) && !state.canSurvive(level, pos)
                 ? net.minecraft.world.level.block.Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+                : super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     // --- growing ---------------------------------------------------------------------------------
@@ -122,41 +124,41 @@ public class VanillaVineBlock extends HorizontalDirectionalBlock implements Bone
         for (int i = 0; i < attempts; i++) {
             BlockState now = level.getBlockState(pos);
             if (!now.is(this) || now.getValue(AGE) >= MAX_AGE) return;
-            if (ForgeHooks.onCropsGrowPre(level, pos, now, random.nextInt(GROWTH_CHANCE) == 0)) {
+            if (CommonHooks.canCropGrow(level, pos, now, random.nextInt(GROWTH_CHANCE) == 0)) {
                 level.setBlock(pos, now.setValue(AGE, now.getValue(AGE) + 1), Block.UPDATE_CLIENTS);
-                ForgeHooks.onCropsGrowPost(level, pos, now);
+                CommonHooks.fireCropGrowPost(level, pos, now);
             }
         }
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean client) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, BonemealSource source) {
         return state.getValue(AGE) < MAX_AGE;
     }
 
     @Override
-    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state) {
+    public boolean isBonemealSuccess(Level level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         return true;
     }
 
     @Override
-    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state) {
+    public void performBonemeal(ServerLevel level, RandomSource random, BlockPos pos, BlockState state, BonemealSource source) {
         level.setBlock(pos, state.setValue(AGE, state.getValue(AGE) + 1), Block.UPDATE_CLIENTS);
     }
 
     // --- picking ---------------------------------------------------------------------------------
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (state.getValue(AGE) < MAX_AGE || !ModConfigs.COMMON.rightClickHarvest.get()) return InteractionResult.PASS;
-        if (!level.isClientSide) pick(level, pos, state);
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        if (!level.isClientSide()) pick(level, pos, state);
+        return InteractionResult.SUCCESS;
     }
 
     /** Picks the pods (1-2) and sets the vine back to leafy, to flower again. */
     public static void pick(Level level, BlockPos pos, BlockState state) {
-        popResource(level, pos, new ItemStack(ModItems.VANILLA_POD.get(), 1 + level.random.nextInt(2)));
+        popResource(level, pos, new ItemStack(ModItems.VANILLA_POD.get(), 1 + level.getRandom().nextInt(2)));
         level.setBlock(pos, state.setValue(AGE, LEAFY), Block.UPDATE_CLIENTS);
-        level.playSound(null, pos, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.9F + level.random.nextFloat() * 0.2F);
+        level.playSound(null, pos, SoundEvents.CAVE_VINES_PICK_BERRIES, SoundSource.BLOCKS, 1.0F, 0.9F + level.getRandom().nextFloat() * 0.2F);
     }
 }

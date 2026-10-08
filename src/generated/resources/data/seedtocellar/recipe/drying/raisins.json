@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/red_grape",
+  "result": {
+    "id": "seedtocellar:raisins"
+  },
+  "time": 18000
+}

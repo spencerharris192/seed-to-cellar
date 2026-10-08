@@ -6,9 +6,8 @@ import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
 import io.github.spencerharris192.seedtocellar.brewing.Drinks;
 import io.github.spencerharris192.seedtocellar.farming.Crops;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
@@ -17,21 +16,17 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /** Our finds in vanilla's chests (GDD section 18.4), added on top of vanilla's loot. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class ChestLootTests {
     private static final String EMPTY = "empty";
 
     /** Everything 200 chests of this kind held. */
-    private static List<ItemStack> open(GameTestHelper helper, ResourceLocation table) {
-        LootTable loot = helper.getLevel().getServer().getLootData().getLootTable(table);
+    private static List<ItemStack> open(GameTestHelper helper, net.minecraft.resources.ResourceKey<LootTable> table) {
+        LootTable loot = helper.getLevel().getServer().reloadableRegistries().getLootTable(table);
         List<ItemStack> all = new ArrayList<>();
         for (int i = 0; i < 200; i++) {
             LootParams params = new LootParams.Builder(helper.getLevel())
@@ -69,10 +64,10 @@ public final class ChestLootTests {
     public static void shipwrecksKeepAgedRum(GameTestHelper helper) {
         List<ItemStack> rum = open(helper, BuiltInLootTables.SHIPWRECK_SUPPLY).stream().filter(s -> s.is(Drinks.RUM.item().get())).toList();
         helper.assertFalse(rum.isEmpty(), "shipwrecks hold rum");
-        helper.assertTrue(rum.stream().allMatch(s -> s.getTag() != null && s.getTag().contains(BrewQuality.TAG)), "with a quality of its own");
-        helper.assertTrue(rum.stream().anyMatch(s -> s.getTag().getInt(DrinkItem.AGE) > 0), "some of it aged");
+        helper.assertTrue(rum.stream().allMatch(s -> io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(s) != null && io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(s).contains(BrewQuality.TAG)), "with a quality of its own");
+        helper.assertTrue(rum.stream().anyMatch(s -> io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(s).getIntOr(DrinkItem.AGE, 0) > 0), "some of it aged");
         helper.assertTrue(rum.stream().map(s -> DrinkItem.quality(s).stars()).distinct().count() > 1, "not all of it alike");
-        helper.assertTrue(rum.stream().allMatch(s -> s.getTag().getInt(io.github.spencerharris192.seedtocellar.brewing.CraftStep.RUNS)
+        helper.assertTrue(rum.stream().allMatch(s -> io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(s).getIntOr(io.github.spencerharris192.seedtocellar.brewing.CraftStep.RUNS, 0)
                 == (DrinkItem.quality(s).craft() ? 2 : 1)), "its label says how many runs gave it its craft star");
         helper.succeed();
     }

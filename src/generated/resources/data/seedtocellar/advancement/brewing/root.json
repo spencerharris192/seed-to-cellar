@@ -1,0 +1,45 @@
+{
+  "criteria": {
+    "rhizome": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:hop_rhizome"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "seeds": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:barley_seeds"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:block/spruce_planks",
+    "description": {
+      "translate": "advancements.seedtocellar.root.description"
+    },
+    "icon": {
+      "id": "seedtocellar:barley"
+    },
+    "show_toast": false,
+    "title": {
+      "translate": "advancements.seedtocellar.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "seeds",
+      "rhizome"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

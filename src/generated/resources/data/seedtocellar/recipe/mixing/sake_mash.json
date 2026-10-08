@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:mixing",
+  "ingredient": "seedtocellar:koji_rice",
+  "liquid": {
+    "tag": "minecraft:water"
+  },
+  "per_bucket": 2,
+  "result": "seedtocellar:sake_mash"
+}

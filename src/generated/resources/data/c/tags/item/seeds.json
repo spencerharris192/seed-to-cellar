@@ -1,0 +1,33 @@
+{
+  "values": [
+    "#c:seeds/barley",
+    "#c:seeds/rye",
+    "#c:seeds/oats",
+    "#c:seeds/sorghum",
+    "#c:seeds/corn",
+    "#c:seeds/rice",
+    "#c:seeds/sugar_beet",
+    "#c:seeds/onion",
+    "#c:seeds/garlic",
+    "#c:seeds/cabbage",
+    "#c:seeds/ginger",
+    "#c:seeds/coriander",
+    "#c:seeds/anise",
+    "#c:seeds/blueberry",
+    "#c:seeds/blackberry",
+    "#c:seeds/elderberry",
+    "#c:seeds/juniper",
+    "#c:seeds/cranberry",
+    "#c:seeds/tomato",
+    "#c:seeds/chili",
+    "#c:seeds/cucumber",
+    "#c:seeds/coffee",
+    "#c:seeds/agave",
+    "#c:seeds/red_grape",
+    "#c:seeds/white_grape",
+    "#c:seeds/mint",
+    "#c:seeds/lavender",
+    "#c:seeds/wormwood",
+    "#c:seeds/hops"
+  ]
+}

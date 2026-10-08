@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "#c:crops/rice"
+  ],
+  "result": {
+    "id": "seedtocellar:cooked_rice"
+  }
+}

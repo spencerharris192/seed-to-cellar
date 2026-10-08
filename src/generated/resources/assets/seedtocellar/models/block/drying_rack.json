@@ -210,7 +210,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "particle": "seedtocellar:block/drying_rack",
     "wood": "seedtocellar:block/drying_rack"

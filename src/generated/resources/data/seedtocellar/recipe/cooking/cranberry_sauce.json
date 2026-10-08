@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "ingredients": [
+    "#c:crops/cranberry",
+    "#seedtocellar:sweeteners"
+  ],
+  "result": {
+    "id": "seedtocellar:cranberry_sauce"
+  }
+}

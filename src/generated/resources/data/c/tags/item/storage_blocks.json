@@ -1,0 +1,21 @@
+{
+  "values": [
+    "#c:storage_blocks/barley",
+    "#c:storage_blocks/rye",
+    "#c:storage_blocks/oats",
+    "#c:storage_blocks/rice",
+    "#c:storage_blocks/wheat_flour",
+    "#c:storage_blocks/pale_malt",
+    "#c:storage_blocks/coffee_beans",
+    "#c:storage_blocks/sugar",
+    "#c:storage_blocks/apple",
+    "#c:storage_blocks/red_grape",
+    "#c:storage_blocks/white_grape",
+    "#c:storage_blocks/cherry",
+    "#c:storage_blocks/plum",
+    "#c:storage_blocks/peach",
+    "#c:storage_blocks/pear",
+    "#c:storage_blocks/lemon",
+    "#c:storage_blocks/orange"
+  ]
+}

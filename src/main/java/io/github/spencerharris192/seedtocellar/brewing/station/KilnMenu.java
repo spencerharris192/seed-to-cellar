@@ -3,7 +3,7 @@ package io.github.spencerharris192.seedtocellar.brewing.station;
 import io.github.spencerharris192.seedtocellar.brewing.RoastLevel;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModMenus;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -12,10 +12,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 /** Kiln screen contents: input, fuel, output, and three roast buttons (menu button ids 0-2). */
 public class KilnMenu extends AbstractContainerMenu {
@@ -24,20 +21,20 @@ public class KilnMenu extends AbstractContainerMenu {
     private final KilnBlockEntity kiln;
 
     /** Client side: built from the position the server sent. */
-    public KilnMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
+    public KilnMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player.level().getBlockEntity(buf.readBlockPos()) instanceof KilnBlockEntity k ? k : null,
-                new ItemStackHandler(3), new SimpleContainerData(5));
+                new StationItems(3), new SimpleContainerData(5));
     }
 
-    public KilnMenu(int id, Inventory inventory, KilnBlockEntity kiln, IItemHandler items, ContainerData data) {
+    public KilnMenu(int id, Inventory inventory, KilnBlockEntity kiln, StationItems items, ContainerData data) {
         super(ModMenus.KILN.get(), id);
         this.kiln = kiln;
         this.data = data;
         this.access = kiln != null ? ContainerLevelAccess.create(kiln.getLevel(), kiln.getBlockPos()) : ContainerLevelAccess.NULL;
 
-        addSlot(new SlotItemHandler(items, KilnBlockEntity.INPUT, 56, 17));
-        addSlot(new SlotItemHandler(items, KilnBlockEntity.FUEL, 56, 53));
-        addSlot(new SlotItemHandler(items, KilnBlockEntity.OUTPUT, 116, 35) {
+        addSlot(new ResourceHandlerSlot(items, items::set, KilnBlockEntity.INPUT, 56, 17));
+        addSlot(new ResourceHandlerSlot(items, items::set, KilnBlockEntity.FUEL, 56, 53));
+        addSlot(new ResourceHandlerSlot(items, items::set, KilnBlockEntity.OUTPUT, 116, 35) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;
@@ -77,7 +74,7 @@ public class KilnMenu extends AbstractContainerMenu {
         int machineSlots = 3;
         if (index < machineSlots) {
             if (!moveItemStackTo(stack, machineSlots, slots.size(), true)) return ItemStack.EMPTY;
-        } else if (ForgeHooks.getBurnTime(stack, null) > 0) {
+        } else if (Fuel.isFuel(stack)) {
             if (!moveItemStackTo(stack, KilnBlockEntity.FUEL, KilnBlockEntity.FUEL + 1, false)
                     && !moveItemStackTo(stack, KilnBlockEntity.INPUT, KilnBlockEntity.INPUT + 1, false)) return ItemStack.EMPTY;
         } else if (!moveItemStackTo(stack, KilnBlockEntity.INPUT, KilnBlockEntity.INPUT + 1, false)) {

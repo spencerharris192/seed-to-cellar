@@ -42,7 +42,7 @@ public final class FruitTrees {
             "savanna plateaus", "Small, bitter olives", "Press them for oil, or cure them in a jar of water"));
 
     private static FoodProperties food(int nutrition, float saturation) {
-        return new FoodProperties.Builder().nutrition(nutrition).saturationMod(saturation).build();
+        return new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build();
     }
 
     private static FruitTree add(FruitTree tree) {

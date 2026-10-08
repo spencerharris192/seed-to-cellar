@@ -10,7 +10,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -20,13 +19,9 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Decor and the tavern (GDD sections 16 and 17.3). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class DecorTests {
     private static final String EMPTY = "empty";
     private static final BlockPos TABLE = new BlockPos(1, 1, 1);
@@ -42,9 +37,9 @@ public final class DecorTests {
     @GameTest(template = EMPTY)
     public static void drinksSetDownStandTogetherFourAtMost(GameTestHelper helper) {
         helper.setBlock(TABLE, Blocks.OAK_PLANKS);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         ItemStack whiskey = new ItemStack(Drinks.MALT_WHISKEY.item().get());
-        whiskey.setTag(new BrewQuality(true, true, true, false).applyTo(new FluidStack(ModFluids.MALT_WHISKEY.get(), 250)).getTag().copy());
+        io.github.spencerharris192.seedtocellar.brewing.BrewData.copy(new BrewQuality(true, true, true, false).applyTo(new FluidStack(ModFluids.MALT_WHISKEY.get(), 250)), whiskey);
         sneakClickTop(helper, player, whiskey.copy(), TABLE);
         BlockPos spot = TABLE.above();
         helper.assertBlockPresent(ModBlocks.PLACED_DRINKS.get(), spot);
@@ -56,10 +51,10 @@ public final class DecorTests {
         player.setShiftKeyDown(false);
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         BlockPos at = helper.absolutePos(spot);
-        helper.getBlockState(spot).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
+        Interact.use(helper.getBlockState(spot), helper.getLevel(), player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
         helper.assertTrue(player.getMainHandItem().is(Drinks.PALE_ALE.item().get()), "an empty hand takes the last one back");
         helper.assertBlockProperty(spot, PlacedDrinksBlock.DRINKS, 3);
-        PlacedDrinksBlockEntity drinks = (PlacedDrinksBlockEntity) helper.getBlockEntity(spot);
+        PlacedDrinksBlockEntity drinks = (PlacedDrinksBlockEntity) helper.getBlockEntity(spot, net.minecraft.world.level.block.entity.BlockEntity.class);
         helper.assertTrue(DrinkItem.quality(drinks.drinks().get(0)).stars() == 4, "a set-down drink keeps its stars");
 
         // Take the table away and they fall as items, nothing lost.
@@ -96,12 +91,12 @@ public final class DecorTests {
     public static void aBarStoolSeatsOneAndTheCounterTakesDrinks(GameTestHelper helper) {
         BlockPos stool = new BlockPos(1, 1, 1);
         helper.setBlock(stool, ModBlocks.BAR_STOOLS.get(io.github.spencerharris192.seedtocellar.brewing.CaskWood.OAK).get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         BlockPos at = helper.absolutePos(stool);
-        helper.getBlockState(stool).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
+        Interact.use(helper.getBlockState(stool), helper.getLevel(), player, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
         helper.assertTrue(player.getVehicle() instanceof io.github.spencerharris192.seedtocellar.decor.SeatEntity, "right-click a stool to sit on it");
-        Player second = helper.makeMockPlayer();
-        helper.getBlockState(stool).use(helper.getLevel(), second, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
+        Player second = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        Interact.use(helper.getBlockState(stool), helper.getLevel(), second, InteractionHand.MAIN_HAND, new BlockHitResult(Vec3.atCenterOf(at), Direction.UP, at, false));
         helper.assertFalse(second.isPassenger(), "one sitter at a time");
         var seat = player.getVehicle();
         helper.setBlock(stool, Blocks.AIR);   // the stool goes: the sitter stands, the seat goes too
@@ -120,16 +115,16 @@ public final class DecorTests {
         BlockPos at = new BlockPos(1, 1, 1);
         helper.setBlock(at, ModBlocks.MUG_RACK.get().defaultBlockState().setValue(io.github.spencerharris192.seedtocellar.winery.WineRackBlock.FACING,
                 Direction.NORTH));
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         BlockPos abs = helper.absolutePos(at);
         // The front's right-hand quarter, as the world sees it, is the viewer's leftmost peg.
         BlockHitResult leftPeg = new BlockHitResult(Vec3.atLowerCornerOf(abs).add(0.875, 0.75, 0.5), Direction.NORTH, abs, false);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Drinks.PALE_ALE.item().get()));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, leftPeg);
-        var rack = (io.github.spencerharris192.seedtocellar.winery.WineRackBlockEntity) helper.getBlockEntity(at);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, leftPeg);
+        var rack = (io.github.spencerharris192.seedtocellar.winery.WineRackBlockEntity) helper.getBlockEntity(at, net.minecraft.world.level.block.entity.BlockEntity.class);
         helper.assertTrue(rack.bottle(0).isEmpty(), "a full mug doesn't hang on a peg");
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(io.github.spencerharris192.seedtocellar.registry.ModItems.MUG.get(), 2));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, leftPeg);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, leftPeg);
         helper.assertTrue(rack.bottle(0).is(io.github.spencerharris192.seedtocellar.registry.ModItems.MUG.get()), "an empty one does");
         helper.assertTrue(player.getMainHandItem().getCount() == 1, "one mug to a peg");
         helper.assertTrue(rack.bottles().getSlots() == 4, "four pegs");
@@ -148,23 +143,23 @@ public final class DecorTests {
         helper.assertFalse(facingNorth.setValue(io.github.spencerharris192.seedtocellar.decor.WallDecorBlock.FACING, Direction.SOUTH)
                 .canSurvive(helper.getLevel(), helper.absolutePos(at)), "but not from thin air");
         helper.setBlock(at, facingNorth);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         BlockPos abs = helper.absolutePos(at);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.EAST, abs, false);
         var emblem = io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.EMBLEM;
         helper.assertBlockProperty(at, emblem, io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.Emblem.ALE);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Drinks.RED_WINE.item().get()));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(at, emblem, io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.Emblem.WINE);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Drinks.MALT_WHISKEY.item().get()));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(at, emblem, io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.Emblem.SPIRITS);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(io.github.spencerharris192.seedtocellar.registry.ModItems.CASKS
                 .get(io.github.spencerharris192.seedtocellar.brewing.CaskWood.OAK).get()));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(at, emblem, io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.Emblem.CASK);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Drinks.LEMONADE.item().get()));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(at, emblem, io.github.spencerharris192.seedtocellar.decor.TavernSignBlock.Emblem.CASK);   // no picture for juice
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 
@@ -188,7 +183,7 @@ public final class DecorTests {
         BlockPos kettle = new BlockPos(1, 1, 1);
         helper.setBlock(kettle, ModBlocks.BREW_KETTLE.get());
         helper.setBlock(kettle.east(), Blocks.STONE);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         ItemStack hydrometer = new ItemStack(io.github.spencerharris192.seedtocellar.registry.ModItems.HYDROMETER.get());
         player.setItemInHand(InteractionHand.MAIN_HAND, hydrometer);
         java.util.function.Function<BlockPos, InteractionResult> read = at -> {
@@ -196,7 +191,7 @@ public final class DecorTests {
             return hydrometer.onItemUseFirst(new UseOnContext(player, InteractionHand.MAIN_HAND,
                     new BlockHitResult(Vec3.atCenterOf(abs), Direction.UP, abs, false)));
         };
-        helper.assertTrue(read.apply(kettle) == InteractionResult.CONSUME, "the kettle is read, not opened");
+        helper.assertTrue(read.apply(kettle).consumesAction(), "the kettle is read, not opened");
         helper.assertTrue(read.apply(kettle.east()) == InteractionResult.PASS, "stone has nothing to read");
         helper.succeed();
     }
@@ -237,30 +232,33 @@ public final class DecorTests {
         }
         helper.assertBlockProperty(at, stage, io.github.spencerharris192.seedtocellar.decor.CopperWeathering.Stage.EXPOSED);   // it turns, a stage at a time
 
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(abs), Direction.NORTH, abs, false);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.HONEYCOMB, 2));
-        helper.getBlockState(at).use(helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
+        Interact.use(helper.getBlockState(at), helper.getLevel(), player, InteractionHand.MAIN_HAND, hit);
         helper.assertBlockProperty(at, waxed, true);
         helper.assertFalse(helper.getBlockState(at).isRandomlyTicking(), "waxed copper keeps its look");
         helper.assertTrue(player.getMainHandItem().getCount() == 1, "waxing takes a honeycomb");
 
         // An axe: the wax first, then a stage of patina, then nothing more to do.
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.IRON_AXE));
-        java.util.function.Supplier<InteractionResult> chop = () -> player.getMainHandItem()
-                .useOn(new UseOnContext(player, InteractionHand.MAIN_HAND, hit));
+        // (26.3 axes change blocks through data; ours are handled by the block itself, first, as a player's click does)
+        java.util.function.Supplier<InteractionResult> chop = () -> Interact.use(helper.getBlockState(at), helper.getLevel(), player,
+                InteractionHand.MAIN_HAND, hit);
         chop.get();
         helper.assertBlockProperty(at, waxed, false);
         helper.assertBlockProperty(at, stage, io.github.spencerharris192.seedtocellar.decor.CopperWeathering.Stage.EXPOSED);
         chop.get();
         helper.assertBlockProperty(at, stage, io.github.spencerharris192.seedtocellar.decor.CopperWeathering.Stage.UNAFFECTED);
-        helper.assertTrue(chop.get() == InteractionResult.PASS, "fresh copper has nothing to scrape");
+        chop.get();
+        helper.assertBlockProperty(at, stage, io.github.spencerharris192.seedtocellar.decor.CopperWeathering.Stage.UNAFFECTED);
+        helper.assertTrue(player.getMainHandItem().getDamageValue() == 2, "fresh copper has nothing to scrape (the axe isn't worn)");
 
         // Broken fresh, it's a plain kettle that stacks with new ones.
         helper.getLevel().destroyBlock(abs, true);
         var kettles = helper.getLevel().getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new net.minecraft.world.phys.AABB(abs).inflate(2));
         helper.assertTrue(kettles.size() == 1 && kettles.get(0).getItem().is(io.github.spencerharris192.seedtocellar.registry.ModItems.BREW_KETTLE.get())
-                && !kettles.get(0).getItem().hasTag(), "a fresh kettle drops a plain kettle");
+                && kettles.get(0).getItem().isComponentsPatchEmpty(), "a fresh kettle drops a plain kettle");
         kettles.forEach(net.minecraft.world.entity.Entity::discard);
 
         // The still's two halves stay in step, whichever is touched; broken, it keeps its patina and wax.
@@ -271,7 +269,7 @@ public final class DecorTests {
                 net.minecraft.world.level.block.state.properties.DoubleBlockHalf.UPPER));
         BlockPos head = helper.absolutePos(pot.above());
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(net.minecraft.world.item.Items.HONEYCOMB));
-        helper.getBlockState(pot.above()).use(helper.getLevel(), player, InteractionHand.MAIN_HAND,
+        Interact.use(helper.getBlockState(pot.above()), helper.getLevel(), player, InteractionHand.MAIN_HAND,
                 new BlockHitResult(Vec3.atCenterOf(head), Direction.NORTH, head, false));
         helper.assertBlockProperty(pot, waxed, true);   // waxing the head waxed the pot
         helper.setBlock(pot, helper.getBlockState(pot).setValue(stage, io.github.spencerharris192.seedtocellar.decor.CopperWeathering.Stage.OXIDIZED));
@@ -290,7 +288,7 @@ public final class DecorTests {
     @GameTest(template = EMPTY)
     public static void drinksOnlyStandOnSomethingSolid(GameTestHelper helper) {
         helper.setBlock(TABLE, Blocks.FLOWER_POT);   // nothing to stand on at its top
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         sneakClickTop(helper, player, new ItemStack(Drinks.RED_WINE.item().get()), TABLE);
         helper.assertBlockNotPresent(ModBlocks.PLACED_DRINKS.get(), TABLE.above());
         helper.setBlock(TABLE, Blocks.OAK_SLAB.defaultBlockState().setValue(net.minecraft.world.level.block.SlabBlock.TYPE,

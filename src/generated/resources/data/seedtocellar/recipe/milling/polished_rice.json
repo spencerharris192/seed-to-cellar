@@ -1,0 +1,10 @@
+{
+  "type": "seedtocellar:milling",
+  "byproduct": {
+    "id": "seedtocellar:rice_bran"
+  },
+  "ingredient": "#c:crops/rice",
+  "result": {
+    "id": "seedtocellar:polished_rice"
+  }
+}

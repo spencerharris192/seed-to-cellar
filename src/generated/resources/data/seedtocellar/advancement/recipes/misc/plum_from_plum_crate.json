@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_plum_crate": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:plum_crate"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:plum_from_plum_crate"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_plum_crate"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:plum_from_plum_crate"
+    ]
+  }
+}

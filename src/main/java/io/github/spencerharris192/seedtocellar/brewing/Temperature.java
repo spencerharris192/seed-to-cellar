@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import io.github.spencerharris192.seedtocellar.registry.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -43,7 +44,7 @@ public enum Temperature implements StringRepresentable {
         }
         if (heat) return WARM;
         if (cold) return COLD;
-        if (level.dimensionType().ultraWarm()) return WARM;
+        if (level.environmentAttributes().getValue(EnvironmentAttributes.WATER_EVAPORATES, pos)) return WARM;   // the nether
 
         float biome = level.getBiome(pos).value().getBaseTemperature();
         Temperature base = biome < 0.15F ? COLD : biome < 0.45F ? COOL : biome < 0.9F ? MILD : WARM;
@@ -57,7 +58,7 @@ public enum Temperature implements StringRepresentable {
     }
 
     /** Serene Seasons is installed: the season moves the temperature (only then is its class touched). */
-    private static final boolean SEASONS = net.minecraftforge.fml.ModList.get().isLoaded("sereneseasons");
+    private static final boolean SEASONS = net.neoforged.fml.ModList.get().isLoaded("sereneseasons");
 
     /** `steps` warmer (or cooler, if negative), staying within Cold to Warm. */
     public static Temperature shift(Temperature t, int steps) {

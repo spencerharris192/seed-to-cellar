@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:pear_juice",
+  "result": "seedtocellar:perry",
+  "temperature": "cool",
+  "yeast": "wine"
+}

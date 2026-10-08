@@ -1,5 +1,28 @@
 # Changelog
 
+## 1.1.0 (2026-10-08): Minecraft 26.3
+
+For Minecraft 26.3, NeoForge 26.3 (26.3.0.52-beta or later). **New worlds only:** worlds played with the 1.20.1 version
+can't be carried over.
+
+### New
+- Pale Oak and Poplar casks, from Minecraft 26.3's new woods: pale oak is delicate, ideal for white wine and perry;
+  poplar is mild, ideal for mead and cider. Each comes with a Bar Counter and Bar Stool.
+
+### Changed
+- Everything from 1.0.0, ported to Minecraft 26.3 and NeoForge.
+- The server settings are now `config/seedtocellar-server.toml`, shared with players who join; copy it into a world's
+  `syncedconfig` folder to change one world only.
+- For pack makers: recipes live in `data/seedtocellar/recipe/` in 26.3's JSON format, drinks carry data components
+  instead of NBT (each quality check is its own component), and the common tags are `c:` tags. See
+  `docs/PACK_MAKERS.md`.
+
+### Integrations
+- JEI and Jade work on 26.3. Serene Seasons support is written for its 26.3 version but can't be tested yet: its
+  GlitchCore library doesn't start on NeoForge 26.3.0.52.
+- The Brewer's Almanac (Patchouli), The One Probe, Farmer's Delight, Create, Mekanism, Immersive Engineering, Botany
+  Pots, Tough As Nails and Cold Sweat come back as each reaches Minecraft 26.3.
+
 ## 1.0.0 (2026-10-02): first release
 
 For Minecraft 1.20.1, Forge 47.
@@ -31,7 +54,7 @@ For Minecraft 1.20.1, Forge 47.
   weather like copper.
 
 ### World and people
-- The Vintner and the Brewer, with Vineyards and Brewhouses (and their cellars) in villages; wandering trader seeds and
+- The Vintner and the Brewer, with Vineyards and Brewhouses (and the Brewhouse's cellar) in villages; wandering trader seeds and
   saplings; finds in vanilla chests (seeds, agave, vanilla, aged rum, old wine and spirits).
 - Advancements through farming, brewing, winemaking, distilling and a few just for fun.
 - Drink effects (Refreshed, Warmth, Courage and a few vanilla ones), tipsiness with accessible view sway, hangovers and

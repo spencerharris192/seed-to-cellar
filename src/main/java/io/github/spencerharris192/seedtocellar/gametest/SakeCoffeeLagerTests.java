@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.MaltType;
 import io.github.spencerharris192.seedtocellar.brewing.WortData;
@@ -14,23 +15,17 @@ import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 
 /** Sake and koji, coffee, lager yeast and lager, wheat beer (GDD sections 8, 9.3, 10.1, 10.5). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class SakeCoffeeLagerTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -38,15 +33,13 @@ public final class SakeCoffeeLagerTests {
     @GameTest(template = EMPTY)
     public static void millingRiceLeavesBran(GameTestHelper helper) {
         helper.setBlock(POS, ModBlocks.MILLSTONE.get());
-        MillstoneBlockEntity mill = (MillstoneBlockEntity) helper.getBlockEntity(POS);
-        mill.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER, net.minecraft.core.Direction.UP)
-                .orElseThrow(IllegalStateException::new).insertItem(0, new ItemStack(Crops.RICE.produce(), 2), false);
+        MillstoneBlockEntity mill = (MillstoneBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Handlers.items(mill, net.minecraft.core.Direction.UP).insertItem(0, new ItemStack(Crops.RICE.produce(), 2), false);
         mill.crank();
         helper.runAfterDelay(MillstoneBlockEntity.CRANK_TICKS + 1, () -> {
             helper.assertTrue(mill.output().is(ModItems.POLISHED_RICE.get()) && mill.byproduct().is(ModItems.RICE_BRAN.get()),
                     "rice mills into polished rice, and its bran beside it");
-            var below = mill.getCapability(net.minecraftforge.common.capabilities.ForgeCapabilities.ITEM_HANDLER, net.minecraft.core.Direction.DOWN)
-                    .orElseThrow(IllegalStateException::new);
+            var below = Handlers.items(mill, net.minecraft.core.Direction.DOWN);
             helper.assertTrue(below.getSlots() == 2, "a hopper below takes both");
             helper.succeed();
         });
@@ -55,8 +48,8 @@ public final class SakeCoffeeLagerTests {
     private static PreservingJarBlockEntity jar(GameTestHelper helper, FluidStack liquid, ItemStack... items) {
         ModConfigs.SERVER.fermentationTimeMultiplier.set(0.001);
         helper.setBlock(POS, ModBlocks.PRESERVING_JAR.get());
-        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS);
-        if (!liquid.isEmpty()) jar.tank().fill(liquid, IFluidHandler.FluidAction.EXECUTE);
+        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        if (!liquid.isEmpty()) jar.tank().fill(liquid, StationTank.Action.EXECUTE);
         for (int i = 0; i < items.length; i++) jar.items().setStackInSlot(i, items[i]);
         return jar;
     }
@@ -91,7 +84,7 @@ public final class SakeCoffeeLagerTests {
     }
 
     private static Optional<FermentingRecipe> best(GameTestHelper helper, FluidStack wort, YeastType yeast) {
-        return helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipes.FERMENTING.get()).stream()
+        return io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.FERMENTING.get())
                 .filter(r -> r.matches(wort, yeast)).max(Comparator.comparingInt(FermentingRecipe::priority));
     }
 
@@ -114,17 +107,17 @@ public final class SakeCoffeeLagerTests {
 
     @GameTest(template = EMPTY)
     public static void sakeAndCoffeeHaveTheirRecipes(GameTestHelper helper) {
-        var recipes = helper.getLevel().getRecipeManager();
-        helper.assertTrue(recipes.getAllRecipesFor(ModRecipes.MIXING.get()).stream()
-                .anyMatch(r -> r.result() == ModFluids.SAKE_MASH.get() && r.ingredient().test(new ItemStack(ModItems.KOJI_RICE.get()))),
+        var recipes = helper.getLevel().recipeAccess();
+        helper.assertTrue(io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.MIXING.get())
+                .anyMatch(r -> r.result() == ModFluids.SAKE_MASH.get() && r.ingredient().map(i -> i.test(new ItemStack(ModItems.KOJI_RICE.get()))).orElse(false)),
                 "koji rice stirs into water as sake mash");
         FluidStack mash = new FluidStack(ModFluids.SAKE_MASH.get(), 1000);
-        helper.assertTrue(recipes.getAllRecipesFor(ModRecipes.FERMENTING.get()).stream().anyMatch(r -> r.matches(mash, YeastType.WINE)
+        helper.assertTrue(io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.FERMENTING.get()).anyMatch(r -> r.matches(mash, YeastType.WINE)
                 && r.result() == ModFluids.SAKE.get()), "sake mash ferments into sake with wine yeast");
-        helper.assertTrue(recipes.getAllRecipesFor(ModRecipes.KILNING.get()).stream()
+        helper.assertTrue(io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.KILNING.get())
                 .anyMatch(r -> r.ingredient().test(new ItemStack(Crops.COFFEE.produce())) && r.result().is(ModItems.ROASTED_COFFEE.get())),
                 "coffee beans roast in the kiln");
-        helper.assertTrue(recipes.getAllRecipesFor(ModRecipes.COOKING.get()).stream()
+        helper.assertTrue(io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.COOKING.get())
                 .anyMatch(r -> r.result().is(io.github.spencerharris192.seedtocellar.brewing.Drinks.COFFEE.item().get())),
                 "ground coffee brews in the kettle");
         helper.succeed();

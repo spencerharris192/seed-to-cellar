@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.datagen;
 
+import net.neoforged.neoforge.registries.DeferredItem;
 import net.minecraft.world.item.Items;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.farming.Climate;
@@ -17,20 +18,19 @@ import io.github.spencerharris192.seedtocellar.registry.ModTags;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.tags.ItemTagsProvider;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.common.Tags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModItemTagsProvider extends ItemTagsProvider {
-    public ModItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup,
-                               CompletableFuture<TagLookup<Block>> blockTags, ExistingFileHelper files) {
-        super(output, lookup, blockTags, SeedToCellar.MOD_ID, files);
+public class ModItemTagsProvider extends ValueTagsProvider<Item> {
+    public ModItemTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
+        super(output, BuiltInRegistries.ITEM, lookup);
     }
 
     /**
@@ -50,7 +50,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
             }
             tag(net.minecraft.tags.ItemTags.create(SeedToCellar.rl("toughasnails", "thirst/" + thirst + "_thirst_drinks"))).add(item);
             tag(net.minecraft.tags.ItemTags.create(SeedToCellar.rl("toughasnails", "hydration/" + hydration + "_hydration_drinks"))).add(item);
-            if (drink.profile().effect().get() == io.github.spencerharris192.seedtocellar.effect.ModEffects.WARMTH.get()) {
+            if (drink.profile().effect().value() == io.github.spencerharris192.seedtocellar.effect.ModEffects.WARMTH.get()) {
                 tag(net.minecraft.tags.ItemTags.create(SeedToCellar.rl("toughasnails", "heating_consumed_items"))).add(item);
             }
         }
@@ -90,7 +90,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
                 tag(ItemTags.VILLAGER_PLANTABLE_SEEDS).add(crop.seeds());
             }
         }
-        // Fruit trees: forge:fruits/<tree> (apple included, for other mods), flat forge:<fruit>, saplings and leaves.
+        // Fruit trees: c:foods/fruit/<tree> (apple included, for other mods), flat c:<fruit>, saplings and leaves.
         for (FruitTree tree : FruitTrees.all()) {
             tag(ModTags.Items.fruit(tree.name)).add(tree.fruit());
             tag(ModTags.Items.FRUITS).addTag(ModTags.Items.fruit(tree.name));
@@ -119,7 +119,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(ModTags.Items.BREAD).add(ModItems.RYE_BREAD.get(), ModItems.SOURDOUGH_BREAD.get(), ModItems.CORNBREAD.get(),
                 ModItems.SPENT_GRAIN_BREAD.get(), ModItems.BEER_BREAD.get(), net.minecraft.world.item.Items.BREAD);
         for (Drinks.Drink beer : Drinks.beers()) tag(ModTags.Items.ALES).add(beer.item().get());
-        for (RegistryObject<Item> jam : ModItems.JAMS) tag(ModTags.Items.JAMS).add(jam.get());
+        for (DeferredItem<Item> jam : ModItems.JAMS) tag(ModTags.Items.JAMS).add(jam.get());
         tag(ModTags.Items.DRIED_FRUITS).add(ModItems.DRIED_BERRIES.get(), ModItems.RAISINS.get(), ModItems.GOLDEN_RAISINS.get(),
                 ModItems.PRUNES.get(), ModItems.DRIED_CHERRIES.get(), ModItems.DRIED_APPLES.get(), ModItems.DRIED_PEACHES.get(),
                 ModItems.DRIED_PEARS.get());
@@ -138,7 +138,7 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         tag(MaltType.WHEAT.maltTag).add(ModItems.WHEAT_MALT.get());
         // Adjuncts: mash with malt into a corn or potato wash. Whole corn stays out (it pops into popcorn in the kettle).
         tag(MaltType.CORN.gristTag).addTag(ModTags.Items.CORNMEAL);
-        tag(MaltType.POTATO.gristTag).addTag(net.minecraftforge.common.Tags.Items.CROPS_POTATO);
+        tag(MaltType.POTATO.gristTag).addTag(net.neoforged.neoforge.common.Tags.Items.CROPS_POTATO);
         tag(MaltType.CORN.maltTag);
         tag(MaltType.POTATO.maltTag);
         // Vanilla: the pod is its crop (and plants itself).
@@ -173,21 +173,26 @@ public class ModItemTagsProvider extends ItemTagsProvider {
         for (String season : Climate.TEMPERATE.seasons()) tag(seasonCrops(season)).add(ModItems.HOP_RHIZOME.get());
 
         // Sickles; straw (Farmer's Delight's joins); thatch stairs and slab.
-        for (RegistryObject<Item> sickle : ModItems.SICKLES) tag(ModTags.Items.SICKLES).add(sickle.get());
+        for (DeferredItem<Item> sickle : ModItems.SICKLES) tag(ModTags.Items.SICKLES).add(sickle.get());
+        // A sickle is a digging tool: Efficiency, Fortune, Unbreaking and Mending.
+        for (TagKey<Item> enchantable : java.util.List.of(ItemTags.MINING_ENCHANTABLE, ItemTags.MINING_LOOT_ENCHANTABLE,
+                ItemTags.DURABILITY_ENCHANTABLE)) {
+            tag(enchantable).addTag(ModTags.Items.SICKLES);
+        }
         tag(ModTags.Items.TOOLS).addTag(ModTags.Items.SICKLES);
         tag(ModTags.Items.STRAW).add(ModItems.STRAW.get()).addOptional(SeedToCellar.rl("farmersdelight", "straw"));
-        tag(ItemTags.STAIRS).add(ModItems.THATCH_STAIRS.get());
+        tag(net.minecraft.tags.BlockItemTags.STAIRS.item()).add(ModItems.THATCH_STAIRS.get());
         for (StorageBlocks.Storage storage : ModBlocks.STORAGE) {
             tag(ModTags.Items.storage(storage.tag())).add(storage.block().get().asItem());
             tag(ModTags.Items.STORAGE_BLOCKS).addTag(ModTags.Items.storage(storage.tag()));
         }
-        tag(ItemTags.SLABS).add(ModItems.THATCH_SLAB.get());
+        tag(net.minecraft.tags.BlockItemTags.SLABS.item()).add(ModItems.THATCH_SLAB.get());
 
-        // Jerky from any common raw meat (Farmer's Delight style tags join if present).
+        // Jerky from any common raw meat (other mods' raw meats join through c:foods/raw_meat); wolves eat it like any meat.
         tag(ModTags.Items.JERKY_MEATS).add(net.minecraft.world.item.Items.BEEF, net.minecraft.world.item.Items.PORKCHOP,
                         net.minecraft.world.item.Items.MUTTON, net.minecraft.world.item.Items.CHICKEN, net.minecraft.world.item.Items.RABBIT)
-                .addOptionalTag(SeedToCellar.rl("forge", "raw_beef")).addOptionalTag(SeedToCellar.rl("forge", "raw_pork"))
-                .addOptionalTag(SeedToCellar.rl("forge", "raw_mutton")).addOptionalTag(SeedToCellar.rl("forge", "raw_chicken"));
+                .addTag(Tags.Items.FOODS_RAW_MEAT);
+        tag(ItemTags.MEAT).add(ModItems.JERKY.get());
 
         // The Compost Bin also takes these (on top of anything the vanilla composter takes).
         tag(ModTags.Items.COMPOSTABLES).add(ModItems.SPENT_GRAIN.get(), net.minecraft.world.item.Items.ROTTEN_FLESH,

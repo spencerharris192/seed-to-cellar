@@ -1,27 +1,21 @@
 package io.github.spencerharris192.seedtocellar.recipe;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
 
 /**
  * Base for our simple station recipes: one ingredient in, one result out, per item,
  * plus a duration. Stations process a whole stack as a batch (16 barley -> 16 malt).
- * Slot 0 of the container is the input.
  */
-public abstract class ProcessingRecipe implements Recipe<Container> {
-    protected final ResourceLocation id;
+public abstract class ProcessingRecipe implements StationRecipe {
     protected final Ingredient ingredient;
-    protected final ItemStack result;
+    protected final ItemStackTemplate result;
     protected final int time;
 
-    protected ProcessingRecipe(ResourceLocation id, Ingredient ingredient, ItemStack result, int time) {
-        this.id = id;
+    protected ProcessingRecipe(Ingredient ingredient, ItemStackTemplate result, int time) {
         this.ingredient = ingredient;
         this.result = result;
         this.time = time;
@@ -31,7 +25,12 @@ public abstract class ProcessingRecipe implements Recipe<Container> {
         return ingredient;
     }
 
+    /** A new stack of the result (for one input item). */
     public ItemStack result() {
+        return result.create();
+    }
+
+    public ItemStackTemplate resultTemplate() {
         return result;
     }
 
@@ -41,37 +40,12 @@ public abstract class ProcessingRecipe implements Recipe<Container> {
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
-        return ingredient.test(container.getItem(0));
+    public boolean matches(SingleRecipeInput input, Level level) {
+        return ingredient.test(input.item());
     }
 
     @Override
-    public ItemStack assemble(Container container, RegistryAccess access) {
-        return result.copy();
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(RegistryAccess access) {
-        return result;
-    }
-
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.of(Ingredient.EMPTY, ingredient);
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public boolean isSpecial() {
-        return true; // keeps them out of the vanilla recipe book
+    public ItemStack assemble(SingleRecipeInput input) {
+        return result.create();
     }
 }

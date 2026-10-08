@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:red_grape_juice",
+  "result": "seedtocellar:rose",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_pie": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:sweet_berry_pie"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:sweet_berry_pie_slice"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_pie"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:sweet_berry_pie_slice"
+    ]
+  }
+}

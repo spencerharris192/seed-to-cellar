@@ -1,10 +1,7 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,10 +30,5 @@ public class BottledLiquidItem extends Item {
 
     public static Optional<BottledLiquidItem> byFluid(Fluid fluid) {
         return ALL.stream().filter(item -> item.fluid() == fluid).findFirst();
-    }
-
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, CompoundTag nbt) {
-        return new VesselFluidHandler(stack);
     }
 }

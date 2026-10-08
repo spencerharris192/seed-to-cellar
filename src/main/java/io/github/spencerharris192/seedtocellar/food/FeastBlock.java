@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.food;
 
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,7 +24,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
@@ -39,7 +41,7 @@ import java.util.function.Supplier;
 public class FeastBlock extends Block {
     public static final int SERVINGS_MAX = 6;
     public static final IntegerProperty SERVINGS = IntegerProperty.create("servings", 0, SERVINGS_MAX);
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape FULL = box(1, 0, 1, 15, 6, 15);
     private static final VoxelShape PLATTER = box(1, 0, 1, 15, 2, 15);
 
@@ -67,31 +69,31 @@ public class FeastBlock extends Block {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int servings = state.getValue(SERVINGS);
         if (servings == 0) {   // leftovers: clear the platter away
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 level.destroyBlock(pos, false, player);
                 popResource(level, pos, new ItemStack(Items.BONE));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         ItemStack held = player.getItemInHand(hand);
         if (!held.is(Items.BOWL)) {
-            if (level.isClientSide) {
-                player.displayClientMessage(Component.translatable("message.seedtocellar.feast.needs_bowl").withStyle(ChatFormatting.YELLOW), true);
+            if (level.isClientSide()) {
+                player.sendOverlayMessage(Component.translatable("message.seedtocellar.feast.needs_bowl").withStyle(ChatFormatting.YELLOW));
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             if (!player.getAbilities().instabuild) held.shrink(1);
             ItemStack plate = new ItemStack(serving.get());
-            if (!player.getInventory().add(plate)) player.drop(plate, false);
+            io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity.give(player, plate);
             level.setBlock(pos, state.setValue(SERVINGS, servings - 1), Block.UPDATE_ALL);
             level.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
-            level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_GENERIC, SoundSource.BLOCKS, 0.8F, 0.8F);
+            level.playSound(null, pos, SoundEvents.ARMOR_EQUIP_GENERIC.value(), SoundSource.BLOCKS, 0.8F, 0.8F);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -100,19 +102,19 @@ public class FeastBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level, BlockPos pos,
-                                  BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         return direction == Direction.DOWN && !state.canSurvive(level, pos) ? Blocks.AIR.defaultBlockState()
-                : super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+                : super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         return state.getValue(SERVINGS) * 2;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.world;
 
+import com.mojang.serialization.MapCodec;
 import io.github.spencerharris192.seedtocellar.farming.VanillaVineBlock;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import net.minecraft.core.BlockPos;
@@ -9,24 +10,23 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.levelgen.feature.Feature;
-import net.minecraft.world.level.levelgen.feature.FeaturePlaceContext;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 
 /**
  * Wild vanilla on jungle trees: from a spot on the ground, looks around for jungle log trunks and climbs a few onto their
  * sides (the vines face their log), at every stage from shoot to podded.
  */
-public class WildVanillaFeature extends Feature<NoneFeatureConfiguration> {
-    public WildVanillaFeature() {
-        super(NoneFeatureConfiguration.CODEC);
+public record WildVanillaFeature() implements Feature {
+    public static final MapCodec<WildVanillaFeature> CODEC = MapCodec.unit(WildVanillaFeature::new);
+
+    @Override
+    public MapCodec<WildVanillaFeature> codec() {
+        return CODEC;
     }
 
     @Override
-    public boolean place(FeaturePlaceContext<NoneFeatureConfiguration> context) {
-        WorldGenLevel level = context.level();
-        RandomSource random = context.random();
-        BlockPos origin = context.origin();
+    public boolean place(WorldGenLevel level, ChunkGenerator generator, RandomSource random, BlockPos origin) {
         BlockState vine = ModBlocks.VANILLA.get().defaultBlockState();
         int placed = 0;
         for (int tries = 0; tries < 48 && placed < 4; tries++) {

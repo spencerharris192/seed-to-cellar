@@ -1,23 +1,3 @@
 {
-  "parent": "seedtocellar:block/brew_kettle",
-  "overrides": [
-    {
-      "model": "seedtocellar:block/brew_kettle_exposed",
-      "predicate": {
-        "seedtocellar:weathering": 1.0
-      }
-    },
-    {
-      "model": "seedtocellar:block/brew_kettle_weathered",
-      "predicate": {
-        "seedtocellar:weathering": 2.0
-      }
-    },
-    {
-      "model": "seedtocellar:block/brew_kettle_oxidized",
-      "predicate": {
-        "seedtocellar:weathering": 3.0
-      }
-    }
-  ]
+  "parent": "seedtocellar:block/brew_kettle"
 }

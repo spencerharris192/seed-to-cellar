@@ -1,5 +1,8 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.level.ScheduledTickAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.BonemealSource;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -23,7 +26,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.function.Supplier;
 
@@ -93,10 +96,10 @@ public class TallCropBlock extends ModCropBlock {
         if (!level.isAreaLoaded(pos, 1) || level.getRawBrightness(pos, 0) < 9) return;
         int age = getAge(state);
         if (age >= getMaxAge()) return;
-        float speed = getGrowthSpeed(this, level, pos);   // like wheat: wetter, fuller fields grow faster
-        if (ForgeHooks.onCropsGrowPre(level, pos, state, random.nextInt((int) (25.0F / speed) + 1) == 0)
+        float speed = getGrowthSpeed(state, level, pos);   // like wheat: wetter, fuller fields grow faster
+        if (CommonHooks.canCropGrow(level, pos, state, random.nextInt((int) (25.0F / speed) + 1) == 0)
                 && setAge(level, pos, age + 1)) {
-            ForgeHooks.onCropsGrowPost(level, pos, state);
+            CommonHooks.fireCropGrowPost(level, pos, state);
         }
     }
 
@@ -117,7 +120,7 @@ public class TallCropBlock extends ModCropBlock {
     }
 
     @Override
-    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, boolean isClient) {
+    public boolean isValidBonemealTarget(LevelReader level, BlockPos pos, BlockState state, BonemealSource source) {
         BlockPos lower = lowerPos(pos, state);
         BlockState bottom = level.getBlockState(lower);
         if (!bottom.is(this) || isMaxAge(bottom)) return false;
@@ -143,18 +146,18 @@ public class TallCropBlock extends ModCropBlock {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
         // The top was removed some other way (a player takes the whole plant): cut back to one block.
         if (!isUpper(state) && direction == Direction.UP && getAge(state) >= UPPER_FROM && !neighbor.is(this)) {
             return getStateForAge(UPPER_FROM - 1);
         }
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override
-    public void playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
-        if (!level.isClientSide && isUpper(state)) {
+    public BlockState playerWillDestroy(Level level, BlockPos pos, BlockState state, Player player) {
+        if (!level.isClientSide() && isUpper(state)) {
             BlockPos lower = pos.below();
             BlockState bottom = level.getBlockState(lower);
             if (bottom.is(this) && !isUpper(bottom)) {
@@ -164,18 +167,18 @@ public class TallCropBlock extends ModCropBlock {
                 level.levelEvent(player, 2001, lower, Block.getId(bottom));   // break particles and sound
             }
         }
-        super.playerWillDestroy(level, pos, state, player);
+        return super.playerWillDestroy(level, pos, state, player);
     }
 
     // --- harvesting --------------------------------------------------------------------------
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         BlockPos lower = lowerPos(pos, state);
         BlockState bottom = level.getBlockState(lower);
         if (!bottom.is(this) || !isMaxAge(bottom) || !ModConfigs.COMMON.rightClickHarvest.get()) return InteractionResult.PASS;
         // Replanting drops the plant back to age 0, and the now-unsupported top half disappears.
         if (level instanceof ServerLevel server) harvest(server, lower, bottom, player, getStateForAge(0));
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 }

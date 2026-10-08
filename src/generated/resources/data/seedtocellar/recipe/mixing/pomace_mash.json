@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:mixing",
+  "ingredient": "seedtocellar:grape_pomace",
+  "liquid": {
+    "tag": "minecraft:water"
+  },
+  "per_bucket": 4,
+  "result": "seedtocellar:pomace_mash"
+}

@@ -1,0 +1,17 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "seedtocellar:ales"
+  },
+  "ingredients": [
+    "minecraft:beef",
+    "#c:crops/onion",
+    "#c:crops/carrot",
+    "#c:crops/potato"
+  ],
+  "result": {
+    "id": "seedtocellar:beef_and_ale_stew"
+  },
+  "time": 300
+}

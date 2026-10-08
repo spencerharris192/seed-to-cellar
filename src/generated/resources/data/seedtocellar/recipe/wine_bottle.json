@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "D": "#c:dyes/green",
+    "G": "#c:glass_blocks/colorless"
+  },
+  "pattern": [
+    " G ",
+    "G G",
+    "GDG"
+  ],
+  "result": {
+    "count": 3,
+    "id": "seedtocellar:wine_bottle"
+  }
+}

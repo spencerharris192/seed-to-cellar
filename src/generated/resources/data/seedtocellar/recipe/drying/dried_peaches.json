@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/peach",
+  "result": {
+    "id": "seedtocellar:dried_peaches"
+  },
+  "time": 18000
+}

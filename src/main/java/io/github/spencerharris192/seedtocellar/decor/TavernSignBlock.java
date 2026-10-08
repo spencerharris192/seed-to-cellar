@@ -60,15 +60,15 @@ public class TavernSignBlock extends WallDecorBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         Emblem emblem = emblemFor(player.getItemInHand(hand));
         if (emblem == null) return InteractionResult.PASS;
         // Already painted so: nothing to do (rather than drinking the mug or placing the cask beside the sign).
-        if (emblem == state.getValue(EMBLEM)) return InteractionResult.sidedSuccess(level.isClientSide);
-        if (!level.isClientSide) {
+        if (emblem == state.getValue(EMBLEM)) return InteractionResult.SUCCESS;
+        if (!level.isClientSide()) {
             level.setBlock(pos, state.setValue(EMBLEM, emblem), Block.UPDATE_ALL);
             level.playSound(null, pos, SoundEvents.BRUSH_GENERIC, SoundSource.BLOCKS, 1F, 1F);   // a fresh coat of paint
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 }

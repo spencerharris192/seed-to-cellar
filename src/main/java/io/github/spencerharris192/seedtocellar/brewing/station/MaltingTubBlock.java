@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
@@ -55,7 +56,7 @@ public class MaltingTubBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -65,7 +66,7 @@ public class MaltingTubBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof MaltingTubBlockEntity tub) {
             return tub.onUse(player, hand, hit);
         }
@@ -77,11 +78,4 @@ public class MaltingTubBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof MaltingTubBlockEntity tub) tub.advance();
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof MaltingTubBlockEntity tub) {
-            tub.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, moved);
-    }
 }

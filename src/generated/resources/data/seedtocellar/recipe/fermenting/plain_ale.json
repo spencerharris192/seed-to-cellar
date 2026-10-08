@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:sweet_wort",
+  "min_strength": "normal",
+  "priority": 20,
+  "result": "seedtocellar:plain_ale"
+}

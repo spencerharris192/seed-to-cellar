@@ -1,0 +1,11 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "minecraft:water",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:crops/ginger",
+    "#seedtocellar:sweeteners",
+    "seedtocellar:ale_yeast"
+  ],
+  "result_fluid": "seedtocellar:ginger_beer"
+}

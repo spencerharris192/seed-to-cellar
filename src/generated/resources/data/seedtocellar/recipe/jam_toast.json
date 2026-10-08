@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:foods/bread",
+    "#seedtocellar:jams"
+  ],
+  "result": {
+    "count": 2,
+    "id": "seedtocellar:jam_toast"
+  }
+}

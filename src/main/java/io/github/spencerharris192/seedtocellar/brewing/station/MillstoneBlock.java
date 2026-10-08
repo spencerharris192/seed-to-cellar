@@ -1,5 +1,8 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import org.jspecify.annotations.Nullable;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -44,7 +47,7 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -54,7 +57,7 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (level.getBlockEntity(pos) instanceof MillstoneBlockEntity mill) {
             return mill.onUse(player, hand);
         }
@@ -62,7 +65,7 @@ public class MillstoneBlock extends BaseEntityBlock {
     }
 
     @Override
-    public void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, BlockPos fromPos, boolean moving) {
+    protected void neighborChanged(BlockState state, Level level, BlockPos pos, Block block, @Nullable Orientation orientation, boolean moving) {
         boolean powered = level.hasNeighborSignal(pos);
         if (powered != state.getValue(POWERED)) {
             if (powered && level.getBlockEntity(pos) instanceof MillstoneBlockEntity mill) mill.crank();
@@ -70,11 +73,4 @@ public class MillstoneBlock extends BaseEntityBlock {
         }
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof MillstoneBlockEntity mill) {
-            mill.dropContents();
-        }
-        super.onRemove(state, level, pos, newState, moved);
-    }
 }

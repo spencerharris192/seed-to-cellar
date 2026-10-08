@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "P": "minecraft:birch_planks",
+    "S": "minecraft:birch_slab"
+  },
+  "pattern": [
+    "SSS",
+    "P P",
+    "PPP"
+  ],
+  "result": {
+    "count": 4,
+    "id": "seedtocellar:birch_bar_counter"
+  }
+}

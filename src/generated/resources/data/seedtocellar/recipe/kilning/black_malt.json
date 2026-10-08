@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "seedtocellar:green_barley_malt",
+  "result": {
+    "id": "seedtocellar:black_malt"
+  },
+  "roast": "dark",
+  "time": 2400
+}

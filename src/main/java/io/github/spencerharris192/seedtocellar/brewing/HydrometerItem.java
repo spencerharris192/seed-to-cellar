@@ -47,11 +47,11 @@ public class HydrometerItem extends Item {
         BlockState state = level.getBlockState(pos);
         List<Component> lines = readout(level, pos, state);
         if (lines.isEmpty()) return InteractionResult.PASS;
-        if (!level.isClientSide) {
-            player.displayClientMessage(state.getBlock().getName().copy().withStyle(ChatFormatting.GOLD), false);
-            for (Component line : lines) player.displayClientMessage(Component.literal("  ").append(line), false);
+        if (!level.isClientSide()) {
+            player.sendSystemMessage(state.getBlock().getName().copy().withStyle(ChatFormatting.GOLD));
+            for (Component line : lines) player.sendSystemMessage(Component.literal("  ").append(line));
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     /**

@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
@@ -16,7 +17,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import io.github.spencerharris192.seedtocellar.registry.ModTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -26,17 +26,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.levelgen.feature.configurations.NoneFeatureConfiguration;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Liqueurs and bitters steeped in the jar, and vanilla on jungle logs (GDD sections 6.1, 9.5, 10.4). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class LiqueurTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -44,8 +38,8 @@ public final class LiqueurTests {
     private static PreservingJarBlockEntity jar(GameTestHelper helper, FluidStack liquid, ItemStack... items) {
         ModConfigs.SERVER.fermentationTimeMultiplier.set(0.001);
         helper.setBlock(POS, ModBlocks.PRESERVING_JAR.get());
-        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS);
-        jar.tank().fill(liquid, IFluidHandler.FluidAction.EXECUTE);
+        PreservingJarBlockEntity jar = (PreservingJarBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        jar.tank().fill(liquid, StationTank.Action.EXECUTE);
         for (int i = 0; i < items.length; i++) jar.items().setStackInSlot(i, items[i]);
         jar.setLid(false, null);
         return jar;
@@ -88,20 +82,20 @@ public final class LiqueurTests {
 
     @GameTest(template = EMPTY)
     public static void bittersCureAHangover(GameTestHelper helper) {
-        Player player = helper.makeMockPlayer();
-        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER.get(), 2400));
-        player.addEffect(new MobEffectInstance(MobEffects.CONFUSION, 200));
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+        player.addEffect(new MobEffectInstance(ModEffects.HANGOVER, 2400));
+        player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 200));
         ItemStack bitters = DrinkItem.fromFluid(spirit(ModFluids.AROMATIC_BITTERS.get(), 250));
         bitters.finishUsingItem(helper.getLevel(), player);
-        helper.assertFalse(player.hasEffect(ModEffects.HANGOVER.get()), "bitters cure a hangover");
-        helper.assertFalse(player.hasEffect(MobEffects.CONFUSION), "and nausea");
+        helper.assertFalse(player.hasEffect(ModEffects.HANGOVER), "bitters cure a hangover");
+        helper.assertFalse(player.hasEffect(MobEffects.NAUSEA), "and nausea");
         helper.succeed();
     }
 
     @GameTest(template = EMPTY)
     public static void vanillaClimbsAJungleLogAndIsPicked(GameTestHelper helper) {
         helper.setBlock(POS, Blocks.JUNGLE_LOG);
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModItems.VANILLA_POD.get()));
         BlockPos log = helper.absolutePos(POS);
         player.getMainHandItem().useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
@@ -122,7 +116,7 @@ public final class LiqueurTests {
     public static void blackForestCakeGivesSixSlices(GameTestHelper helper) {
         helper.setBlock(POS.below(), Blocks.STONE);
         helper.setBlock(POS, ModBlocks.BLACK_FOREST_CAKE.get());
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         for (int i = 0; i < io.github.spencerharris192.seedtocellar.food.LayerCakeBlock.SLICES; i++) {
             helper.assertBlockPresent(ModBlocks.BLACK_FOREST_CAKE.get(), POS);
             helper.useBlock(POS, player);
@@ -139,8 +133,8 @@ public final class LiqueurTests {
                 if ((x + z) % 2 == 0) for (int y = 1; y < 10; y++) helper.setBlock(new BlockPos(x, y, z), Blocks.JUNGLE_LOG);
             }
         }
-        boolean placed = ModFeatures.WILD_VANILLA.get().place(NoneFeatureConfiguration.INSTANCE, helper.getLevel(),
-                helper.getLevel().getChunkSource().getGenerator(), helper.getLevel().random, helper.absolutePos(new BlockPos(3, 0, 3)));
+        boolean placed = new io.github.spencerharris192.seedtocellar.world.WildVanillaFeature().place(helper.getLevel(),
+                helper.getLevel().getChunkSource().getGenerator(), helper.getLevel().getRandom(), helper.absolutePos(new BlockPos(3, 0, 3)));
         helper.assertTrue(placed, "vines climb the trunks around");
         helper.succeed();
     }

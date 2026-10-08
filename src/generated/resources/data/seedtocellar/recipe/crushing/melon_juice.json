@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "minecraft:melon_slice",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:melon_juice"
+  }
+}

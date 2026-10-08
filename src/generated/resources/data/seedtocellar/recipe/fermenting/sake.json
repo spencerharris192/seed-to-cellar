@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:sake_mash",
+  "result": "seedtocellar:sake",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

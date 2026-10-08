@@ -10,7 +10,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 
 import java.util.function.Supplier;
 
@@ -47,9 +47,9 @@ public class SucculentCropBlock extends ModCropBlock {
         for (int i = 0; i < attempts; i++) {
             BlockState now = level.getBlockState(pos);
             if (!now.is(this) || isMaxAge(now) || level.getRawBrightness(pos, 0) < 9) return;
-            if (ForgeHooks.onCropsGrowPre(level, pos, now, random.nextInt(GROWTH_CHANCE) == 0)) {
+            if (CommonHooks.canCropGrow(level, pos, now, random.nextInt(GROWTH_CHANCE) == 0)) {
                 level.setBlock(pos, getStateForAge(getAge(now) + 1), 2);
-                ForgeHooks.onCropsGrowPost(level, pos, now);
+                CommonHooks.fireCropGrowPost(level, pos, now);
             }
         }
     }

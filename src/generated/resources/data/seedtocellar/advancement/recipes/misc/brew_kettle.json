@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_grist": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:pale_grist"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:brew_kettle"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_grist"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:brew_kettle"
+    ]
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "#c:flours/rye",
+    "#c:flours/rye",
+    "#c:flours/rye",
+    "minecraft:water_bucket"
+  ],
+  "result": {
+    "count": 3,
+    "id": "seedtocellar:rye_dough"
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:sweet_wort",
+  "result": "seedtocellar:table_beer"
+}

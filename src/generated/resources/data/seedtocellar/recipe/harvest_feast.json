@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "B": "#c:foods/bread",
+    "C": "minecraft:cooked_chicken",
+    "K": "#c:crops/carrot",
+    "P": "minecraft:baked_potato",
+    "S": "seedtocellar:cranberry_sauce"
+  },
+  "pattern": [
+    " S ",
+    "PCP",
+    "KBK"
+  ],
+  "result": {
+    "id": "seedtocellar:harvest_feast"
+  }
+}

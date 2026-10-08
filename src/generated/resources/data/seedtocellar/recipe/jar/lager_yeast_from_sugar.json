@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "minecraft:water",
+  "fluid_amount": 250,
+  "ingredients": [
+    "seedtocellar:ale_yeast",
+    "#seedtocellar:sweeteners"
+  ],
+  "result": {
+    "count": 2,
+    "id": "seedtocellar:lager_yeast"
+  },
+  "temperature": [
+    "cold"
+  ]
+}

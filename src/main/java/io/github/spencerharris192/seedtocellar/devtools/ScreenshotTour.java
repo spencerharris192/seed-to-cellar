@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.devtools;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -14,11 +15,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraftforge.api.distmarker.Dist;
+import net.neoforged.api.distmarker.Dist;
 import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.loading.FMLLoader;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.loading.FMLLoader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -113,7 +114,7 @@ public final class ScreenshotTour {
                         }
                         boolean inside = x >= free[0] - 1 && x <= free[2] + 1 && z >= free[1] - 1 && z <= free[3] + 1;
                         if (scatter && !inside) {       // wild grass and a few flowers, so the plot isn't a lawn
-                            int roll = level.random.nextInt(100);
+                            int roll = level.getRandom().nextInt(100);
                             BlockState plant = roll < 14 ? Blocks.GRASS.defaultBlockState() : roll == 14 ? Blocks.DANDELION.defaultBlockState()
                                     : roll == 15 ? Blocks.POPPY.defaultBlockState() : roll == 16 ? Blocks.OXEYE_DAISY.defaultBlockState()
                                     : roll == 17 ? Blocks.CORNFLOWER.defaultBlockState() : null;
@@ -134,8 +135,8 @@ public final class ScreenshotTour {
             wait = 10;
         } else if (step.has("replace")) {
             int[] b = ints(step.getAsJsonArray("replace"));
-            Block from = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(SeedToCellar.parse(step.get("from").getAsString()));
-            BlockState to = net.minecraftforge.registries.ForgeRegistries.BLOCKS.getValue(SeedToCellar.parse(step.get("to").getAsString())).defaultBlockState();
+            Block from = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(SeedToCellar.parse(step.get("from").getAsString()));
+            BlockState to = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(SeedToCellar.parse(step.get("to").getAsString())).defaultBlockState();
             server.submit(() -> {
                 for (BlockPos pos : BlockPos.betweenClosed(origin.offset(b[0], b[1], b[2]), origin.offset(b[3], b[4], b[5]))) {
                     if (level.getBlockState(pos).is(from)) level.setBlock(pos, to, Block.UPDATE_CLIENTS);

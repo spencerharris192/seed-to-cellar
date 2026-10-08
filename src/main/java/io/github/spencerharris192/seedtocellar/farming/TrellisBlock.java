@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -73,10 +74,10 @@ public class TrellisBlock extends Block {
     }
 
     @Override
-    public BlockState updateShape(BlockState state, Direction direction, BlockState neighbor, LevelAccessor level,
-                                  BlockPos pos, BlockPos neighborPos) {
-        if (direction == Direction.DOWN && !isSupported(level, pos)) level.scheduleTick(pos, this, COLLAPSE_DELAY);
-        return super.updateShape(state, direction, neighbor, level, pos, neighborPos);
+    protected BlockState updateShape(BlockState state, LevelReader level, ScheduledTickAccess ticks, BlockPos pos, Direction direction,
+                                     BlockPos neighborPos, BlockState neighbor, RandomSource random) {
+        if (direction == Direction.DOWN && !isSupported(level, pos)) ticks.scheduleTick(pos, this, COLLAPSE_DELAY);
+        return super.updateShape(state, level, ticks, pos, direction, neighborPos, neighbor, random);
     }
 
     @Override

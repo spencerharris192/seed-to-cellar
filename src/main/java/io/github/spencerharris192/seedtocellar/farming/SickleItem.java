@@ -7,9 +7,9 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
@@ -20,14 +20,14 @@ import java.util.List;
  * Sickle (GDD section 6.6), six tiers: right-click a crop to harvest every ripe plant in the 3x3
  * around it and replant them. Unripe plants are left alone; Fortune gives more; grain harvested
  * with a sickle also gives Straw (see {@link StrawModifier}). One point of durability per swing.
- * Being a digging tool, it also cuts plants and leaves quickly and takes Fortune, Efficiency,
- * Unbreaking and Mending.
+ * Being a digging tool, it also cuts plants and leaves quickly; its item tags let it take Fortune, Efficiency,
+ * Unbreaking and Mending (ModItemTagsProvider).
  */
-public class SickleItem extends DiggerItem {
+public class SickleItem extends Item {
     public static final int RADIUS = 1;
 
-    public SickleItem(Tier tier, Properties properties) {
-        super(1.5F, -2.2F, tier, ModTags.Blocks.MINEABLE_WITH_SICKLE, properties);
+    public SickleItem(ToolMaterial tier, Properties properties) {
+        super(properties.tool(tier, ModTags.Blocks.MINEABLE_WITH_SICKLE, 1.5F, -2.2F, 0F));
     }
 
     /** Runs before the crop's own right-click, so the sickle's area harvest wins over picking one plant. */
@@ -46,8 +46,8 @@ public class SickleItem extends DiggerItem {
         if (level instanceof ServerLevel server) {
             for (BlockPos pos : ripe) Harvesting.harvest(server, pos, player);
             level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundSource.PLAYERS, 0.8F, 1.2F);
-            stack.hurtAndBreak(1, player, p -> p.broadcastBreakEvent(context.getHand()));
+            stack.hurtAndBreak(1, player, context.getHand());
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 }

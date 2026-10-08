@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:apple_juice",
+  "result": "seedtocellar:cider",
+  "temperature": "cool",
+  "yeast": "wine"
+}

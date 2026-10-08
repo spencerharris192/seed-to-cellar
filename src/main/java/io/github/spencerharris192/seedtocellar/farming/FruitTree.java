@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
@@ -13,8 +15,9 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.level.levelgen.feature.Feature;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import net.neoforged.neoforge.registries.DeferredHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -30,6 +33,8 @@ import java.util.function.Supplier;
 public final class FruitTree {
     /** How the leaves are colored: by the biome like oak leaves, birch's fixed green, or not at all (own texture). */
     public enum Tint { FOLIAGE, BIRCH, NONE }
+    /** Birch leaves' fixed green (vanilla's), for leaves tinted like birch's in the world and in the hand. */
+    public static final int BIRCH_LEAF_COLOR = 0xFF80A755;
 
     /** Which wild orchard it joins: temperate (forests, plains) or warm (savannas, jungles). */
     public enum Orchard { TEMPERATE, WARM }
@@ -48,8 +53,8 @@ public final class FruitTree {
     /** Fruit tooltip lines (null for vanilla fruit, which keep vanilla's). */
     public final String fruitDesc, fruitNext;
 
-    private final RegistryObject<Block> sapling, leaves;
-    private final RegistryObject<Item> saplingItem, leavesItem;
+    private final DeferredBlock<Block> sapling, leaves;
+    private final DeferredItem<Item> saplingItem, leavesItem;
     private final Supplier<? extends Item> fruit;
 
     FruitTree(String name, String displayName, String fruitId, String fruitName, @Nullable FoodProperties food,
@@ -68,18 +73,19 @@ public final class FruitTree {
         this.fruitDesc = fruitDesc;
         this.fruitNext = fruitNext;
 
-        // Creative tab order: sapling, fruit, leaves.
-        sapling = ModBlocks.BLOCKS.register(name + "_sapling", () -> new FruitSaplingBlock(FruitSaplingBlock.treeKey(name), climate,
-                BlockBehaviour.Properties.copy(Blocks.OAK_SAPLING)));
-        saplingItem = ModItems.ITEMS.register(name + "_sapling", () -> new BlockItem(sapling.get(), new Item.Properties()));
+        // Creative tab order: sapling, fruit, leaves. All compost like vanilla's saplings, leaves and apples.
+        sapling = ModBlocks.BLOCKS.registerBlock(name + "_sapling", p -> new FruitSaplingBlock(name, climate, p), () -> BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_SAPLING));
+        saplingItem = ModItems.ITEMS.registerItem(name + "_sapling", p -> new BlockItem(sapling.get(), p),
+                () -> new Item.Properties().compostable(ContextIntProviders.COMPOSTABLE_LOW).useBlockDescriptionPrefix());
         if (vanillaFruit != null) {
             fruit = vanillaFruit;
         } else {
-            fruit = ModItems.ITEMS.register(fruitId, () -> new Item(new Item.Properties().food(food)));
+            fruit = ModItems.ITEMS.registerItem(fruitId, Item::new, () -> new Item.Properties().food(food).compostable(ContextIntProviders.COMPOSTABLE_MEDIUM));
         }
-        leaves = ModBlocks.BLOCKS.register(name + "_leaves", () -> new FruitLeavesBlock(BlockBehaviour.Properties.copy(Blocks.OAK_LEAVES),
-                fruit, climate));
-        leavesItem = ModItems.ITEMS.register(name + "_leaves", () -> new BlockItem(leaves.get(), new Item.Properties()));
+        leaves = ModBlocks.BLOCKS.registerBlock(name + "_leaves", p -> new FruitLeavesBlock(p,
+                fruit, climate), () -> BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_LEAVES));
+        leavesItem = ModItems.ITEMS.registerItem(name + "_leaves", p -> new BlockItem(leaves.get(), p),
+                () -> new Item.Properties().compostable(ContextIntProviders.COMPOSTABLE_LOW).useBlockDescriptionPrefix());
     }
 
     public Block sapling() {
@@ -104,11 +110,11 @@ public final class FruitTree {
 
     /** Whether the fruit is one of ours (not a vanilla item like the apple). */
     public boolean ownFruit() {
-        return fruit instanceof RegistryObject<?>;
+        return fruit instanceof DeferredHolder<?, ?>;
     }
 
     /** The configured feature its saplings grow into, and wild trees are placed from. */
-    public ResourceKey<ConfiguredFeature<?, ?>> treeFeature() {
+    public ResourceKey<Feature> treeFeature() {
         return FruitSaplingBlock.treeKey(name);
     }
 

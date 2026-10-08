@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smithing_transform",
+  "addition": "#c:ingots/netherite",
+  "base": "seedtocellar:diamond_sickle",
+  "result": {
+    "id": "seedtocellar:netherite_sickle"
+  },
+  "template": "minecraft:netherite_upgrade_smithing_template"
+}

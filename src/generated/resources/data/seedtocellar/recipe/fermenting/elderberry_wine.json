@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:elderberry_juice",
+  "result": "seedtocellar:elderberry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

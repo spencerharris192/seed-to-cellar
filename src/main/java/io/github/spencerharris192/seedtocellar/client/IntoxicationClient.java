@@ -7,23 +7,23 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.event.ViewportEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.neoforge.client.event.ViewportEvent;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
 
 /**
  * The view sways when Tipsy or worse. Strength follows the stage, vanilla's Distortion Effects
  * accessibility slider, and our client swayIntensity option (either at 0 = no sway at all).
  */
-@Mod.EventBusSubscriber(modid = SeedToCellar.MOD_ID, value = Dist.CLIENT)
+@EventBusSubscriber(modid = SeedToCellar.MOD_ID, value = Dist.CLIENT)
 public final class IntoxicationClient {
     @SubscribeEvent
     public static void onCameraAngles(ViewportEvent.ComputeCameraAngles event) {
         Minecraft mc = Minecraft.getInstance();
         Player player = mc.player;
         if (player == null) return;
-        MobEffectInstance tipsy = player.getEffect(ModEffects.TIPSY.get());
+        MobEffectInstance tipsy = player.getEffect(ModEffects.TIPSY);
         if (tipsy == null || tipsy.getAmplifier() < 1) return; // Merry: no sway
         double scale = mc.options.screenEffectScale().get() * ModConfigs.CLIENT.swayIntensity.get();
         if (scale <= 0) return;

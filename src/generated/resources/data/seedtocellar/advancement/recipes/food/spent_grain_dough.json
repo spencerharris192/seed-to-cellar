@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_spent_grain": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:spent_grain"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipes": "seedtocellar:spent_grain_dough"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_spent_grain"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "seedtocellar:spent_grain_dough"
+    ]
+  }
+}

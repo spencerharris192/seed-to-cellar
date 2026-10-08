@@ -7,7 +7,7 @@ import net.minecraft.world.level.material.MapColor;
 import java.util.Optional;
 
 /**
- * The ten vanilla woods a cask can be made from (GDD section 13). Each drink that ages lists its ideal
+ * The twelve vanilla woods a cask can be made from (GDD section 13). Each drink that ages lists its ideal
  * woods ({@link DrinkProfile#woods()}): there the aging star comes on time, in any other wood it takes
  * twice as long. Crimson and warped casks age twice as fast but never give the aging star.
  */
@@ -20,6 +20,8 @@ public enum CaskWood {
     DARK_OAK("dark_oak", MapColor.COLOR_BROWN, SoundType.WOOD, false),
     MANGROVE("mangrove", MapColor.COLOR_RED, SoundType.WOOD, false),
     CHERRY("cherry", MapColor.TERRACOTTA_WHITE, SoundType.CHERRY_WOOD, false),
+    PALE_OAK("pale_oak", MapColor.QUARTZ, SoundType.WOOD, false),
+    POPLAR("poplar", MapColor.COLOR_LIGHT_GRAY, SoundType.WOOD, false),
     CRIMSON("crimson", MapColor.CRIMSON_STEM, SoundType.NETHER_WOOD, true),
     WARPED("warped", MapColor.WARPED_STEM, SoundType.NETHER_WOOD, true);
 

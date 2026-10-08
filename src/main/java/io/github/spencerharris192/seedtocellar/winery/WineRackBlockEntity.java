@@ -1,5 +1,16 @@
 package io.github.spencerharris192.seedtocellar.winery;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
+import io.github.spencerharris192.seedtocellar.brewing.station.StationItems;
+import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import java.util.List;
 import java.util.ArrayList;
 import net.minecraft.network.chat.MutableComponent;
@@ -15,11 +26,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
 
 /**
  * The bottles in a rack (GDD section 16): one per place, top row first, left to right as you face it, as many as its
@@ -27,13 +33,12 @@ import net.minecraftforge.items.ItemStackHandler;
  */
 public class WineRackBlockEntity extends SyncedBlockEntity implements HydrometerReadable {
     private final RackLayout layout;
-    private final ItemStackHandler bottles;
-    private final LazyOptional<IItemHandler> itemCap;
+    private final StationItems bottles;
 
     public WineRackBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.WINE_RACK.get(), pos, state);
         this.layout = state.getBlock() instanceof WineRackBlock rack ? rack.layout() : RackLayout.WINE_RACK;
-        this.bottles = new ItemStackHandler(layout.slots()) {
+        this.bottles = new StationItems(layout.slots()) {
             @Override
             public int getSlotLimit(int slot) {
                 return 1;
@@ -50,7 +55,6 @@ public class WineRackBlockEntity extends SyncedBlockEntity implements Hydrometer
                 if (level != null) level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
             }
         };
-        this.itemCap = LazyOptional.of(() -> bottles);
     }
 
     /** How many different drinks it holds (Tavern Keeper: a Bottle Shelf of six). */
@@ -66,7 +70,7 @@ public class WineRackBlockEntity extends SyncedBlockEntity implements Hydrometer
         return layout;
     }
 
-    public ItemStackHandler bottles() {
+    public StationItems bottles() {
         return bottles;
     }
 
@@ -101,7 +105,8 @@ public class WineRackBlockEntity extends SyncedBlockEntity implements Hydrometer
         return lines;
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < bottles.getSlots(); i++) {
             Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), bottles.getStackInSlot(i));
@@ -109,28 +114,20 @@ public class WineRackBlockEntity extends SyncedBlockEntity implements Hydrometer
     }
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Bottles", bottles.serializeNBT());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        bottles.serialize(output.child("Bottles"));
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        CompoundTag saved = tag.getCompound("Bottles");
-        saved.putInt("Size", bottles.getSlots());   // the layout decides the size, whatever was saved
-        bottles.deserializeNBT(saved);
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        bottles.deserialize(input.childOrEmpty("Bottles"));   // the layout decides the size, whatever was saved
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return itemCap.cast();
-        return super.getCapability(cap, side);
+    /** Hoppers and pipes put bottles in and take them out. */
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return bottles;
     }
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemCap.invalidate();
-    }
 }

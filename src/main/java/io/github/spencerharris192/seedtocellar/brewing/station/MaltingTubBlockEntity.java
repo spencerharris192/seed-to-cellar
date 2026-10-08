@@ -1,5 +1,14 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.HydrometerReadable;
 import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import io.github.spencerharris192.seedtocellar.recipe.MaltingRecipe;
@@ -9,29 +18,22 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.SimpleContainer;
+import io.github.spencerharris192.seedtocellar.recipe.Recipes;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
 import java.util.Optional;
@@ -49,14 +51,14 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
 
     public enum Phase { IDLE, STEEPING, SPROUTING }
 
-    private final FluidTank tank = new FluidTank(CAPACITY, fluid -> fluid.getFluid().is(FluidTags.WATER)) {
+    private final StationTank tank = new StationTank(CAPACITY, fluid -> fluid.getFluid().is(FluidTags.WATER)) {
         @Override
         protected void onContentsChanged() {
             changed();
         }
     };
 
-    private final ItemStackHandler items = new ItemStackHandler(2) {
+    private final StationItems items = new StationItems(2) {
         @Override
         protected void onContentsChanged(int slot) {
             changed();
@@ -75,10 +77,7 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
 
     private Phase phase = Phase.IDLE;
     private long phaseEnd;
-    private ResourceLocation recipeId;
-
-    private final LazyOptional<IItemHandler> itemCap = LazyOptional.of(AutomationItems::new);
-    private final LazyOptional<IFluidHandler> fluidCap = LazyOptional.of(AutomationFluids::new);
+    private Identifier recipeId;
 
     public MaltingTubBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.MALTING_TUB.get(), pos, state);
@@ -113,28 +112,27 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
 
     private void changed() {
         setChanged();
-        if (level != null && !level.isClientSide) {
+        if (level != null && !level.isClientSide()) {
             tryStart();
             updateBlockState();
         }
     }
 
-    private Optional<MaltingRecipe> findRecipe(ItemStack stack) {
-        if (level == null || stack.isEmpty()) return Optional.empty();
-        return level.getRecipeManager().getRecipeFor(ModRecipes.MALTING.get(), new SimpleContainer(stack), level);
+    private Optional<RecipeHolder<MaltingRecipe>> findRecipe(ItemStack stack) {
+        if (stack.isEmpty()) return Optional.empty();
+        return Recipes.find(level, ModRecipes.MALTING.get(), new SingleRecipeInput(stack));
     }
 
     private Optional<MaltingRecipe> currentRecipe() {
-        if (level == null || recipeId == null) return Optional.empty();
-        return level.getRecipeManager().byKey(recipeId).filter(MaltingRecipe.class::isInstance).map(MaltingRecipe.class::cast);
+        return Recipes.byId(level, recipeId, MaltingRecipe.class);
     }
 
     private void tryStart() {
         if (phase != Phase.IDLE || !output().isEmpty() || tank.getFluidAmount() < CAPACITY || input().isEmpty()) return;
-        findRecipe(input()).ifPresent(recipe -> {
+        findRecipe(input()).ifPresent(holder -> {
             phase = Phase.STEEPING;
-            recipeId = recipe.getId();
-            phaseEnd = level.getGameTime() + ModConfigs.processTicks(recipe.steepTime());
+            recipeId = holder.id().identifier();
+            phaseEnd = level.getGameTime() + ModConfigs.processTicks(holder.value().steepTime());
             scheduleCheck();
             level.playSound(null, worldPosition, SoundEvents.BUCKET_EMPTY, SoundSource.BLOCKS, 0.6F, 1.2F);
         });
@@ -142,7 +140,7 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
 
     /** Moves through any phases whose end time has passed. Called by the scheduled tick and on use. */
     public void advance() {
-        if (level == null || level.isClientSide || phase == Phase.IDLE) return;
+        if (level == null || level.isClientSide() || phase == Phase.IDLE) return;
         Optional<MaltingRecipe> recipe = currentRecipe();
         if (recipe.isEmpty()) { // recipe removed by a datapack: give the grain back
             phase = Phase.IDLE;
@@ -158,7 +156,7 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
                 phase = Phase.SPROUTING;
                 phaseEnd += ModConfigs.processTicks(recipe.get().sproutTime());
             } else {
-                ItemStack result = recipe.get().result().copy();
+                ItemStack result = recipe.get().result();
                 result.setCount(result.getCount() * input().getCount());
                 phase = Phase.IDLE;
                 recipeId = null;
@@ -192,14 +190,14 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
     // --- player interaction ----------------------------------------------------------------
 
     public InteractionResult onUse(Player player, InteractionHand hand, BlockHitResult hit) {
-        boolean client = level.isClientSide;
+        boolean client = level.isClientSide();
         if (!client) advance();
         ItemStack held = player.getItemInHand(hand);
 
-        if (FluidUtil.getFluidHandler(held).isPresent()) {
+        if (holdsLiquidContainer(player, hand)) {
             if (phase != Phase.IDLE) return InteractionResult.PASS;
-            if (!client) FluidUtil.interactWithFluidHandler(player, hand, tank);
-            return InteractionResult.sidedSuccess(client);
+            if (!client) pourWith(player, hand, tank);
+            return InteractionResult.SUCCESS;
         }
         if (!held.isEmpty() && phase == Phase.IDLE && output().isEmpty() && findRecipe(held).isPresent()) {
             if (!client) {
@@ -209,17 +207,17 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
                     level.playSound(null, worldPosition, SoundEvents.CROP_PLANTED, SoundSource.BLOCKS, 1.0F, 0.8F);
                 }
             }
-            return InteractionResult.sidedSuccess(client);
+            return InteractionResult.SUCCESS;
         }
         if (held.isEmpty()) {
             if (!client) {
                 if (!output().isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, items.extractItem(OUTPUT, 64, false));
+                    give(player, items.extractItem(OUTPUT, 64, false));
                 } else if (phase == Phase.IDLE && !input().isEmpty()) {
-                    ItemHandlerHelper.giveItemToPlayer(player, items.extractItem(INPUT, 64, false));
+                    give(player, items.extractItem(INPUT, 64, false));
                 }
             }
-            return InteractionResult.sidedSuccess(client);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
@@ -237,7 +235,8 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
         return List.of(Component.translatable(h + "empty"));
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < items.getSlots(); i++) {
             Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), items.getStackInSlot(i));
@@ -247,116 +246,80 @@ public class MaltingTubBlockEntity extends SyncedBlockEntity implements Hydromet
     // --- save / load -----------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Tank", tank.writeToNBT(new CompoundTag()));
-        tag.put("Items", items.serializeNBT());
-        tag.putString("Phase", phase.name());
-        tag.putLong("PhaseEnd", phaseEnd);
-        if (recipeId != null) tag.putString("Recipe", recipeId.toString());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        tank.serialize(output.child("Tank"));
+        items.serialize(output.child("Items"));
+        output.putString("Phase", phase.name());
+        output.putLong("PhaseEnd", phaseEnd);
+        if (recipeId != null) output.putString("Recipe", recipeId.toString());
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        tank.readFromNBT(tag.getCompound("Tank"));
-        items.deserializeNBT(tag.getCompound("Items"));
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tank.deserialize(input.childOrEmpty("Tank"));
+        items.deserialize(input.childOrEmpty("Items"));
         try {
-            phase = Phase.valueOf(tag.getString("Phase"));
+            phase = Phase.valueOf(input.getStringOr("Phase", ""));
         } catch (IllegalArgumentException e) {
             phase = Phase.IDLE;
         }
-        phaseEnd = tag.getLong("PhaseEnd");
-        recipeId = tag.contains("Recipe") ? ResourceLocation.tryParse(tag.getString("Recipe")) : null;
+        phaseEnd = input.getLongOr("PhaseEnd", 0L);
+        recipeId = input.getString("Recipe").map(Identifier::tryParse).orElse(null);
     }
 
     // --- automation ------------------------------------------------------------------------
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return itemCap.cast();
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return fluidCap.cast();
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        itemCap.invalidate();
-        fluidCap.invalidate();
-    }
-
     /** Hoppers: grain in (only while idle and empty of malt), green malt out. */
-    private class AutomationItems implements IItemHandler {
+    private final ResourceHandler<ItemResource> automationItems = new DelegatingResourceHandler<>(items) {
         @Override
-        public int getSlots() {
-            return 2;
+        public boolean isValid(int index, ItemResource resource) {
+            return index == INPUT && super.isValid(index, resource);
         }
 
         @Override
-        public ItemStack getStackInSlot(int slot) {
-            return items.getStackInSlot(slot);
+        public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            if (index != INPUT || phase != Phase.IDLE || !output().isEmpty()) return 0;
+            return super.insert(index, resource, amount, transaction);
         }
 
         @Override
-        public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-            if (slot != INPUT || phase != Phase.IDLE || !output().isEmpty()) return stack;
-            return items.insertItem(INPUT, stack, simulate);
+        public int insert(ItemResource resource, int amount, TransactionContext transaction) {
+            return insert(INPUT, resource, amount, transaction);
         }
 
         @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot != OUTPUT) return ItemStack.EMPTY;
+        public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            if (index != OUTPUT) return 0;
             advance();
-            return items.extractItem(OUTPUT, amount, simulate);
+            return super.extract(index, resource, amount, transaction);
         }
 
         @Override
-        public int getSlotLimit(int slot) {
-            return items.getSlotLimit(slot);
+        public int extract(ItemResource resource, int amount, TransactionContext transaction) {
+            return extract(OUTPUT, resource, amount, transaction);
         }
-
-        @Override
-        public boolean isItemValid(int slot, ItemStack stack) {
-            return slot == INPUT && items.isItemValid(slot, stack);
-        }
-    }
+    };
 
     /** Pipes: water in or out, but never while a batch is steeping. */
-    private class AutomationFluids implements IFluidHandler {
+    private final ResourceHandler<FluidResource> automationFluids = new DelegatingResourceHandler<>(tank) {
         @Override
-        public int getTanks() {
-            return 1;
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return phase == Phase.IDLE ? super.insert(index, resource, amount, transaction) : 0;
         }
 
         @Override
-        public FluidStack getFluidInTank(int tankIndex) {
-            return tank.getFluid();
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return phase == Phase.IDLE ? super.extract(index, resource, amount, transaction) : 0;
         }
+    };
 
-        @Override
-        public int getTankCapacity(int tankIndex) {
-            return CAPACITY;
-        }
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return automationItems;
+    }
 
-        @Override
-        public boolean isFluidValid(int tankIndex, FluidStack stack) {
-            return tank.isFluidValid(stack);
-        }
-
-        @Override
-        public int fill(FluidStack resource, FluidAction action) {
-            return phase == Phase.IDLE ? tank.fill(resource, action) : 0;
-        }
-
-        @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
-            return phase == Phase.IDLE ? tank.drain(resource, action) : FluidStack.EMPTY;
-        }
-
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            return phase == Phase.IDLE ? tank.drain(maxDrain, action) : FluidStack.EMPTY;
-        }
+    public ResourceHandler<FluidResource> fluidHandler(@Nullable Direction side) {
+        return automationFluids;
     }
 }

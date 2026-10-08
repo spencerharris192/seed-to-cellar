@@ -1,5 +1,14 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import org.jspecify.annotations.Nullable;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.DrinkItem;
 import io.github.spencerharris192.seedtocellar.brewing.HydrometerReadable;
@@ -14,10 +23,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import io.github.spencerharris192.seedtocellar.recipe.Recipes;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,16 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RangedWrapper;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -56,14 +58,14 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
     public static final int LEES = 1;
     public static final float WILD_SLOWDOWN = 1.5F;
 
-    private final FluidTank tank = new FluidTank(CAPACITY) {
+    private final StationTank tank = new StationTank(CAPACITY) {
         @Override
         protected void onContentsChanged() {
             sync();
         }
     };
 
-    private final ItemStackHandler items = new ItemStackHandler(2) {
+    private final StationItems items = new StationItems(2) {
         @Override
         protected void onContentsChanged(int slot) {
             sync();
@@ -80,7 +82,7 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
     private long end;
     private YeastType yeastUsed = YeastType.WILD;
     private boolean temperatureOk;
-    private ResourceLocation recipeId;
+    private Identifier recipeId;
 
     private final ContainerData data = new ContainerData() {
         @Override
@@ -104,21 +106,17 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
         }
     };
 
-    private final LazyOptional<IItemHandler> yeastCap = LazyOptional.of(() -> new RangedWrapper(items, YEAST, YEAST + 1));
-    private final LazyOptional<IItemHandler> leesCap = LazyOptional.of(() -> new RangedWrapper(items, LEES, LEES + 1));
-    private final LazyOptional<IFluidHandler> fluidCap = LazyOptional.of(AutomationFluids::new);
-
     public FermentingVatBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.FERMENTING_VAT.get(), pos, state);
     }
 
     // --- queries ---------------------------------------------------------------------------
 
-    public FluidTank tank() {
+    public StationTank tank() {
         return tank;
     }
 
-    public ItemStackHandler items() {
+    public StationItems items() {
         return items;
     }
 
@@ -145,27 +143,30 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
 
     /** What the current contents would ferment into with the current yeast (client and server). */
     public Optional<FermentingRecipe> expectedRecipe() {
+        return expectedHolder().map(RecipeHolder::value);
+    }
+
+    private Optional<RecipeHolder<FermentingRecipe>> expectedHolder() {
         if (level == null || tank.isEmpty()) return Optional.empty();
         YeastType yeast = YeastType.of(items.getStackInSlot(YEAST));
-        return level.getRecipeManager().getAllRecipesFor(ModRecipes.FERMENTING.get()).stream()
-                .filter(r -> r.matches(tank.getFluid(), yeast))
-                .max(Comparator.comparingInt(FermentingRecipe::priority));
+        return Recipes.holders(level, ModRecipes.FERMENTING.get())
+                .filter(h -> h.value().matches(tank.getFluid(), yeast))
+                .max(Comparator.comparingInt(h -> h.value().priority()));
     }
 
     private Optional<FermentingRecipe> currentRecipe() {
-        if (level == null || recipeId == null) return Optional.empty();
-        return level.getRecipeManager().byKey(recipeId).filter(FermentingRecipe.class::isInstance).map(FermentingRecipe.class::cast);
+        return Recipes.byId(level, recipeId, FermentingRecipe.class);
     }
 
     // --- player actions --------------------------------------------------------------------
 
     public void useFluidContainer(Player player, InteractionHand hand) {
         if (fermenting) {
-            player.displayClientMessage(Component.translatable("message.seedtocellar.vat.busy").withStyle(ChatFormatting.YELLOW), true);
+            player.sendOverlayMessage(Component.translatable("message.seedtocellar.vat.busy").withStyle(ChatFormatting.YELLOW));
         } else if (!isOpen()) {
-            player.displayClientMessage(Component.translatable("message.seedtocellar.vat.closed").withStyle(ChatFormatting.YELLOW), true);
+            player.sendOverlayMessage(Component.translatable("message.seedtocellar.vat.closed").withStyle(ChatFormatting.YELLOW));
         } else {
-            FluidUtil.interactWithFluidHandler(player, hand, tank);
+            pourWith(player, hand, tank);
         }
     }
 
@@ -187,8 +188,8 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
         if (level == null || isOpen() == open) return;
         if (open && fermenting) {
             if (player != null) {
-                player.displayClientMessage(Component.translatable("message.seedtocellar.vat.busy_progress",
-                        Math.round(progress() * 100)).withStyle(ChatFormatting.YELLOW), true);
+                player.sendOverlayMessage(Component.translatable("message.seedtocellar.vat.busy_progress",
+                        Math.round(progress() * 100)).withStyle(ChatFormatting.YELLOW));
             }
             return;
         }
@@ -199,10 +200,11 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
 
     private void tryStart(Player player) {
         if (fermenting || tank.isEmpty()) return;
-        Optional<FermentingRecipe> recipe = expectedRecipe();
+        Optional<RecipeHolder<FermentingRecipe>> holder = expectedHolder();
+        Optional<FermentingRecipe> recipe = holder.map(RecipeHolder::value);
         if (recipe.isEmpty()) {
             if (player != null) {
-                player.displayClientMessage(Component.translatable("message.seedtocellar.vat.nothing").withStyle(ChatFormatting.YELLOW), true);
+                player.sendOverlayMessage(Component.translatable("message.seedtocellar.vat.nothing").withStyle(ChatFormatting.YELLOW));
             }
             return;
         }
@@ -211,7 +213,7 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
         if (yeastUsed != YeastType.WILD) items.extractItem(YEAST, 1, false);
         float ticks = recipe.get().time() * ModConfigs.SERVER.fermentationTimeMultiplier.get().floatValue();
         if (yeastUsed == YeastType.WILD) ticks *= WILD_SLOWDOWN;
-        recipeId = recipe.get().getId();
+        recipeId = holder.get().id().identifier();
         start = level.getGameTime();
         end = start + Math.max(1, Math.round(ticks));
         temperatureOk = recipe.get().suits(Temperature.at(level, worldPosition));
@@ -234,7 +236,7 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
 
     /** Finishes the batch if its time is up. Called by the scheduled tick and when drained. */
     public void advance() {
-        if (!fermenting || level == null || level.isClientSide) return;
+        if (!fermenting || level == null || level.isClientSide()) return;
         if (level.getGameTime() < end) {
             level.scheduleTick(worldPosition, getBlockState().getBlock(), (int) Math.max(1, end - level.getGameTime()));
             return;
@@ -261,7 +263,7 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
         if (current.isEmpty()) {
             items.setStackInSlot(LEES, lees);
             remainder = ItemStack.EMPTY;
-        } else if (ItemStack.isSameItemSameTags(current, lees)) {
+        } else if (ItemStack.isSameItemSameComponents(current, lees)) {
             int moved = Math.min(lees.getCount(), current.getMaxStackSize() - current.getCount());
             items.setStackInSlot(LEES, current.copyWithCount(current.getCount() + moved));
             remainder = lees.copyWithCount(lees.getCount() - moved);
@@ -277,23 +279,24 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
         List<Component> lines = new ArrayList<>();
         String h = "hydrometer.seedtocellar.";
         FluidStack fluid = tank.getFluid();
-        lines.add(fluid.isEmpty() ? Component.translatable(h + "empty") : fluid.getDisplayName().copy().append(" " + fluid.getAmount() + " mB"));
+        lines.add(fluid.isEmpty() ? Component.translatable(h + "empty") : fluid.getHoverName().copy().append(" " + fluid.getAmount() + " mB"));
         Optional<FermentingRecipe> recipe = fermenting ? currentRecipe() : expectedRecipe();
         recipe.ifPresent(r -> {
             if (fermenting) lines.add(Component.translatable("gui.seedtocellar.vat.fermenting", Math.round(progress() * 100)));
-            else lines.add(Component.translatable("gui.seedtocellar.vat.makes", new FluidStack(r.result(), 1).getDisplayName()));
+            else lines.add(Component.translatable("gui.seedtocellar.vat.makes", new FluidStack(r.result(), 1).getHoverName()));
             Temperature now = Temperature.at(level, worldPosition);
             boolean ok = fermenting ? temperatureOk && r.suits(now) : r.suits(now);
             lines.add(Component.translatable(h + "temperature", now.displayName(), r.idealName())
                     .withStyle(ok ? ChatFormatting.GREEN : ChatFormatting.RED));
         });
-        if (!fluid.isEmpty() && fluid.getTag() != null && fluid.getTag().contains(BrewQuality.TAG)) {
+        if (!fluid.isEmpty() && BrewQuality.has(fluid)) {
             lines.add(DrinkItem.stars(BrewQuality.of(fluid).stars()));
         }
         return lines;
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < items.getSlots(); i++) {
             Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), items.getStackInSlot(i));
@@ -315,70 +318,56 @@ public class FermentingVatBlockEntity extends SyncedBlockEntity implements MenuP
     // --- save / load -----------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Tank", tank.writeToNBT(new CompoundTag()));
-        tag.put("Items", items.serializeNBT());
-        tag.putBoolean("Fermenting", fermenting);
-        tag.putLong("Start", start);
-        tag.putLong("End", end);
-        tag.putString("Yeast", yeastUsed.key);
-        tag.putBoolean("TemperatureOk", temperatureOk);
-        if (recipeId != null) tag.putString("Recipe", recipeId.toString());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        tank.serialize(output.child("Tank"));
+        items.serialize(output.child("Items"));
+        output.putBoolean("Fermenting", fermenting);
+        output.putLong("Start", start);
+        output.putLong("End", end);
+        output.putString("Yeast", yeastUsed.key);
+        output.putBoolean("TemperatureOk", temperatureOk);
+        if (recipeId != null) output.putString("Recipe", recipeId.toString());
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        tank.readFromNBT(tag.getCompound("Tank"));
-        items.deserializeNBT(tag.getCompound("Items"));
-        fermenting = tag.getBoolean("Fermenting");
-        start = tag.getLong("Start");
-        end = tag.getLong("End");
-        yeastUsed = YeastType.byKey(tag.getString("Yeast"));
-        temperatureOk = tag.getBoolean("TemperatureOk");
-        recipeId = tag.contains("Recipe") ? ResourceLocation.tryParse(tag.getString("Recipe")) : null;
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tank.deserialize(input.childOrEmpty("Tank"));
+        items.deserialize(input.childOrEmpty("Items"));
+        fermenting = input.getBooleanOr("Fermenting", false);
+        start = input.getLongOr("Start", 0L);
+        end = input.getLongOr("End", 0L);
+        yeastUsed = YeastType.byKey(input.getStringOr("Yeast", ""));
+        temperatureOk = input.getBooleanOr("TemperatureOk", false);
+        recipeId = input.getString("Recipe").map(Identifier::tryParse).orElse(null);
     }
 
     // --- automation ------------------------------------------------------------------------
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return fluidCap.cast();
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return side == Direction.DOWN ? leesCap.cast() : yeastCap.cast();
-        return super.getCapability(cap, side);
-    }
-
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        yeastCap.invalidate();
-        leesCap.invalidate();
-        fluidCap.invalidate();
-    }
-
     /** Pipes may fill (lid open) and drain, but never while a batch is fermenting. */
-    private class AutomationFluids implements IFluidHandler {
-        @Override public int getTanks() { return 1; }
-        @Override public FluidStack getFluidInTank(int t) { return tank.getFluid(); }
-        @Override public int getTankCapacity(int t) { return CAPACITY; }
-        @Override public boolean isFluidValid(int t, FluidStack stack) { return tank.isFluidValid(stack); }
-
+    private final ResourceHandler<FluidResource> automationFluids = new DelegatingResourceHandler<>(tank) {
         @Override
-        public int fill(FluidStack resource, FluidAction action) {
-            return !fermenting && isOpen() ? tank.fill(resource, action) : 0;
+        public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+            return !fermenting && isOpen() ? super.insert(index, resource, amount, transaction) : 0;
         }
 
         @Override
-        public FluidStack drain(FluidStack resource, FluidAction action) {
+        public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
             advance();
-            return fermenting ? FluidStack.EMPTY : tank.drain(resource, action);
+            return fermenting ? 0 : super.extract(index, resource, amount, transaction);
         }
+    };
 
-        @Override
-        public FluidStack drain(int maxDrain, FluidAction action) {
-            advance();
-            return fermenting ? FluidStack.EMPTY : tank.drain(maxDrain, action);
-        }
+    private final ResourceHandler<ItemResource> yeastSide = RangedResourceHandler.ofSingleIndex(items, YEAST);
+    private final ResourceHandler<ItemResource> leesSide = RangedResourceHandler.ofSingleIndex(items, LEES);
+
+    /** Hoppers: yeast in from the top and sides, lees out from below. */
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return side == Direction.DOWN ? leesSide : yeastSide;
+    }
+
+    public ResourceHandler<FluidResource> fluidHandler(@Nullable Direction side) {
+        return automationFluids;
     }
 }

@@ -13,13 +13,13 @@ import io.github.spencerharris192.seedtocellar.recipe.MillingRecipe;
 import io.github.spencerharris192.seedtocellar.recipe.MixingRecipe;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
@@ -57,12 +57,12 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(Growing r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(Growing r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             var font = net.minecraft.client.Minecraft.getInstance().font;
             int y = 26;   // below the output slots' frames
             for (var line : font.split(Component.translatable(r.hintKey()), WIDTH - 2)) {
-                g.drawString(font, line, 1, y, 0x555555, false);
+                g.text(font, line, 1, y, 0xFF555555, false);
                 y += 10;
             }
             lines(g, 1, y, List.of(Component.translatable("tooltip.seedtocellar.climate", Component.translatable(r.climate().translationKey()))));
@@ -83,7 +83,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(MaltingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(MaltingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 44, 1);
             lines(g, 1, 24, List.of(Component.translatable(J + "malting.times", seconds(r.steepTime()), seconds(r.sproutTime()))));
         }
@@ -101,7 +101,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(KilningRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(KilningRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             flame.draw(g, 88, 3);
             lines(g, 1, 24, List.of(Component.translatable(J + "kiln.setting", r.roast().displayName(), seconds(r.time()))));
@@ -121,7 +121,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(MillingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(MillingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             lines(g, 1, 24, List.of(Component.translatable(J + "mill.cranks", r.cranks())));
         }
@@ -135,24 +135,24 @@ public final class StationCategories {
 
         @Override
         public void setRecipe(IRecipeLayoutBuilder b, CookingRecipe r, IFocusGroup focuses) {
-            List<Ingredient> ingredients = r.getIngredients();
+            List<Ingredient> ingredients = r.ingredients();
             for (int i = 0; i < ingredients.size(); i++) {
                 b.addSlot(RecipeIngredientRole.INPUT, 1 + (i % 2) * 18, 1 + (i / 2) * 18).setStandardSlotBackground()
                         .addIngredients(ingredients.get(i));
             }
             if (r.liquid() != null) {
                 b.addSlot(RecipeIngredientRole.INPUT, 43, 10).setStandardSlotBackground()
-                        .addIngredients(ForgeTypes.FLUID_STACK, r.liquid().examples())
+                        .addIngredients(NeoForgeTypes.FLUID_STACK, r.liquid().examples())
                         .setFluidRenderer(r.liquid().amount(), false, 16, 16);
             }
             if (r.needsContainer()) {
-                b.addSlot(RecipeIngredientRole.INPUT, 97, 1).setStandardSlotBackground().addIngredients(r.container());
+                b.addSlot(RecipeIngredientRole.INPUT, 97, 1).setStandardSlotBackground().addIngredients(r.container().orElseThrow());
             }
             b.addSlot(RecipeIngredientRole.OUTPUT, 97, 19).setOutputSlotBackground().addItemStack(r.result());
         }
 
         @Override
-        public void draw(CookingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(CookingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 67, 19);
             lines(g, 1, 42, List.of(Component.translatable(J + "cooking.time", seconds(r.time()))));
         }
@@ -170,7 +170,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(DryingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(DryingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             lines(g, 1, 24, List.of(Component.translatable(J + "drying.time", seconds(r.time())),
                     Component.translatable(J + "drying.weather")));
@@ -187,13 +187,13 @@ public final class StationCategories {
             b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addFluidStack(r.liquid().examples().isEmpty()
                     ? Fluids.WATER : r.liquid().examples().get(0).getFluid(), 1000).setFluidRenderer(1000, false, 16, 16);
             b.addSlot(RecipeIngredientRole.INPUT, 21, 1).setStandardSlotBackground()
-                    .addItemStacks(java.util.Arrays.stream(r.ingredient().getItems()).map(s -> s.copyWithCount(r.perBucket())).toList());
+                    .addItemStacks(r.ingredient().map(i -> i.items().map(h -> new ItemStack(h, r.perBucket())).toList()).orElse(List.of()));
             b.addSlot(RecipeIngredientRole.OUTPUT, 71, 1).setOutputSlotBackground().addFluidStack(r.result(), 1000)
                     .setFluidRenderer(1000, false, 16, 16);
         }
 
         @Override
-        public void draw(MixingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(MixingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 44, 1);
             lines(g, 1, 24, List.of(Component.translatable(r.boilsDown() ? J + "mixing.boil_down" : J + "mixing.per_bucket", r.perBucket())));
         }
@@ -212,7 +212,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(CrushingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(CrushingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             lines(g, 1, 24, List.of(Component.translatable(J + "crushing.stomps", r.stomps()), Component.translatable(J + "crushing.jump")));
         }
@@ -226,14 +226,14 @@ public final class StationCategories {
         @Override
         public void setRecipe(IRecipeLayoutBuilder b, PressingRecipe r, IFocusGroup focuses) {
             b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground()
-                    .addItemStacks(java.util.Arrays.stream(r.ingredient().getItems()).map(s -> s.copyWithCount(r.count())).toList());
+                    .addItemStacks(r.ingredient().items().map(h -> new ItemStack(h, r.count())).toList());
             b.addSlot(RecipeIngredientRole.OUTPUT, 61, 1).setOutputSlotBackground()
                     .addFluidStack(r.result().getFluid(), r.result().getAmount()).setFluidRenderer(1000, false, 16, 16);
             if (!r.byproduct().isEmpty()) b.addSlot(RecipeIngredientRole.OUTPUT, 85, 1).setOutputSlotBackground().addItemStack(r.byproduct());
         }
 
         @Override
-        public void draw(PressingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(PressingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 26, 1);
             lines(g, 1, 24, List.of(Component.translatable(J + "pressing.cranks", r.count(), r.cranks())));
         }
@@ -251,7 +251,7 @@ public final class StationCategories {
         public void setRecipe(IRecipeLayoutBuilder b, KettleStep step, IFocusGroup focuses) {
             if (!step.boil()) {
                 List<ItemStack> grist = new ArrayList<>();
-                for (MaltType type : MaltType.values()) grist.addAll(List.of(Ingredient.of(type.gristTag).getItems()));
+                for (MaltType type : MaltType.values()) net.minecraft.core.registries.BuiltInRegistries.ITEM.getTagOrEmpty(type.gristTag).forEach(h -> grist.add(new ItemStack(h)));
                 b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addItemStacks(grist);
                 b.addSlot(RecipeIngredientRole.INPUT, 21, 1).setStandardSlotBackground().addFluidStack(Fluids.WATER, 1000)
                         .setFluidRenderer(1000, false, 16, 16);
@@ -271,7 +271,7 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(KettleStep step, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(KettleStep step, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 44, 1);
             if (step.boil()) {
                 lines(g, 1, 24, List.of(Component.translatable(J + "kettle.boil"), Component.translatable(J + "kettle.heat")));
@@ -290,13 +290,13 @@ public final class StationCategories {
         public void setRecipe(IRecipeLayoutBuilder b, FermentingRecipe r, IFocusGroup focuses) {
             b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addFluidStack(r.input(), 1000)
                     .setFluidRenderer(1000, false, 16, 16);
-            b.addSlot(RecipeIngredientRole.CATALYST, 21, 1).setStandardSlotBackground().addItemStack(new ItemStack(r.yeast().leesItem()));
+            b.addSlot(RecipeIngredientRole.CRAFTING_STATION, 21, 1).setStandardSlotBackground().addItemStack(new ItemStack(r.yeast().leesItem()));
             b.addSlot(RecipeIngredientRole.OUTPUT, 71, 1).setOutputSlotBackground().addFluidStack(r.result(), 1000)
                     .setFluidRenderer(1000, false, 16, 16);
         }
 
         @Override
-        public void draw(FermentingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(FermentingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 44, 1);
             List<Component> text = new ArrayList<>();
             if (r.input() == ModFluids.SWEET_WORT.get() || r.input() == ModFluids.HOPPED_WORT.get()) {
@@ -320,7 +320,7 @@ public final class StationCategories {
             }
             if (any) text.add(malts);
             text.add(Component.translatable(J + "ferment.conditions", r.idealName(), days(r.time())));
-            text.add(r.allowWild() ? Component.translatable(J + "ferment.yeast_wild_ok", r.yeast().leesItem().getDescription())
+            text.add(r.allowWild() ? Component.translatable(J + "ferment.yeast_wild_ok", new ItemStack(r.yeast().leesItem()).getHoverName())
                     : Component.translatable(J + "ferment.yeast_needed"));
             lines(g, 1, 24, text);
         }
@@ -334,14 +334,14 @@ public final class StationCategories {
         @Override
         public void setRecipe(IRecipeLayoutBuilder b, JarRecipe r, IFocusGroup focuses) {
             int x = 1;
-            for (Ingredient ingredient : r.getIngredients()) {
+            for (Ingredient ingredient : r.ingredients()) {
                 b.addSlot(RecipeIngredientRole.INPUT, x, 1).setStandardSlotBackground().addIngredients(ingredient);
                 x += 18;
             }
             if (r.liquid() != null) {
                 b.addSlot(RecipeIngredientRole.INPUT, x, 1).setStandardSlotBackground()
-                        .addIngredients(ForgeTypes.FLUID_STACK, r.liquid().examples().stream()
-                                .map(f -> new net.minecraftforge.fluids.FluidStack(f.getFluid(), Math.max(250, r.fluidAmount()))).toList())
+                        .addIngredients(NeoForgeTypes.FLUID_STACK, r.liquid().examples().stream()
+                                .map(f -> new net.neoforged.neoforge.fluids.FluidStack(f.getFluid(), Math.max(250, r.fluidAmount()))).toList())
                         .setFluidRenderer(1000, false, 16, 16);
                 x += 18;
             }
@@ -351,8 +351,8 @@ public final class StationCategories {
         }
 
         @Override
-        public void draw(JarRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
-            int inputs = r.getIngredients().size() + (r.liquid() != null ? 1 : 0);
+        public void draw(JarRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
+            int inputs = r.ingredients().size() + (r.liquid() != null ? 1 : 0);
             arrow.draw(g, 1 + inputs * 18 + 3, 1);
             List<Component> text = new ArrayList<>();
             text.add(Component.translatable(J + "jar.time", days(r.time())));
@@ -370,14 +370,14 @@ public final class StationCategories {
 
         @Override
         public void setRecipe(IRecipeLayoutBuilder b, io.github.spencerharris192.seedtocellar.recipe.DistillingRecipe r, IFocusGroup focuses) {
-            List<net.minecraftforge.fluids.FluidStack> inputs = r.input().examples().stream()
-                    .map(f -> new net.minecraftforge.fluids.FluidStack(f.getFluid(), 1000)).toList();
-            b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addIngredients(ForgeTypes.FLUID_STACK, inputs)
+            List<net.neoforged.neoforge.fluids.FluidStack> inputs = r.input().examples().stream()
+                    .map(f -> new net.neoforged.neoforge.fluids.FluidStack(f.getFluid(), 1000)).toList();
+            b.addSlot(RecipeIngredientRole.INPUT, 1, 1).setStandardSlotBackground().addIngredients(NeoForgeTypes.FLUID_STACK, inputs)
                     .setFluidRenderer(1000, false, 16, 16);
             int x = 21;
             if (r.filter()) {
-                b.addSlot(RecipeIngredientRole.CATALYST, x, 1).setStandardSlotBackground()
-                        .addIngredients(Ingredient.of(io.github.spencerharris192.seedtocellar.registry.ModTags.Items.FILTER_CHARCOAL));
+                b.addSlot(RecipeIngredientRole.CRAFTING_STATION, x, 1).setStandardSlotBackground()
+                        .addIngredients(Ingredient.of(net.minecraft.core.registries.BuiltInRegistries.ITEM.getOrThrow(io.github.spencerharris192.seedtocellar.registry.ModTags.Items.FILTER_CHARCOAL)));
                 x += 18;
             }
             if (r.basket() != null) {
@@ -386,14 +386,14 @@ public final class StationCategories {
             }
             var out = b.addSlot(RecipeIngredientRole.OUTPUT, 91, 1).setOutputSlotBackground().setFluidRenderer(1000, false, 16, 16);
             if (r.result() != null) out.addFluidStack(r.result(), 500);
-            else out.addIngredients(ForgeTypes.FLUID_STACK, inputs.stream().map(f -> new net.minecraftforge.fluids.FluidStack(f.getFluid(), 500)).toList());
+            else out.addIngredients(NeoForgeTypes.FLUID_STACK, inputs.stream().map(f -> new net.neoforged.neoforge.fluids.FluidStack(f.getFluid(), 500)).toList());
             // the other half of the pot stays behind as stillage
             b.addSlot(RecipeIngredientRole.OUTPUT, 115, 1).setOutputSlotBackground().addFluidStack(ModFluids.STILLAGE.get(), 500)
                     .setFluidRenderer(1000, false, 16, 16);
         }
 
         @Override
-        public void draw(io.github.spencerharris192.seedtocellar.recipe.DistillingRecipe r, IRecipeSlotsView slots, GuiGraphics g, double mx, double my) {
+        public void draw(io.github.spencerharris192.seedtocellar.recipe.DistillingRecipe r, IRecipeSlotsView slots, GuiGraphicsExtractor g, double mx, double my) {
             arrow.draw(g, 64, 1);
             List<Component> text = new ArrayList<>();
             text.add(Component.translatable(J + (r.result() == null ? "distilling.again" : "distilling.run")));

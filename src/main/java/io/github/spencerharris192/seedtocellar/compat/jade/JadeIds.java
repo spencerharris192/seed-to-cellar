@@ -1,7 +1,7 @@
 package io.github.spencerharris192.seedtocellar.compat.jade;
 
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -13,12 +13,12 @@ import java.util.Map;
 public final class JadeIds {
     public static final Map<String, String> NAMES = new LinkedHashMap<>();
 
-    public static final ResourceLocation STATION = add("station", "Seed to Cellar: stations");
-    public static final ResourceLocation FARM = add("farm", "Seed to Cellar: climate and soil");
-    public static final ResourceLocation TABLE_FOOD = add("table_food", "Seed to Cellar: pies and feasts");
-    public static final ResourceLocation VINES = add("vines", "Seed to Cellar: vines on trellises");
+    public static final Identifier STATION = add("station", "Seed to Cellar: stations");
+    public static final Identifier FARM = add("farm", "Seed to Cellar: climate and soil");
+    public static final Identifier TABLE_FOOD = add("table_food", "Seed to Cellar: pies and feasts");
+    public static final Identifier VINES = add("vines", "Seed to Cellar: vines on trellises");
 
-    private static ResourceLocation add(String path, String name) {
+    private static Identifier add(String path, String name) {
         NAMES.put(path, name);
         return SeedToCellar.id(path);
     }

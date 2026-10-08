@@ -16,14 +16,13 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.data.BlockTagsProvider;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ModBlockTagsProvider extends BlockTagsProvider {
-    public ModBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup, ExistingFileHelper files) {
-        super(output, lookup, SeedToCellar.MOD_ID, files);
+public class ModBlockTagsProvider extends ValueTagsProvider<Block> {
+    public ModBlockTagsProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> lookup) {
+        super(output, BuiltInRegistries.BLOCK, lookup);
     }
 
     @Override
@@ -68,6 +67,11 @@ public class ModBlockTagsProvider extends BlockTagsProvider {
             for (String season : tree.climate.seasons()) tag(seasonCrops(season)).add(tree.leaves(), tree.sapling());
         }
         tag(BlockTags.MINEABLE_WITH_SHOVEL).add(ModBlocks.FERTILE_FARMLAND.get());
+        // Fertile Farmland is farmland: crops grow on it, and it keeps them growing.
+        for (TagKey<Block> farmland : java.util.List.of(BlockTags.SUPPORTS_VEGETATION, BlockTags.SUPPORTS_CROPS, BlockTags.GROWS_CROPS,
+                BlockTags.SUPPORT_OVERRIDE_CACTUS_FLOWER)) {
+            tag(farmland).add(ModBlocks.FERTILE_FARMLAND.get());
+        }
         tag(BlockTags.MINEABLE_WITH_HOE).add(ModBlocks.THATCH.get(), ModBlocks.THATCH_STAIRS.get(), ModBlocks.THATCH_SLAB.get());
         tag(BlockTags.STAIRS).add(ModBlocks.THATCH_STAIRS.get());
         for (StorageBlocks.Storage storage : ModBlocks.STORAGE) {

@@ -1,0 +1,15 @@
+{
+  "type": "seedtocellar:jar",
+  "fluid": "seedtocellar:vinegar",
+  "fluid_amount": 250,
+  "ingredients": [
+    "#c:crops/cucumber",
+    "#c:crops/cucumber",
+    "#c:crops/garlic",
+    "#c:crops/coriander"
+  ],
+  "result": {
+    "count": 4,
+    "id": "seedtocellar:pickles"
+  }
+}

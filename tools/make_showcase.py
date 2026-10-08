@@ -17,7 +17,7 @@ from structgen import Plot, compound_payload, tag_byte, tag_compound, tag_int, t
 
 ROOT = Path(__file__).resolve().parent.parent
 WORLD = ROOT / "run/saves/showcase"
-TEMPLATES = WORLD / "generated/seedtocellar/structures"
+TEMPLATES = WORLD / "generated/seedtocellar/structure"
 TOUR = ROOT / "run/showcase_tour.json"
 BLOCKSTATES = ROOT / "src/generated/resources/assets/seedtocellar/blockstates"
 M = "seedtocellar:"

@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:foods/fruit/cherry",
+  "result": {
+    "id": "seedtocellar:dried_cherries"
+  },
+  "time": 18000
+}

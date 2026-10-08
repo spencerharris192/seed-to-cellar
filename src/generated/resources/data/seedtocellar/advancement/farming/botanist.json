@@ -1,0 +1,59 @@
+{
+  "parent": "seedtocellar:farming/orchardist",
+  "criteria": {
+    "lavender": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:lavender"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "mint": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:mint"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "wormwood": {
+      "conditions": {
+        "items": [
+          {
+            "items": "seedtocellar:wormwood"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.botanist.description"
+    },
+    "frame": "goal",
+    "icon": {
+      "id": "seedtocellar:lavender"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.botanist.title"
+    }
+  },
+  "requirements": [
+    [
+      "mint"
+    ],
+    [
+      "lavender"
+    ],
+    [
+      "wormwood"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "minecraft:glow_berries",
+  "result": {
+    "amount": 75,
+    "fluid": "seedtocellar:glow_berry_juice"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "seedtocellar:mug",
+  "fluid": {
+    "fluid": "seedtocellar:red_wine"
+  },
+  "ingredients": [
+    "#c:foods/fruit/orange",
+    "#seedtocellar:sweeteners"
+  ],
+  "result": {
+    "id": "seedtocellar:mulled_wine"
+  }
+}

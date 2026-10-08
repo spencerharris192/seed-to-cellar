@@ -1,0 +1,9 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "#c:crops/coffee",
+  "result": {
+    "id": "seedtocellar:roasted_coffee"
+  },
+  "roast": "medium",
+  "time": 800
+}

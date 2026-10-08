@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "S": "#c:rods/wooden",
+    "T": "minecraft:smooth_stone_slab"
+  },
+  "pattern": [
+    " S ",
+    "TTT",
+    "TTT"
+  ],
+  "result": {
+    "id": "seedtocellar:millstone"
+  }
+}

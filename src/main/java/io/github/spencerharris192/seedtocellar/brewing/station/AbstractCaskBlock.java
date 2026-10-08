@@ -19,10 +19,9 @@ import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidUtil;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -30,7 +29,7 @@ import org.jetbrains.annotations.Nullable;
  * contents, and facing (the tap points at the player who placed it).
  */
 public abstract class AbstractCaskBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 
     protected AbstractCaskBlock(Properties properties) {
         super(properties);
@@ -59,7 +58,7 @@ public abstract class AbstractCaskBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -69,34 +68,34 @@ public abstract class AbstractCaskBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof CaskBlockEntity cask)) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
-        if (FluidUtil.getFluidHandler(held).isPresent()) {
-            if (!level.isClientSide) {
+        if (io.github.spencerharris192.seedtocellar.brewing.station.SyncedBlockEntity.holdsLiquidContainer(player, hand)) {
+            if (!level.isClientSide()) {
                 FluidStack before = cask.serving(cask.tank().getFluid());
                 int amount = cask.tank().getFluidAmount();
-                boolean moved = FluidUtil.interactWithFluidHandler(player, hand, cask.handler());
+                boolean moved = net.neoforged.neoforge.transfer.fluid.FluidUtil.interactWithFluidHandler(player, hand, pos, cask.handler(), null);
                 if (moved && cask.tank().getFluidAmount() < amount && player instanceof net.minecraft.server.level.ServerPlayer server
                         && io.github.spencerharris192.seedtocellar.brewing.Drinks.spirits().stream().anyMatch(d -> d.fluid().get() == before.getFluid())
-                        && io.github.spencerharris192.seedtocellar.brewing.AgedStyle.years(before.getTag())
+                        && io.github.spencerharris192.seedtocellar.brewing.AgedStyle.years(io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(before))
                         >= io.github.spencerharris192.seedtocellar.registry.ModTriggers.ANGELS_SHARE_YEARS) {
-                    io.github.spencerharris192.seedtocellar.registry.ModTriggers.ANGELS_SHARE.trigger(server);
+                    io.github.spencerharris192.seedtocellar.registry.ModTriggers.ANGELS_SHARE.get().trigger(server);
                 }
                 if (!moved && !isTapped(state) && !cask.tank().isEmpty()) {
-                    player.displayClientMessage(Component.translatable("message.seedtocellar.cask.no_tap"), true);
+                    player.sendOverlayMessage(Component.translatable("message.seedtocellar.cask.no_tap"));
                 }
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (held.isEmpty()) {
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 FluidStack serving = cask.serving(cask.tank().getFluid());
                 Component summary = serving.isEmpty() ? Component.translatable("hydrometer.seedtocellar.empty")
-                        : serving.getDisplayName().copy().append(" ").append(DrinkItem.stars(BrewQuality.of(serving).stars()));
-                player.displayClientMessage(summary, true);
+                        : serving.getHoverName().copy().append(" ").append(DrinkItem.stars(BrewQuality.of(serving).stars()));
+                player.sendOverlayMessage(summary);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }

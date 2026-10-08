@@ -6,7 +6,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
@@ -61,9 +61,9 @@ public abstract class SimpleCategory<T> implements IRecipeCategory<T> {
     }
 
     /** Writes lines of grey text starting at (x, y), 10 px apart. */
-    protected static void lines(GuiGraphics graphics, int x, int y, List<Component> text) {
+    protected static void lines(GuiGraphicsExtractor graphics, int x, int y, List<Component> text) {
         for (int i = 0; i < text.size(); i++) {
-            graphics.drawString(Minecraft.getInstance().font, text.get(i), x, y + i * 10, 0x555555, false);
+            graphics.text(Minecraft.getInstance().font, text.get(i), x, y + i * 10, 0xFF555555, false);
         }
     }
 

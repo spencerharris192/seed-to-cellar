@@ -84,7 +84,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout_mipped",
   "textures": {
     "all": "minecraft:block/dark_oak_leaves",
     "overlay": "seedtocellar:block/plum_leaves_blossom",

@@ -1,0 +1,23 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "seedtocellar:item/bourbon",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "neoforge:fluid_contents_tint"
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14861454
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 10821150
+      }
+    ]
+  }
+}

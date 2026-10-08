@@ -1,0 +1,13 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:hopped_wort",
+  "malt_max": {
+    "black": 0.0
+  },
+  "malt_min": {
+    "wheat": 0.5
+  },
+  "min_strength": "normal",
+  "priority": 45,
+  "result": "seedtocellar:wheat_beer"
+}

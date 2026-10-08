@@ -1,5 +1,13 @@
 package io.github.spencerharris192.seedtocellar.brewing.station;
 
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.RangedResourceHandler;
+import net.neoforged.neoforge.transfer.DelegatingResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
 import io.github.spencerharris192.seedtocellar.brewing.HydrometerReadable;
 import io.github.spencerharris192.seedtocellar.brewing.MaltType;
 import io.github.spencerharris192.seedtocellar.brewing.Temperature;
@@ -16,11 +24,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
+import io.github.spencerharris192.seedtocellar.recipe.Recipes;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -31,15 +41,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.wrapper.RangedWrapper;
+import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -75,14 +77,14 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
 
     public enum Stage { IDLE, MASHING, BOILING, COOKING, MIXING }
 
-    private final FluidTank tank = new FluidTank(CAPACITY, stack -> stack.getFluid().is(ModTags.Fluids.KETTLE_LIQUIDS)) {
+    private final StationTank tank = new StationTank(CAPACITY, stack -> stack.getFluid().is(ModTags.Fluids.KETTLE_LIQUIDS)) {
         @Override
         protected void onContentsChanged() {
             sync();
         }
     };
 
-    private final ItemStackHandler items = new ItemStackHandler(SLOTS) {
+    private final StationItems items = new StationItems(SLOTS) {
         @Override
         protected void onContentsChanged(int slot) {
             sync();
@@ -100,7 +102,7 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
     private int progress;
     private int total;
     private boolean heated;
-    @Nullable private ResourceLocation cookingId;   // the recipe being cooked (COOKING) or mixed (MIXING)
+    @Nullable private Identifier cookingId;   // the recipe being cooked (COOKING) or mixed (MIXING)
     /**
      * Something changed (contents, heat) since an idle kettle last looked for work. Looking every tick cost a heated, idle
      * kettle (every village Brewhouse has one) three times a furnace's tick; now it looks when something changes, and every
@@ -135,10 +137,6 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         }
     };
 
-    private final LazyOptional<IItemHandler> inputCap = LazyOptional.of(() -> new RangedWrapper(items, 0, CONTAINER + 1));
-    private final LazyOptional<IItemHandler> outputCap = LazyOptional.of(() -> new RangedWrapper(items, OUTPUT, OUTPUT + 1));
-    private final LazyOptional<IFluidHandler> fluidCap = LazyOptional.of(() -> tank);
-
     public BrewKettleBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.BREW_KETTLE.get(), pos, state);
     }
@@ -149,11 +147,11 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         super.sync();
     }
 
-    public FluidTank tank() {
+    public StationTank tank() {
         return tank;
     }
 
-    public ItemStackHandler items() {
+    public StationItems items() {
         return items;
     }
 
@@ -170,21 +168,30 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
     /** Malt, grist, hops, or anything some cooking recipe uses. */
     public boolean isIngredient(ItemStack stack) {
         if (MaltType.of(stack) != null || stack.is(ModTags.Items.BOIL_HOPS)) return true;
-        if (mixingRecipes().stream().anyMatch(r -> r.ingredient().test(stack))) return true;
-        return cookingRecipes().stream().anyMatch(r -> r.getIngredients().stream().anyMatch(i -> i.test(stack)));
+        if (mixingRecipes().stream().anyMatch(r -> r.ingredient().map(i -> i.test(stack)).orElse(false))) return true;
+        return cookingRecipes().stream().anyMatch(r -> r.ingredients().stream().anyMatch(i -> i.test(stack)));
     }
 
     /** A bowl, bottle or whatever some cooking recipe serves into. */
     public boolean isContainer(ItemStack stack) {
-        return cookingRecipes().stream().anyMatch(r -> r.needsContainer() && r.container().test(stack));
+        return cookingRecipes().stream().anyMatch(r -> takesContainer(r, stack));
+    }
+
+    private static boolean takesContainer(CookingRecipe recipe, ItemStack stack) {
+        return recipe.container().map(c -> c.test(stack)).orElse(false);
+    }
+
+    /** The first item an ingredient takes, to name it on the screen. */
+    private static Component example(Ingredient ingredient) {
+        return ingredient.items().findFirst().map(item -> new ItemStack(item).getHoverName()).orElse(Component.literal("?"));
     }
 
     private List<MixingRecipe> mixingRecipes() {
-        return level == null ? List.of() : level.getRecipeManager().getAllRecipesFor(ModRecipes.MIXING.get());
+        return Recipes.stream(level, ModRecipes.MIXING.get()).toList();
     }
 
     private List<CookingRecipe> cookingRecipes() {
-        return level == null ? List.of() : level.getRecipeManager().getAllRecipesFor(ModRecipes.COOKING.get());
+        return Recipes.stream(level, ModRecipes.COOKING.get()).toList();
     }
 
     private List<ItemStack> ingredientStacks() {
@@ -213,14 +220,14 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
                     kettle.begin(Stage.MASHING, MASH_TICKS);
                 } else if (kettle.canBoil()) {
                     kettle.begin(Stage.BOILING, BOIL_TICKS);
-                } else if (kettle.mixable().isPresent()) {
-                    MixingRecipe recipe = kettle.mixable().get();
-                    kettle.begin(Stage.MIXING, recipe.time());
-                    kettle.cookingId = recipe.getId();
+                } else if (kettle.mixableHolder().isPresent()) {
+                    RecipeHolder<MixingRecipe> recipe = kettle.mixableHolder().get();
+                    kettle.begin(Stage.MIXING, recipe.value().time());
+                    kettle.cookingId = recipe.id().identifier();
                 } else {
-                    kettle.cookable().ifPresent(recipe -> {
-                        kettle.begin(Stage.COOKING, recipe.time());
-                        kettle.cookingId = recipe.getId();
+                    kettle.cookableHolder().ifPresent(recipe -> {
+                        kettle.begin(Stage.COOKING, recipe.value().time());
+                        kettle.cookingId = recipe.id().identifier();
                     });
                 }
             } else if (kettle.stage != Stage.IDLE) {
@@ -250,8 +257,8 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         return switch (stage) {
             case MASHING -> canMash();
             case BOILING -> canBoil();
-            case COOKING -> cookable().map(r -> r.getId().equals(cookingId)).orElse(false);
-            case MIXING -> mixable().map(r -> r.getId().equals(cookingId)).orElse(false);
+            case COOKING -> cookableHolder().map(r -> r.id().identifier().equals(cookingId)).orElse(false);
+            case MIXING -> mixableHolder().map(r -> r.id().identifier().equals(cookingId)).orElse(false);
             default -> true;
         };
     }
@@ -265,7 +272,7 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
     /** Can the output slot take this stack? */
     private boolean outputFits(ItemStack stack) {
         ItemStack out = items.getStackInSlot(OUTPUT);
-        return out.isEmpty() || ItemStack.isSameItemSameTags(out, stack) && out.getCount() + stack.getCount() <= out.getMaxStackSize();
+        return out.isEmpty() || ItemStack.isSameItemSameComponents(out, stack) && out.getCount() + stack.getCount() <= out.getMaxStackSize();
     }
 
     // brewing ---
@@ -345,9 +352,7 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
             stack.shrink(used);
             needed -= used;
         }
-        FluidStack wort = tank.getFluid();
-        FluidStack hopped = new FluidStack(ModFluids.HOPPED_WORT.get(), wort.getAmount(), wort.getTag() == null ? null : wort.getTag().copy());
-        tank.setFluid(hopped);
+        tank.setFluid(tank.getFluid().transmuteCopy(ModFluids.HOPPED_WORT.get()));   // the same wort's data, hopped
         sync();
     }
 
@@ -370,16 +375,16 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         boolean slotsEmpty = ingredientStacks().stream().allMatch(ItemStack::isEmpty);
         for (MixingRecipe recipe : mixingRecipes()) {
             if (!recipe.matchesLiquid(fluid) || recipe.boilsDown()) continue;
-            int have = count(recipe.ingredient());
+            Ingredient ingredient = recipe.ingredient().orElseThrow();
+            int have = count(ingredient);
             int needed = recipe.needed(fluid.getAmount());
             if (have >= needed) continue;
             if (have > 0) {
-                ItemStack added = ingredientStacks().stream().filter(recipe.ingredient()).findFirst().orElse(ItemStack.EMPTY);
+                ItemStack added = ingredientStacks().stream().filter(ingredient).findFirst().orElse(ItemStack.EMPTY);
                 return Component.translatable("gui.seedtocellar.kettle.needs_more", needed - have, added.getHoverName(), recipe.perBucket());
             }
-            ItemStack[] options = recipe.ingredient().getItems();
-            if (slotsEmpty && !fluid.getFluid().is(FluidTags.WATER) && options.length > 0) {
-                return Component.translatable("gui.seedtocellar.kettle.stir_in", recipe.perBucket(), options[0].getHoverName());
+            if (slotsEmpty && !fluid.getFluid().is(FluidTags.WATER)) {
+                return Component.translatable("gui.seedtocellar.kettle.stir_in", recipe.perBucket(), example(ingredient));
             }
         }
         return null;
@@ -387,11 +392,16 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
 
     /** The mixing recipe that can run now: the right liquid, and enough of its ingredient for the whole kettle. */
     public Optional<MixingRecipe> mixable() {
+        return mixableHolder().map(RecipeHolder::value);
+    }
+
+    private Optional<RecipeHolder<MixingRecipe>> mixableHolder() {
         FluidStack fluid = tank.getFluid();
         boolean slotsEmpty = ingredientStacks().stream().allMatch(ItemStack::isEmpty);
-        return mixingRecipes().stream()
-                .filter(r -> r.matchesLiquid(fluid) && (r.boilsDown() ? slotsEmpty : count(r.ingredient()) >= r.needed(fluid.getAmount())))
-                .findFirst();
+        return Recipes.holders(level, ModRecipes.MIXING.get()).filter(h -> {
+            MixingRecipe r = h.value();
+            return r.matchesLiquid(fluid) && (r.boilsDown() ? slotsEmpty : count(r.ingredient().orElseThrow()) >= r.needed(fluid.getAmount()));
+        }).findFirst();
     }
 
     private void finishMix() {
@@ -401,11 +411,11 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         int volume = tank.getFluidAmount();
         int needed = recipe.needed(volume);
         List<ItemStack> leftovers = new ArrayList<>();
-        for (int i = 0; i < INGREDIENTS && needed > 0; i++) {
+        for (int i = 0; i < INGREDIENTS && needed > 0 && recipe.ingredient().isPresent(); i++) {
             ItemStack stack = items.getStackInSlot(i);
-            if (!recipe.ingredient().test(stack)) continue;
+            if (!recipe.ingredient().get().test(stack)) continue;
             int used = Math.min(needed, stack.getCount());
-            if (stack.hasCraftingRemainingItem()) leftovers.add(stack.getCraftingRemainingItem().copyWithCount(used));
+            if (stack.getItem().getCraftingRemainder() != null) leftovers.add(stack.getItem().getCraftingRemainder().create().copyWithCount(used));
             stack.shrink(used);
             needed -= used;
         }
@@ -425,9 +435,13 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
      * empty kettle doesn't ask for it.
      */
     public Optional<CookingRecipe> matchingRecipe() {
+        return matchingHolder().map(RecipeHolder::value);
+    }
+
+    private Optional<RecipeHolder<CookingRecipe>> matchingHolder() {
         List<ItemStack> stacks = ingredientStacks();
-        return cookingRecipes().stream().filter(r -> r.matchesItems(stacks)
-                && (!r.getIngredients().isEmpty() || r.liquid() != null && r.liquid().test(tank.getFluid()))).findFirst();
+        return Recipes.holders(level, ModRecipes.COOKING.get()).filter(h -> h.value().matchesItems(stacks)
+                && (!h.value().ingredients().isEmpty() || h.value().liquid() != null && h.value().liquid().test(tank.getFluid()))).findFirst();
     }
 
     /** What's missing to cook the matching recipe (null if it can cook, or nothing matches). For the screen. */
@@ -439,11 +453,10 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         String k = "gui.seedtocellar.kettle.";
         if (r.liquid() != null && !r.liquid().test(tank.getFluid())) {
             FluidStack example = r.liquid().examples().stream().findFirst().orElse(FluidStack.EMPTY);
-            return Component.translatable(k + "needs_liquid", r.liquid().amount(), example.getDisplayName());
+            return Component.translatable(k + "needs_liquid", r.liquid().amount(), example.getHoverName());
         }
-        if (r.needsContainer() && !r.container().test(items.getStackInSlot(CONTAINER))) {
-            ItemStack[] options = r.container().getItems();
-            return Component.translatable(k + "needs_container", options.length > 0 ? options[0].getHoverName() : Component.literal("?"));
+        if (r.needsContainer() && !takesContainer(r, items.getStackInSlot(CONTAINER))) {
+            return Component.translatable(k + "needs_container", example(r.container().get()));
         }
         if (!outputFits(r.result())) return Component.translatable(k + "output_full");
         return null;
@@ -451,9 +464,16 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
 
     /** The recipe that can cook right now: ingredients match, liquid and container present, room for the result. */
     private Optional<CookingRecipe> cookable() {
-        return matchingRecipe().filter(r -> (r.liquid() == null || r.liquid().test(tank.getFluid()))
-                && (!r.needsContainer() || r.container().test(items.getStackInSlot(CONTAINER)))
-                && outputFits(r.result()));
+        return cookableHolder().map(RecipeHolder::value);
+    }
+
+    private Optional<RecipeHolder<CookingRecipe>> cookableHolder() {
+        return matchingHolder().filter(h -> {
+            CookingRecipe r = h.value();
+            return (r.liquid() == null || r.liquid().test(tank.getFluid()))
+                    && (!r.needsContainer() || takesContainer(r, items.getStackInSlot(CONTAINER)))
+                    && outputFits(r.result());
+        });
     }
 
     private void finishCooking() {
@@ -464,13 +484,13 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         for (int i = 0; i < INGREDIENTS; i++) {
             ItemStack stack = items.getStackInSlot(i);
             if (stack.isEmpty()) continue;
-            if (stack.hasCraftingRemainingItem()) leftovers.add(stack.getCraftingRemainingItem());   // honey bottle -> glass bottle
+            if (stack.getItem().getCraftingRemainder() != null) leftovers.add(stack.getItem().getCraftingRemainder().create());   // honey bottle -> glass bottle
             stack.shrink(1);
         }
-        if (recipe.liquid() != null) tank.drain(recipe.liquid().amount(), IFluidHandler.FluidAction.EXECUTE);
+        if (recipe.liquid() != null) tank.drain(recipe.liquid().amount(), StationTank.Action.EXECUTE);
         if (recipe.needsContainer()) items.getStackInSlot(CONTAINER).shrink(1);
         ItemStack out = items.getStackInSlot(OUTPUT);
-        ItemStack result = recipe.result().copy();
+        ItemStack result = recipe.result();
         if (out.isEmpty()) items.setStackInSlot(OUTPUT, result);
         else out.grow(result.getCount());
         for (ItemStack leftover : leftovers) {
@@ -491,7 +511,7 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         List<Component> lines = new ArrayList<>();
         String h = "hydrometer.seedtocellar.";
         FluidStack fluid = tank.getFluid();
-        lines.add(fluid.isEmpty() ? Component.translatable(h + "empty") : fluid.getDisplayName().copy().append(" " + fluid.getAmount() + " mB"));
+        lines.add(fluid.isEmpty() ? Component.translatable(h + "empty") : fluid.getHoverName().copy().append(" " + fluid.getAmount() + " mB"));
         if (fluid.getFluid() == ModFluids.SWEET_WORT.get() || fluid.getFluid() == ModFluids.HOPPED_WORT.get()) {
             lines.add(Component.translatable("gui.seedtocellar.kettle.strength", WortData.of(fluid).strength().displayName()));
         }
@@ -501,7 +521,8 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
         return lines;
     }
 
-    public void dropContents() {
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
         if (level == null) return;
         for (int i = 0; i < items.getSlots(); i++) {
             Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(), items.getStackInSlot(i));
@@ -523,53 +544,44 @@ public class BrewKettleBlockEntity extends SyncedBlockEntity implements MenuProv
     // --- save / load -----------------------------------------------------------------------
 
     @Override
-    protected void saveAdditional(CompoundTag tag) {
-        super.saveAdditional(tag);
-        tag.put("Tank", tank.writeToNBT(new CompoundTag()));
-        tag.put("Items", items.serializeNBT());
-        tag.putString("Stage", stage.name());
-        tag.putInt("Progress", progress);
-        tag.putInt("Total", total);
-        if (cookingId != null) tag.putString("Cooking", cookingId.toString());
+    protected void saveAdditional(ValueOutput output) {
+        super.saveAdditional(output);
+        tank.serialize(output.child("Tank"));
+        items.serialize(output.child("Items"));
+        output.putString("Stage", stage.name());
+        output.putInt("Progress", progress);
+        output.putInt("Total", total);
+        if (cookingId != null) output.putString("Cooking", cookingId.toString());
     }
 
     @Override
-    public void load(CompoundTag tag) {
-        super.load(tag);
-        tank.readFromNBT(tag.getCompound("Tank"));
-        // Kettles from before cooking had 5 slots: 3 grist, hops, spent grain. Carry them over.
-        ItemStackHandler saved = new ItemStackHandler();
-        saved.deserializeNBT(tag.getCompound("Items"));
-        boolean old = saved.getSlots() == 5;
-        for (int i = 0; i < SLOTS; i++) items.setStackInSlot(i, ItemStack.EMPTY);
-        for (int i = 0; i < saved.getSlots(); i++) {
-            int target = old && i == 4 ? OUTPUT : i;
-            if (target < SLOTS) items.setStackInSlot(target, saved.getStackInSlot(i));
-        }
+    protected void loadAdditional(ValueInput input) {
+        super.loadAdditional(input);
+        tank.deserialize(input.childOrEmpty("Tank"));
+        items.deserialize(input.childOrEmpty("Items"));
         try {
-            stage = Stage.valueOf(tag.getString("Stage"));
+            stage = Stage.valueOf(input.getStringOr("Stage", ""));
         } catch (IllegalArgumentException e) {
             stage = Stage.IDLE;
         }
-        progress = tag.getInt("Progress");
-        total = tag.getInt("Total");
-        cookingId = tag.contains("Cooking") ? ResourceLocation.tryParse(tag.getString("Cooking")) : null;
+        progress = input.getIntOr("Progress", 0);
+        total = input.getIntOr("Total", 0);
+        cookingId = input.getString("Cooking").map(Identifier::tryParse).orElse(null);
     }
 
     // --- automation ------------------------------------------------------------------------
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (cap == ForgeCapabilities.FLUID_HANDLER) return fluidCap.cast();
-        if (cap == ForgeCapabilities.ITEM_HANDLER) return side == Direction.DOWN ? outputCap.cast() : inputCap.cast();
-        return super.getCapability(cap, side);
+    private final ResourceHandler<ItemResource> inputSide = RangedResourceHandler.of(items, 0, CONTAINER + 1);
+    private final ResourceHandler<ItemResource> outputSide = RangedResourceHandler.ofSingleIndex(items, OUTPUT);
+
+    /** Hoppers: ingredients and containers in from the top and sides, the dish out from below. */
+    public ResourceHandler<ItemResource> itemHandler(@Nullable Direction side) {
+        return side == Direction.DOWN ? outputSide : inputSide;
     }
 
-    @Override
-    public void invalidateCaps() {
-        super.invalidateCaps();
-        inputCap.invalidate();
-        outputCap.invalidate();
-        fluidCap.invalidate();
+    /** Pipes: liquids in and out on every side. */
+    public ResourceHandler<FluidResource> fluidHandler(@Nullable Direction side) {
+        return tank;
     }
+
 }

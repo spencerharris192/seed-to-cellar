@@ -1,0 +1,16 @@
+{
+  "type": "seedtocellar:cooking",
+  "container": "minecraft:bowl",
+  "fluid": {
+    "tag": "minecraft:water"
+  },
+  "ingredients": [
+    "#c:crops/beetroot",
+    "#c:crops/cabbage",
+    "#c:crops/onion"
+  ],
+  "result": {
+    "id": "seedtocellar:borscht"
+  },
+  "time": 240
+}

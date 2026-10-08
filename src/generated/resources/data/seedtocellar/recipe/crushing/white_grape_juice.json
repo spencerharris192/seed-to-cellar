@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:crushing",
+  "ingredient": "#c:foods/fruit/white_grape",
+  "result": {
+    "amount": 100,
+    "fluid": "seedtocellar:white_grape_juice"
+  }
+}

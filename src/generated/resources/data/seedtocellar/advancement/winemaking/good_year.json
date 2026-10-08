@@ -1,0 +1,39 @@
+{
+  "parent": "seedtocellar:winemaking/vintner",
+  "criteria": {
+    "wine": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_aged": {},
+              "seedtocellar:quality_craft": {},
+              "seedtocellar:quality_temperature": {},
+              "seedtocellar:quality_yeast": {}
+            },
+            "items": "#seedtocellar:wines"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.good_year.description"
+    },
+    "frame": "challenge",
+    "icon": {
+      "id": "seedtocellar:white_wine"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.good_year.title"
+    }
+  },
+  "requirements": [
+    [
+      "wine"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

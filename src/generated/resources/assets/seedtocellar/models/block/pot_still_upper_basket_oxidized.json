@@ -1,6 +1,5 @@
 {
   "parent": "seedtocellar:block/pot_still_upper_basket",
-  "render_type": "minecraft:cutout",
   "textures": {
     "basket": "seedtocellar:block/pot_still_basket_oxidized",
     "copper": "seedtocellar:block/pot_still_copper_oxidized",

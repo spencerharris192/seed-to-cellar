@@ -2,7 +2,8 @@ package io.github.spencerharris192.seedtocellar.distillery;
 
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModMenus;
-import net.minecraft.network.FriendlyByteBuf;
+import io.github.spencerharris192.seedtocellar.brewing.station.StationItems;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -11,9 +12,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 /**
  * Still screen contents: the charcoal filter slot, the four Gin Basket slots (only while a basket is fitted), and a
@@ -30,19 +29,19 @@ public class PotStillMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final PotStillBlockEntity still;
 
-    public PotStillMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
+    public PotStillMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player.level().getBlockEntity(buf.readBlockPos()) instanceof PotStillBlockEntity s ? s : null,
-                new ItemStackHandler(PotStillBlockEntity.SLOTS), new SimpleContainerData(5));
+                new StationItems(PotStillBlockEntity.SLOTS), new SimpleContainerData(5));
     }
 
-    public PotStillMenu(int id, Inventory inventory, PotStillBlockEntity still, IItemHandler items, ContainerData data) {
+    public PotStillMenu(int id, Inventory inventory, PotStillBlockEntity still, StationItems items, ContainerData data) {
         super(ModMenus.POT_STILL.get(), id);
         this.still = still;
         this.data = data;
         this.access = still != null ? ContainerLevelAccess.create(still.getLevel(), still.getBlockPos()) : ContainerLevelAccess.NULL;
-        addSlot(new SlotItemHandler(items, PotStillBlockEntity.FILTER, FILTER_X, FILTER_Y));
+        addSlot(new ResourceHandlerSlot(items, items::set, PotStillBlockEntity.FILTER, FILTER_X, FILTER_Y));
         for (int i = 0; i < PotStillBlockEntity.BASKET_SLOTS; i++) {
-            addSlot(new SlotItemHandler(items, PotStillBlockEntity.BASKET + i, BASKET_XY[i][0], BASKET_XY[i][1]) {
+            addSlot(new ResourceHandlerSlot(items, items::set, PotStillBlockEntity.BASKET + i, BASKET_XY[i][0], BASKET_XY[i][1]) {
                 @Override
                 public boolean isActive() {
                     return hasBasket();

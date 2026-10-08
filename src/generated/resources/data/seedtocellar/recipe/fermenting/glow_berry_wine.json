@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:glow_berry_juice",
+  "result": "seedtocellar:glow_berry_wine",
+  "temperature": "cool",
+  "time": 36000,
+  "yeast": "wine"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "seedtocellar:blueberry_pie_slice",
+    "seedtocellar:blueberry_pie_slice",
+    "seedtocellar:blueberry_pie_slice",
+    "seedtocellar:blueberry_pie_slice"
+  ],
+  "result": {
+    "id": "seedtocellar:blueberry_pie"
+  }
+}

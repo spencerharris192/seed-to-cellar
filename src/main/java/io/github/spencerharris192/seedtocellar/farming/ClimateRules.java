@@ -4,8 +4,8 @@ import io.github.spencerharris192.seedtocellar.config.ModConfigs;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.LevelReader;
-import net.minecraftforge.common.Tags;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.fml.ModList;
 
 /**
  * Climate preference (GDD section 6.5): speed only, never a hard stop.
@@ -34,7 +34,7 @@ public final class ClimateRules {
 
     public static boolean underGlass(LevelReader level, BlockPos pos) {
         for (int dy = 1; dy <= GREENHOUSE_HEIGHT; dy++) {
-            if (level.getBlockState(pos.above(dy)).is(Tags.Blocks.GLASS)) return true;
+            if (level.getBlockState(pos.above(dy)).is(Tags.Blocks.GLASS_BLOCKS)) return true;
         }
         return false;
     }

@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.BrewQuality;
 import io.github.spencerharris192.seedtocellar.brewing.CaskWood;
@@ -21,7 +22,6 @@ import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
@@ -36,23 +36,17 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.Comparator;
 import java.util.Map;
 
 /** The Pot Still, the washes that feed it, and stillage on the fields (GDD sections 9.4, 11). */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class DistilleryTests {
     private static final String EMPTY = "empty";
     private static final BlockPos HEAT = new BlockPos(1, 0, 1);
     private static final BlockPos STILL = new BlockPos(1, 1, 1);
-    private static final IFluidHandler.FluidAction EXECUTE = IFluidHandler.FluidAction.EXECUTE;
+    private static final StationTank.Action EXECUTE = StationTank.Action.EXECUTE;
 
     private static void fast() {
         ModConfigs.SERVER.processTimeMultiplier.set(0.01);
@@ -65,18 +59,18 @@ public final class DistilleryTests {
         BlockState lower = ModBlocks.POT_STILL.get().defaultBlockState();
         helper.setBlock(STILL, lower);
         helper.setBlock(STILL.above(), lower.setValue(PotStillBlock.HALF, DoubleBlockHalf.UPPER));
-        return (PotStillBlockEntity) helper.getBlockEntity(STILL);
+        return (PotStillBlockEntity) helper.getBlockEntity(STILL, net.minecraft.world.level.block.entity.BlockEntity.class);
     }
 
     private static FluidStack brewed(Fluid fluid, int amount, boolean yeast, boolean temperature, int runs) {
         FluidStack stack = new BrewQuality(yeast, temperature, false, false).applyTo(new FluidStack(fluid, amount));
-        if (runs > 0) stack.getOrCreateTag().putInt(CraftStep.RUNS, runs);
+        if (runs > 0) io.github.spencerharris192.seedtocellar.brewing.BrewData.update(stack, t -> t.putInt(CraftStep.RUNS, runs));
         return stack;
     }
 
     private static int runs(FluidStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag == null ? 0 : tag.getInt(CraftStep.RUNS);
+        CompoundTag tag = io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(stack);
+        return tag == null ? 0 : tag.getIntOr(CraftStep.RUNS, 0);
     }
 
     @GameTest(template = EMPTY, timeoutTicks = 200)
@@ -88,7 +82,7 @@ public final class DistilleryTests {
         helper.succeedWhen(() -> {
             FluidStack spirit = still.receiver().getFluid();
             helper.assertTrue(spirit.getFluid() == ModFluids.MALT_WHISKEY.get() && spirit.getAmount() == 2000,
-                    "one run: half the wash comes over as malt whiskey, was " + spirit.getAmount() + " mB of " + spirit.getDisplayName().getString());
+                    "one run: half the wash comes over as malt whiskey, was " + spirit.getAmount() + " mB of " + spirit.getHoverName().getString());
             helper.assertTrue(still.stillage().getFluidAmount() == 2000 && still.pot().isEmpty(), "the other half is left as stillage");
             BrewQuality q = BrewQuality.of(spirit);
             helper.assertTrue(runs(spirit) == 1 && q.yeast() && q.temperature() && !q.craft() && q.stars() == 3,
@@ -121,7 +115,7 @@ public final class DistilleryTests {
         helper.succeedWhen(() -> {
             FluidStack spirit = still.receiver().getFluid();
             helper.assertTrue(spirit.getFluid() == ModFluids.VODKA.get() && spirit.getAmount() == 500, "malt wash through charcoal: vodka");
-            helper.assertTrue(BrewQuality.of(spirit).craft() && spirit.getTag().getBoolean(CraftStep.FILTERED),
+            helper.assertTrue(BrewQuality.of(spirit).craft() && io.github.spencerharris192.seedtocellar.brewing.BrewData.orNull(spirit).getBooleanOr(CraftStep.FILTERED, false),
                     "filtered vodka has its craft star after one run");
             helper.assertTrue(still.items().getStackInSlot(PotStillBlockEntity.FILTER).getCount() == 1, "one charcoal per run");
         });
@@ -180,14 +174,14 @@ public final class DistilleryTests {
     @GameTest(template = EMPTY)
     public static void pipesFillThePotAndDrainSpiritOrStillage(GameTestHelper helper) {
         PotStillBlockEntity still = placeStill(helper, false);
-        IFluidHandler side = still.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.NORTH).orElseThrow(IllegalStateException::new);
-        IFluidHandler bottom = still.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.DOWN).orElseThrow(IllegalStateException::new);
+        Handlers.Fluids side = Handlers.fluids(still, Direction.NORTH);
+        Handlers.Fluids bottom = Handlers.fluids(still, Direction.DOWN);
         helper.assertTrue(side.fill(new FluidStack(ModFluids.APPLE_JUICE.get(), 1000), EXECUTE) == 0, "juice won't distil: refused");
         helper.assertTrue(side.fill(brewed(ModFluids.CORN_WASH.get(), 1000, false, false, 0), EXECUTE) == 1000, "a wash goes in");
         helper.assertTrue(bottom.fill(brewed(ModFluids.CORN_WASH.get(), 1000, false, false, 0), EXECUTE) == 0, "nothing goes in from below");
         still.receiver().fill(brewed(ModFluids.BOURBON.get(), 500, false, false, 1), EXECUTE);
         still.stillage().fill(new FluidStack(ModFluids.STILLAGE.get(), 1000), EXECUTE);
-        helper.assertTrue(side.drain(250, IFluidHandler.FluidAction.SIMULATE).getFluid() == ModFluids.BOURBON.get(), "the sides give spirit");
+        helper.assertTrue(side.drain(250, StationTank.Action.SIMULATE).getFluid() == ModFluids.BOURBON.get(), "the sides give spirit");
         helper.assertTrue(bottom.drain(1000, EXECUTE).getFluid() == ModFluids.STILLAGE.get(), "the bottom gives stillage");
         helper.succeed();
     }
@@ -204,7 +198,7 @@ public final class DistilleryTests {
     public static void stillageFeedsTheFarmlandAround(GameTestHelper helper) {
         for (int x = 0; x < 3; x++) for (int z = 0; z < 3; z++) helper.setBlock(new BlockPos(x, 1, z), Blocks.FARMLAND);
         helper.setBlock(new BlockPos(0, 1, 0), ModBlocks.FERTILE_FARMLAND.get().defaultBlockState().setValue(FertileFarmlandBlock.FERTILITY, 2));
-        Player player = helper.makeMockPlayer();
+        Player player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ModFluids.STILLAGE.bucket.get()));
         BlockPos center = helper.absolutePos(new BlockPos(1, 1, 1));
         player.getItemInHand(InteractionHand.MAIN_HAND).useOn(new UseOnContext(player, InteractionHand.MAIN_HAND,
@@ -221,7 +215,7 @@ public final class DistilleryTests {
         helper.setBlock(new BlockPos(1, 1, 1), Blocks.CAMPFIRE);
         BlockPos kettlePos = new BlockPos(1, 2, 1);
         helper.setBlock(kettlePos, ModBlocks.BREW_KETTLE.get());
-        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos);
+        BrewKettleBlockEntity kettle = (BrewKettleBlockEntity) helper.getBlockEntity(kettlePos, net.minecraft.world.level.block.entity.BlockEntity.class);
         kettle.tank().fill(new FluidStack(Fluids.WATER, 2000), EXECUTE);
         kettle.items().setStackInSlot(0, new ItemStack(ModItems.CORNMEAL.get(), 3));
         helper.assertTrue(kettle.needsMalt(), "cornmeal alone needs malt");
@@ -240,7 +234,7 @@ public final class DistilleryTests {
     public static void cornWortFermentsIntoCornWashMildOrWarm(GameTestHelper helper) {
         FluidStack wort = new WortData(Map.of(MaltType.CORN, 0.75F, MaltType.PALE, 0.25F), WortData.Strength.NORMAL)
                 .applyTo(new FluidStack(ModFluids.SWEET_WORT.get(), 1000));
-        FermentingRecipe recipe = helper.getLevel().getRecipeManager().getAllRecipesFor(ModRecipes.FERMENTING.get()).stream()
+        FermentingRecipe recipe = io.github.spencerharris192.seedtocellar.recipe.Recipes.stream(helper.getLevel(), ModRecipes.FERMENTING.get())
                 .filter(r -> r.matches(wort, YeastType.ALE)).max(Comparator.comparingInt(FermentingRecipe::priority)).orElseThrow();
         helper.assertTrue(recipe.result() == ModFluids.CORN_WASH.get(), "mostly corn ferments into corn wash, not Plain Ale");
         helper.assertTrue(recipe.suits(Temperature.MILD) && recipe.suits(Temperature.WARM) && !recipe.suits(Temperature.COOL),

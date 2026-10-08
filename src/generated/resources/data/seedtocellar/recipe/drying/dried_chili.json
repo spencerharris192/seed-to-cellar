@@ -1,0 +1,8 @@
+{
+  "type": "seedtocellar:drying",
+  "ingredient": "#c:crops/chili",
+  "result": {
+    "id": "seedtocellar:dried_chili"
+  },
+  "time": 18000
+}

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:milling",
+  "ingredient": "seedtocellar:roasted_coffee",
+  "result": {
+    "id": "seedtocellar:ground_coffee"
+  }
+}

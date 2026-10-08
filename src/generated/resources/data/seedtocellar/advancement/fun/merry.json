@@ -1,0 +1,30 @@
+{
+  "parent": "seedtocellar:brewing/root",
+  "criteria": {
+    "tipsy": {
+      "conditions": {
+        "effects": {
+          "seedtocellar:tipsy": {}
+        }
+      },
+      "trigger": "minecraft:effects_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.merry.description"
+    },
+    "icon": {
+      "id": "seedtocellar:pale_ale"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.merry.title"
+    }
+  },
+  "requirements": [
+    [
+      "tipsy"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

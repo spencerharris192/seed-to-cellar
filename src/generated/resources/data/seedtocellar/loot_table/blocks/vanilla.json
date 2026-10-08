@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "seedtocellar:vanilla",
+                "state": {
+                  "age": "3"
+                }
+              },
+              "count": 2
+            },
+            {
+              "type": "minecraft:set_count",
+              "add": true,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "seedtocellar:vanilla",
+                "state": {
+                  "age": "3"
+                }
+              },
+              "count": {
+                "type": "minecraft:uniform",
+                "max": 1,
+                "min": 0
+              }
+            }
+          ],
+          "name": "seedtocellar:vanilla_pod"
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "seedtocellar:blocks/vanilla"
+}

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:bowl",
+    "#c:crops/cabbage",
+    "#c:crops/tomato",
+    "#c:crops/cucumber",
+    "seedtocellar:olive_oil"
+  ],
+  "result": {
+    "id": "seedtocellar:salad"
+  }
+}

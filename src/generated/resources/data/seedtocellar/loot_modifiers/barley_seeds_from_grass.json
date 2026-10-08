@@ -1,31 +1,32 @@
 {
   "type": "seedtocellar:grass_seeds",
   "chance": 0.05,
-  "conditions": [
-    {
-      "condition": "minecraft:any_of",
-      "terms": [
-        {
-          "condition": "forge:loot_table_id",
-          "loot_table_id": "minecraft:blocks/grass"
-        },
-        {
-          "condition": "forge:loot_table_id",
-          "loot_table_id": "minecraft:blocks/tall_grass"
-        }
-      ]
-    },
-    {
-      "condition": "minecraft:inverted",
-      "term": {
-        "condition": "minecraft:match_tool",
-        "predicate": {
-          "items": [
-            "minecraft:shears"
-          ]
+  "condition": {
+    "type": "minecraft:all_of",
+    "terms": [
+      {
+        "type": "minecraft:any_of",
+        "terms": [
+          {
+            "type": "neoforge:loot_table_id",
+            "loot_table_id": "minecraft:blocks/short_grass"
+          },
+          {
+            "type": "neoforge:loot_table_id",
+            "loot_table_id": "minecraft:blocks/tall_grass"
+          }
+        ]
+      },
+      {
+        "type": "minecraft:inverted",
+        "term": {
+          "type": "minecraft:match_tool",
+          "predicate": {
+            "items": "minecraft:shears"
+          }
         }
       }
-    }
-  ],
+    ]
+  },
   "item": "seedtocellar:barley_seeds"
 }

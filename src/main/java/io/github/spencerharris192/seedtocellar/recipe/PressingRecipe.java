@@ -1,38 +1,53 @@
 package io.github.spencerharris192.seedtocellar.recipe;
 
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.spencerharris192.seedtocellar.registry.ModRecipes;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStackTemplate;
+
+import java.util.Optional;
 
 /**
  * Fruit Press: `count` of the ingredient, pressed with `cranks` turns of the screw, give a liquid and
  * (optionally) a byproduct left in the press (pomace, bagasse).
- * JSON: {"type":"seedtocellar:pressing","ingredient":{...},"count":4,"result":{"fluid":"...","amount":500},
- * "byproduct":{"item":"..."},"cranks":4}
+ * JSON: {"type":"seedtocellar:pressing","ingredient":...,"count":4,"result":{"fluid":"...","amount":500},
+ * "byproduct":{"id":"..."},"cranks":4}
  */
-public class PressingRecipe implements Recipe<Container> {
-    private final ResourceLocation id;
+public class PressingRecipe implements StationRecipe {
+    public static final MapCodec<PressingRecipe> MAP_CODEC = RecordCodecBuilder.mapCodec(i -> i.group(
+            Ingredient.CODEC.fieldOf("ingredient").forGetter(r -> r.ingredient),
+            Codec.intRange(1, 99).optionalFieldOf("count", 4).forGetter(r -> r.count),
+            RecipeCodecs.FLUID_RESULT.fieldOf("result").forGetter(r -> r.result),
+            ItemStackTemplate.CODEC.optionalFieldOf("byproduct").forGetter(r -> r.byproduct),
+            Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("cranks", 4).forGetter(r -> r.cranks)
+    ).apply(i, PressingRecipe::new));
+    public static final StreamCodec<RegistryFriendlyByteBuf, PressingRecipe> STREAM_CODEC = StreamCodec.composite(
+            Ingredient.CONTENTS_STREAM_CODEC, r -> r.ingredient,
+            ByteBufCodecs.VAR_INT, r -> r.count,
+            FluidStackTemplate.STREAM_CODEC, r -> r.result,
+            ByteBufCodecs.optional(ItemStackTemplate.STREAM_CODEC), r -> r.byproduct,
+            ByteBufCodecs.VAR_INT, r -> r.cranks,
+            PressingRecipe::new);
+
     private final Ingredient ingredient;
     private final int count;
-    private final FluidStack result;
-    private final ItemStack byproduct;
+    private final FluidStackTemplate result;
+    private final Optional<ItemStackTemplate> byproduct;
     private final int cranks;
 
-    public PressingRecipe(ResourceLocation id, Ingredient ingredient, int count, FluidStack result, ItemStack byproduct, int cranks) {
-        this.id = id;
+    public PressingRecipe(Ingredient ingredient, int count, FluidStackTemplate result, Optional<ItemStackTemplate> byproduct, int cranks) {
         this.ingredient = ingredient;
         this.count = count;
         this.result = result;
@@ -50,12 +65,12 @@ public class PressingRecipe implements Recipe<Container> {
     }
 
     public FluidStack result() {
-        return result.copy();
+        return result.create();
     }
 
     /** Left behind in the press (may be empty). */
     public ItemStack byproduct() {
-        return byproduct.copy();
+        return RecipeCodecs.create(byproduct);
     }
 
     public int cranks() {
@@ -63,70 +78,22 @@ public class PressingRecipe implements Recipe<Container> {
     }
 
     @Override
-    public boolean matches(Container container, Level level) {
-        return ingredient.test(container.getItem(0));
+    public boolean matches(SingleRecipeInput input, Level level) {
+        return ingredient.test(input.item());
     }
 
     @Override
-    public ItemStack assemble(Container container, RegistryAccess access) {
-        return byproduct.copy();
+    public ItemStack assemble(SingleRecipeInput input) {
+        return byproduct();
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
-    }
-
-    @Override
-    public ItemStack getResultItem(RegistryAccess access) {
-        return byproduct;
-    }
-
-    @Override
-    public NonNullList<Ingredient> getIngredients() {
-        return NonNullList.of(Ingredient.EMPTY, ingredient);
-    }
-
-    @Override
-    public ResourceLocation getId() {
-        return id;
-    }
-
-    @Override
-    public boolean isSpecial() {
-        return true;
-    }
-
-    @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<PressingRecipe> getSerializer() {
         return ModRecipes.PRESSING_SERIALIZER.get();
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<PressingRecipe> getType() {
         return ModRecipes.PRESSING.get();
-    }
-
-    public static class Serializer implements RecipeSerializer<PressingRecipe> {
-        @Override
-        public PressingRecipe fromJson(ResourceLocation id, JsonObject json) {
-            ItemStack byproduct = json.has("byproduct") ? ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, "byproduct")) : ItemStack.EMPTY;
-            return new PressingRecipe(id, Ingredient.fromJson(json.get("ingredient")), Math.max(1, GsonHelper.getAsInt(json, "count", 4)),
-                    FluidResult.fromJson(GsonHelper.getAsJsonObject(json, "result")), byproduct, Math.max(1, GsonHelper.getAsInt(json, "cranks", 4)));
-        }
-
-        @Override
-        public PressingRecipe fromNetwork(ResourceLocation id, FriendlyByteBuf buf) {
-            return new PressingRecipe(id, Ingredient.fromNetwork(buf), buf.readVarInt(), FluidResult.fromNetwork(buf), buf.readItem(), buf.readVarInt());
-        }
-
-        @Override
-        public void toNetwork(FriendlyByteBuf buf, PressingRecipe recipe) {
-            recipe.ingredient.toNetwork(buf);
-            buf.writeVarInt(recipe.count);
-            FluidResult.toNetwork(buf, recipe.result);
-            buf.writeItem(recipe.byproduct);
-            buf.writeVarInt(recipe.cranks);
-        }
     }
 }

@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:kilning",
+  "ingredient": "seedtocellar:green_barley_malt",
+  "result": {
+    "id": "seedtocellar:pale_malt"
+  }
+}

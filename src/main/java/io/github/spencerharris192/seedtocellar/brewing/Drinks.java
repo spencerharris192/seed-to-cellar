@@ -1,5 +1,7 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
+import net.minecraft.core.Holder;
+import net.neoforged.neoforge.registries.DeferredItem;
 import io.github.spencerharris192.seedtocellar.effect.ModEffects;
 import io.github.spencerharris192.seedtocellar.registry.ModFluids;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
@@ -7,9 +9,10 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
  */
 public final class Drinks {
     /** {@code style}: how its name and color follow its age (spirits like whiskey), or null. */
-    public record Drink(ModFluids.Entry fluid, RegistryObject<Item> item, DrinkProfile profile, Vessel vessel, @Nullable AgedStyle style) {
+    public record Drink(ModFluids.Entry fluid, DeferredItem<Item> item, DrinkProfile profile, Vessel vessel, @Nullable AgedStyle style) {
         public String name() {
             return fluid.name;
         }
@@ -38,9 +41,11 @@ public final class Drinks {
     // Ideal cask woods (GDD section 13): oak suits everything that ages; each other wood has its own character.
     private static final List<CaskWood> OLD_ALE_WOODS = List.of(CaskWood.OAK, CaskWood.SPRUCE, CaskWood.DARK_OAK);      // resinous, rich
     private static final List<CaskWood> RED_WINE_WOODS = List.of(CaskWood.OAK, CaskWood.DARK_OAK, CaskWood.MANGROVE);   // rich, earthy
-    private static final List<CaskWood> WHITE_WINE_WOODS = List.of(CaskWood.OAK, CaskWood.BIRCH, CaskWood.ACACIA);      // light, honeyed
-    private static final List<CaskWood> MEAD_WOODS = List.of(CaskWood.OAK, CaskWood.ACACIA, CaskWood.JUNGLE);           // honeyed, spicy
-    private static final List<CaskWood> PERRY_WOODS = List.of(CaskWood.OAK, CaskWood.BIRCH);                            // light
+    private static final List<CaskWood> WHITE_WINE_WOODS = List.of(CaskWood.OAK, CaskWood.BIRCH, CaskWood.ACACIA,
+            CaskWood.PALE_OAK);                                                                                      // light, honeyed, delicate
+    private static final List<CaskWood> MEAD_WOODS = List.of(CaskWood.OAK, CaskWood.ACACIA, CaskWood.JUNGLE, CaskWood.POPLAR); // honeyed, spicy, mild
+    private static final List<CaskWood> PERRY_WOODS = List.of(CaskWood.OAK, CaskWood.BIRCH, CaskWood.PALE_OAK);         // light, delicate
+    private static final List<CaskWood> CIDER_WOODS = List.of(CaskWood.OAK, CaskWood.CHERRY, CaskWood.POPLAR);          // fruity, mild
     private static final List<CaskWood> FRUITY_WOODS = List.of(CaskWood.OAK, CaskWood.CHERRY);                          // cider, fruit wines
 
     // Effect lengths (the final balance pass): at three stars a beer gives 1.5-3.5 minutes, a wine or liqueur about 3-4, a
@@ -61,11 +66,11 @@ public final class Drinks {
     public static final Drink WHEAT_BEER = add(ModFluids.WHEAT_BEER, Vessel.MUG, graded(ModEffects.REFRESHED, 180, 1, 2, 0.2F, 0));
 
     // Wines and meads, in a wine bottle; cider and perry, in a mug.
-    public static final Drink RED_WINE = add(ModFluids.RED_WINE, Vessel.WINE_BOTTLE, graded(() -> MobEffects.REGENERATION, 8, 2, 2, 0.2F, 3, RED_WINE_WOODS));
+    public static final Drink RED_WINE = add(ModFluids.RED_WINE, Vessel.WINE_BOTTLE, graded(MobEffects.REGENERATION, 8, 2, 2, 0.2F, 3, RED_WINE_WOODS));
     public static final Drink WHITE_WINE = add(ModFluids.WHITE_WINE, Vessel.WINE_BOTTLE, graded(ModEffects.REFRESHED, 240, 2, 2, 0.2F, 2, WHITE_WINE_WOODS));
     public static final Drink ROSE = add(ModFluids.ROSE, Vessel.WINE_BOTTLE, graded(ModEffects.REFRESHED, 210, 2, 2, 0.2F, 0));
     public static final Drink MEAD = add(ModFluids.MEAD, Vessel.WINE_BOTTLE, graded(ModEffects.COURAGE, 240, 2, 3, 0.3F, 2, MEAD_WOODS));
-    public static final Drink CIDER = add(ModFluids.CIDER, Vessel.MUG, graded(ModEffects.REFRESHED, 180, 1, 2, 0.2F, 2, FRUITY_WOODS));
+    public static final Drink CIDER = add(ModFluids.CIDER, Vessel.MUG, graded(ModEffects.REFRESHED, 180, 1, 2, 0.2F, 2, CIDER_WOODS));
     public static final Drink PERRY = add(ModFluids.PERRY, Vessel.MUG, graded(ModEffects.REFRESHED, 180, 1, 2, 0.2F, 2, PERRY_WOODS));
     public static final Drink CHERRY_WINE = fruitWine(ModFluids.CHERRY_WINE);
     public static final Drink PLUM_WINE = fruitWine(ModFluids.PLUM_WINE);
@@ -77,10 +82,10 @@ public final class Drinks {
     public static final Drink SWEET_BERRY_WINE = fruitWine(ModFluids.SWEET_BERRY_WINE);
     /** Glow-berry wine: a little night vision instead of Refreshed. */
     public static final Drink GLOW_BERRY_WINE = add(ModFluids.GLOW_BERRY_WINE, Vessel.WINE_BOTTLE,
-            graded(() -> MobEffects.NIGHT_VISION, 180, 2, 2, 0.2F, 2, FRUITY_WOODS));
+            graded(MobEffects.NIGHT_VISION, 180, 2, 2, 0.2F, 2, FRUITY_WOODS));
     public static final Drink MELON_WINE = fruitWine(ModFluids.MELON_WINE);
     /** Sake: rice and koji fermented cool with wine yeast; served in a wine bottle. */
-    public static final Drink SAKE = add(ModFluids.SAKE, Vessel.WINE_BOTTLE, graded(() -> MobEffects.REGENERATION, 8, 2, 2, 0.2F, 0));
+    public static final Drink SAKE = add(ModFluids.SAKE, Vessel.WINE_BOTTLE, graded(MobEffects.REGENERATION, 8, 2, 2, 0.2F, 0));
     /** Ginger beer, brewed in a jar: fizzy and refreshing, almost no alcohol (no stars). */
     public static final Drink GINGER_BEER = add(ModFluids.GINGER_BEER, Vessel.MUG,
             new DrinkProfile(ModEffects.REFRESHED, 180, 0, 2, 0.2F, 0, false, List.of(), CraftStep.CONDITIONED, DrinkProfile.Charring.NONE));
@@ -93,7 +98,7 @@ public final class Drinks {
     public static final Drink ELDERFLOWER_CORDIAL = softDrink(ModFluids.ELDERFLOWER_CORDIAL);
     /** Coffee from the kettle: a short burst of Haste, no alcohol. */
     public static final Drink COFFEE = add(ModFluids.COFFEE, Vessel.GLASS_BOTTLE,
-            new DrinkProfile(() -> MobEffects.DIG_SPEED, 120, 0, 1, 0.1F, 0, false, List.of(), CraftStep.CONDITIONED, DrinkProfile.Charring.NONE));
+            new DrinkProfile(MobEffects.HASTE, 120, 0, 1, 0.1F, 0, false, List.of(), CraftStep.CONDITIONED, DrinkProfile.Charring.NONE));
 
     // Spirits, in a spirit bottle (GDD section 10.3): strong and warming, made in the Pot Still. Their craft star is how they
     // were distilled (twice; vodka three times or through charcoal), never resting.
@@ -126,7 +131,7 @@ public final class Drinks {
                     0xB0F4F0E4, 0xF45A2410, 8));
     /** Tequila (agave): Blanco, Reposado at 1 year, Añejo at 4; best in oak or mangrove (earthy). A quick burst of speed. */
     public static final Drink TEQUILA = add(ModFluids.TEQUILA, Vessel.SPIRIT_BOTTLE,
-            spirit(() -> net.minecraft.world.effect.MobEffects.MOVEMENT_SPEED, 40, 4, List.of(CaskWood.OAK, CaskWood.MANGROVE),
+            spirit(net.minecraft.world.effect.MobEffects.SPEED, 40, 4, List.of(CaskWood.OAK, CaskWood.MANGROVE),
                     CraftStep.DOUBLE_DISTILLED, DrinkProfile.Charring.NONE),
             new AgedStyle(List.of(AgedStyle.Name.from(4, "tequila_anejo"), AgedStyle.Name.from(1, "tequila_reposado"),
                     AgedStyle.Name.from(0, "tequila_blanco")), 0xA8F0F4F4, 0xE8D8963C, 6));
@@ -149,7 +154,7 @@ public final class Drinks {
     public static final Drink AROMATIC_BITTERS = add(ModFluids.AROMATIC_BITTERS, Vessel.SPIRIT_BOTTLE,
             new DrinkProfile(ModEffects.REFRESHED, 90, 1, 0, 0F, 0, true, List.of(), CraftStep.INFUSED, DrinkProfile.Charring.NONE));
     /** Coffee liqueur: a quick kick of Haste. */
-    public static final Drink COFFEE_LIQUEUR = liqueur(ModFluids.COFFEE_LIQUEUR, () -> MobEffects.DIG_SPEED, 90);
+    public static final Drink COFFEE_LIQUEUR = liqueur(ModFluids.COFFEE_LIQUEUR, MobEffects.HASTE, 90);
     /**
      * Apple Crown Whiskey: malt whiskey steeped in the jar with apples and honey, warming like whiskey and keeping its stars.
      * Its secret: a perfect (5-star) whiskey steeped with a golden apple instead comes out crowned, with a sixth star, and
@@ -178,24 +183,24 @@ public final class Drinks {
     public static final Drink GLOW_BERRY_JUICE = juice(ModFluids.GLOW_BERRY_JUICE);
     public static final Drink MELON_JUICE = juice(ModFluids.MELON_JUICE);
 
-    private static DrinkProfile graded(Supplier<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears) {
+    private static DrinkProfile graded(Holder<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears) {
         return graded(effect, seconds, units, nutrition, saturation, agingYears, List.of());
     }
 
-    private static DrinkProfile graded(Supplier<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears,
+    private static DrinkProfile graded(Holder<MobEffect> effect, int seconds, float units, int nutrition, float saturation, int agingYears,
                                        List<CaskWood> woods) {
         return new DrinkProfile(effect, seconds, units, nutrition, saturation, agingYears, true, woods, CraftStep.CONDITIONED,
                 DrinkProfile.Charring.NONE);
     }
 
     /** A spirit: 3 units, no food value, its craft star from the still. */
-    private static DrinkProfile spirit(Supplier<MobEffect> effect, int seconds, int agingYears, List<CaskWood> woods, CraftStep craft,
+    private static DrinkProfile spirit(Holder<MobEffect> effect, int seconds, int agingYears, List<CaskWood> woods, CraftStep craft,
                                        DrinkProfile.Charring charring) {
         return new DrinkProfile(effect, seconds, 3, 0, 0F, agingYears, true, woods, craft, charring);
     }
 
     /** A liqueur: sweet and medium-strong (2 units), a little food value. */
-    private static Drink liqueur(ModFluids.Entry fluid, Supplier<MobEffect> effect, int seconds) {
+    private static Drink liqueur(ModFluids.Entry fluid, Holder<MobEffect> effect, int seconds) {
         return add(fluid, Vessel.SPIRIT_BOTTLE, new DrinkProfile(effect, seconds, 2, 1, 0.1F, 0, true, List.of(), CraftStep.INFUSED,
                 DrinkProfile.Charring.NONE));
     }
@@ -224,9 +229,9 @@ public final class Drinks {
     }
 
     private static Drink add(ModFluids.Entry fluid, Vessel vessel, DrinkProfile profile, @Nullable AgedStyle style) {
-        RegistryObject<Item> item = ModItems.ITEMS.register(fluid.name, () -> new DrinkItem(fluid::get, profile, vessel,
-                new Item.Properties().stacksTo(16).craftRemainder(vessel.empty())
-                        .food(new FoodProperties.Builder().nutrition(profile.nutrition()).saturationMod(profile.saturation()).alwaysEat().build())));
+        DeferredItem<Item> item = ModItems.ITEMS.registerItem(fluid.name, p -> new DrinkItem(fluid::get, profile, vessel, p), () -> new Item.Properties().stacksTo(16).craftRemainder(vessel.empty()).usingConvertsTo(vessel.empty())
+                        .food(new FoodProperties.Builder().nutrition(profile.nutrition()).saturationModifier(profile.saturation()).alwaysEdible().build(),
+                                Consumables.defaultDrink().build()));
         Drink drink = new Drink(fluid, item, profile, vessel, style);
         ALL.add(drink);
         return drink;
@@ -254,9 +259,9 @@ public final class Drinks {
     }
 
     /** What drinking it takes away: bitters cure a hangover and nausea, herbal liqueur nausea. */
-    public static List<Supplier<MobEffect>> cures(Drink drink) {
-        if (drink == AROMATIC_BITTERS) return List.of(ModEffects.HANGOVER, () -> net.minecraft.world.effect.MobEffects.CONFUSION);
-        if (drink == HERBAL_LIQUEUR) return List.of(() -> net.minecraft.world.effect.MobEffects.CONFUSION);
+    public static List<Holder<MobEffect>> cures(Drink drink) {
+        if (drink == AROMATIC_BITTERS) return List.of(ModEffects.HANGOVER, net.minecraft.world.effect.MobEffects.NAUSEA);
+        if (drink == HERBAL_LIQUEUR) return List.of(net.minecraft.world.effect.MobEffects.NAUSEA);
         return List.of();
     }
 

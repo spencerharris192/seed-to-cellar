@@ -1,12 +1,13 @@
 package io.github.spencerharris192.seedtocellar.config;
 
+import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.farming.Crop;
 import io.github.spencerharris192.seedtocellar.farming.Crops;
 import io.github.spencerharris192.seedtocellar.farming.FruitTree;
 import io.github.spencerharris192.seedtocellar.farming.FruitTrees;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.config.ModConfig;
 
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -16,38 +17,43 @@ import java.util.Map;
  * All configuration (GDD section 21). Files:
  * <ul>
  *   <li>config/seedtocellar-common.toml: world generation and loot (applies to all worlds)</li>
- *   <li>saves/&lt;world&gt;/serverconfig/seedtocellar-server.toml: gameplay balance, per world</li>
+ *   <li>config/seedtocellar-server.toml: gameplay balance; a world can have its own copy in saves/&lt;world&gt;/syncedconfig/</li>
+ *   <li>config/seedtocellar-client.toml: the view sway</li>
  * </ul>
  */
 public final class ModConfigs {
     public static final Common COMMON;
     public static final Server SERVER;
     public static final Client CLIENT;
-    private static final ForgeConfigSpec COMMON_SPEC;
-    private static final ForgeConfigSpec SERVER_SPEC;
-    private static final ForgeConfigSpec CLIENT_SPEC;
+    private static final ModConfigSpec COMMON_SPEC;
+    private static final ModConfigSpec SERVER_SPEC;
+    private static final ModConfigSpec CLIENT_SPEC;
 
     static {
-        ForgeConfigSpec.Builder common = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder common = new ModConfigSpec.Builder();
         COMMON = new Common(common);
         COMMON_SPEC = common.build();
-        ForgeConfigSpec.Builder server = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder server = new ModConfigSpec.Builder();
         SERVER = new Server(server);
         SERVER_SPEC = server.build();
-        ForgeConfigSpec.Builder client = new ForgeConfigSpec.Builder();
+        ModConfigSpec.Builder client = new ModConfigSpec.Builder();
         CLIENT = new Client(client);
         CLIENT_SPEC = client.build();
     }
 
-    public static void register(ModLoadingContext context) {
-        context.registerConfig(ModConfig.Type.COMMON, COMMON_SPEC);
-        context.registerConfig(ModConfig.Type.SERVER, SERVER_SPEC);
-        context.registerConfig(ModConfig.Type.CLIENT, CLIENT_SPEC);
+    /**
+     * The gameplay settings are synced: the server's file (config/seedtocellar-server.toml, or a world's own copy in
+     * saves/&lt;world&gt;/syncedconfig/) goes to every player. World generation and loot settings are local to each game.
+     */
+    public static void register(ModContainer container) {
+        container.registerConfig(ModConfig.Type.LOCAL, COMMON_SPEC, SeedToCellar.MOD_ID + "-common.toml");
+        container.registerConfig(ModConfig.Type.SYNCED, SERVER_SPEC, SeedToCellar.MOD_ID + "-server.toml");
+        container.registerConfig(ModConfig.Type.CLIENT, CLIENT_SPEC, SeedToCellar.MOD_ID + "-client.toml");
     }
 
     /** Looked up by name from data files (see ConfigAddFeaturesModifier). Unknown names count as enabled. */
     public static boolean worldgenEnabled(String toggle) {
-        ForgeConfigSpec.BooleanValue value = COMMON.worldgenToggles.get(toggle);
+        ModConfigSpec.BooleanValue value = COMMON.worldgenToggles.get(toggle);
         return value == null || value.get();
     }
 
@@ -70,26 +76,26 @@ public final class ModConfigs {
     }
 
     public static final class Common {
-        public final ForgeConfigSpec.BooleanValue grassSeedDrops;
+        public final ModConfigSpec.BooleanValue grassSeedDrops;
         /** Each grass-dropped seed's chance, by its item's path (barley_seeds...). */
-        public final Map<String, ForgeConfigSpec.DoubleValue> grassSeedChances;
-        public final ForgeConfigSpec.BooleanValue rightClickHarvest;
-        public final ForgeConfigSpec.DoubleValue cropGrowthMultiplier;
-        public final ForgeConfigSpec.DoubleValue climateSlowdown;
-        public final ForgeConfigSpec.BooleanValue climateWithSereneSeasons;
-        public final ForgeConfigSpec.DoubleValue fertileGrowthBonus;
-        public final ForgeConfigSpec.DoubleValue fertileExtraHarvestChance;
-        public final ForgeConfigSpec.DoubleValue fertileUseChance;
-        public final Map<String, ForgeConfigSpec.BooleanValue> worldgenToggles;
-        public final ForgeConfigSpec.BooleanValue chestLoot;
-        public final ForgeConfigSpec.BooleanValue theOneProbe;
+        public final Map<String, ModConfigSpec.DoubleValue> grassSeedChances;
+        public final ModConfigSpec.BooleanValue rightClickHarvest;
+        public final ModConfigSpec.DoubleValue cropGrowthMultiplier;
+        public final ModConfigSpec.DoubleValue climateSlowdown;
+        public final ModConfigSpec.BooleanValue climateWithSereneSeasons;
+        public final ModConfigSpec.DoubleValue fertileGrowthBonus;
+        public final ModConfigSpec.DoubleValue fertileExtraHarvestChance;
+        public final ModConfigSpec.DoubleValue fertileUseChance;
+        public final Map<String, ModConfigSpec.BooleanValue> worldgenToggles;
+        public final ModConfigSpec.BooleanValue chestLoot;
+        public final ModConfigSpec.BooleanValue theOneProbe;
 
-        Common(ForgeConfigSpec.Builder b) {
+        Common(ModConfigSpec.Builder b) {
             b.push("farming");
             grassSeedDrops = b.comment("Breaking grass sometimes drops barley and oat seeds (and rye seeds in cold biomes), like vanilla wheat seeds.")
                     .define("grassSeedDrops", true);
             b.comment("The chance that breaking a grass block drops each of these seeds (vanilla's wheat seeds: 0.125).").push("grassSeedChances");
-            Map<String, ForgeConfigSpec.DoubleValue> chances = new LinkedHashMap<>();
+            Map<String, ModConfigSpec.DoubleValue> chances = new LinkedHashMap<>();
             for (Crop crop : Crops.all()) {
                 if (crop.grassDrop == null) continue;
                 chances.put(crop.seedId, b.comment(crop.seedName + (crop.grassDrop.coldOnly() ? ", in cold biomes only." : "."))
@@ -116,7 +122,7 @@ public final class ModConfigs {
 
             b.push("worldgen");
             b.comment("Wild plants generate in the world. Turning one off only affects newly generated chunks.");
-            Map<String, ForgeConfigSpec.BooleanValue> toggles = new LinkedHashMap<>();
+            Map<String, ModConfigSpec.BooleanValue> toggles = new LinkedHashMap<>();
             for (Crop crop : Crops.all()) {
                 if (crop.growsWild()) {
                     toggles.put("wild_" + crop.name, b.comment("Wild " + crop.displayName.toLowerCase(Locale.ROOT) + " in " + crop.wild.where() + ".")
@@ -150,18 +156,18 @@ public final class ModConfigs {
     }
 
     public static final class Server {
-        public final ForgeConfigSpec.DoubleValue processTimeMultiplier;
-        public final ForgeConfigSpec.DoubleValue fermentationTimeMultiplier;
-        public final ForgeConfigSpec.DoubleValue agingSpeedMultiplier;
-        public final ForgeConfigSpec.BooleanValue drinkEffects;
-        public final ForgeConfigSpec.BooleanValue seasonsChangeTemperature;
-        public final ForgeConfigSpec.BooleanValue intoxication;
-        public final ForgeConfigSpec.DoubleValue intoxicationIntensity;
-        public final ForgeConfigSpec.IntValue secondsPerUnit;
-        public final ForgeConfigSpec.BooleanValue hangovers;
-        public final ForgeConfigSpec.BooleanValue hiccups;
+        public final ModConfigSpec.DoubleValue processTimeMultiplier;
+        public final ModConfigSpec.DoubleValue fermentationTimeMultiplier;
+        public final ModConfigSpec.DoubleValue agingSpeedMultiplier;
+        public final ModConfigSpec.BooleanValue drinkEffects;
+        public final ModConfigSpec.BooleanValue seasonsChangeTemperature;
+        public final ModConfigSpec.BooleanValue intoxication;
+        public final ModConfigSpec.DoubleValue intoxicationIntensity;
+        public final ModConfigSpec.IntValue secondsPerUnit;
+        public final ModConfigSpec.BooleanValue hangovers;
+        public final ModConfigSpec.BooleanValue hiccups;
 
-        Server(ForgeConfigSpec.Builder b) {
+        Server(ModConfigSpec.Builder b) {
             b.push("brewing");
             processTimeMultiplier = b.comment(
                             "Multiplies how long stations take (malting, the kiln, the kettle, the still, drying, composting). 0.1 = ten times faster, 2.0 = twice as slow.")
@@ -195,9 +201,9 @@ public final class ModConfigs {
     }
 
     public static final class Client {
-        public final ForgeConfigSpec.DoubleValue swayIntensity;
+        public final ModConfigSpec.DoubleValue swayIntensity;
 
-        Client(ForgeConfigSpec.Builder b) {
+        Client(ModConfigSpec.Builder b) {
             swayIntensity = b.comment("How much the view sways when tipsy (also scaled by vanilla's Distortion Effects slider). 0 = none.")
                     .defineInRange("swayIntensity", 1.0, 0.0, 1.0);
         }

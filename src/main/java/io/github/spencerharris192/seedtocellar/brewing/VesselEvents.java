@@ -1,26 +1,36 @@
 package io.github.spencerharris192.seedtocellar.brewing;
 
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import io.github.spencerharris192.seedtocellar.registry.ModFluids;
+import io.github.spencerharris192.seedtocellar.registry.ModItems;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.minecraft.world.level.ItemLike;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * Juices are served in vanilla's Glass Bottle (GDD section 16). An empty glass bottle gets our vessel
- * handler, so pressing it against a juice tank (or a machine filling it) pours a bottle of juice. It
- * only ever accepts drinks served in glass bottles, so water, potions and other mods' liquids are
- * untouched.
+ * Drinks' vessels hold liquid for pipes and machines ({@link VesselFluidHandler}): our mugs and bottles, every drink and
+ * bottled liquid, and vanilla's Glass Bottle, which serves juices (GDD section 16). The handler only ever accepts drinks
+ * served in that vessel, so water, potions and other mods' liquids are untouched. Our buckets keep their liquid's data.
  */
-@Mod.EventBusSubscriber(modid = SeedToCellar.MOD_ID)
+@EventBusSubscriber(modid = SeedToCellar.MOD_ID)
 public final class VesselEvents {
-    private static final ResourceLocation GLASS_BOTTLE = SeedToCellar.id("drink_vessel");
-
     @SubscribeEvent
-    public static void attach(AttachCapabilitiesEvent<ItemStack> event) {
-        if (event.getObject().is(Items.GLASS_BOTTLE)) event.addCapability(GLASS_BOTTLE, new VesselFluidHandler(event.getObject()));
+    public static void capabilities(RegisterCapabilitiesEvent event) {
+        List<ItemLike> vessels = new ArrayList<>(List.of(ModItems.MUG.get(), ModItems.WINE_BOTTLE.get(), ModItems.SPIRIT_BOTTLE.get(), Items.GLASS_BOTTLE));
+        for (Item item : BuiltInRegistries.ITEM) {
+            if (item instanceof DrinkItem || item instanceof BottledLiquidItem) vessels.add(item);
+        }
+        event.registerItem(Capabilities.Fluid.ITEM, (stack, access) -> new VesselFluidHandler(access), vessels.toArray(ItemLike[]::new));
+        event.registerItem(Capabilities.Fluid.ITEM, (stack, access) -> new VesselBucketItem.Handler(access),
+                ModFluids.all().stream().map(fluid -> fluid.bucket.get()).toArray(ItemLike[]::new));
     }
 
     private VesselEvents() {}

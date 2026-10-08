@@ -1,5 +1,10 @@
 package io.github.spencerharris192.seedtocellar.farming;
 
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProvider;
+import net.minecraft.resources.ResourceKey;
+import net.neoforged.neoforge.registries.DeferredBlock;
+import net.neoforged.neoforge.registries.DeferredItem;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
@@ -8,7 +13,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemNameBlockItem;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -17,7 +21,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -88,12 +92,12 @@ public final class Crop {
     /** What the harvest is for, and what to do next (the item's "what is this / Next:" lines). */
     public final String produceDesc, produceNext;
 
-    private final RegistryObject<Block> block;
-    private final RegistryObject<Item> seeds;
-    private final RegistryObject<Item> produce;
-    private final RegistryObject<Item> flowers;
-    private final RegistryObject<Block> wildBlock;
-    private final RegistryObject<Item> wildItem;
+    private final DeferredBlock<Block> block;
+    private final DeferredItem<Item> seeds;
+    private final DeferredItem<Item> produce;
+    private final DeferredItem<Item> flowers;
+    private final DeferredBlock<Block> wildBlock;
+    private final DeferredItem<Item> wildItem;
 
     private Crop(Builder b) {
         name = b.name;
@@ -127,44 +131,59 @@ public final class Crop {
         maxYield = b.maxYield;
 
         // Registration order is the creative tab order: seeds, harvest, wild plant.
-        block = ModBlocks.BLOCKS.register(blockId, () -> switch (style) {
-            case ROW -> new ModCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT), this::seeds, climate);
-            case TALL -> new TallCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT), this::seeds, climate);
-            case PADDY -> new PaddyCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT), this::seeds, climate);
-            case BUSH, HERB -> new BushCropBlock(BlockBehaviour.Properties.copy(Blocks.SWEET_BERRY_BUSH), this::seeds, this::produce,
+        block = ModBlocks.BLOCKS.registerBlock(blockId, p -> switch (style) {
+            case ROW -> new ModCropBlock(p, this::seeds, climate);
+            case TALL -> new TallCropBlock(p, this::seeds, climate);
+            case PADDY -> new PaddyCropBlock(p, this::seeds, climate);
+            case BUSH, HERB -> new BushCropBlock(p, this::seeds, this::produce,
                     new BushCropBlock.Traits(thorny, waterEdge, flowersId == null ? null : this::flowers), climate);
-            case VINE -> new TrellisVineBlock(ModBlocks.trellis().randomTicks(),
-                    new TrellisVineBlock.Harvest(this::seeds, this::produce, minYield, maxYield, prunings), climate);
-            case SUCCULENT -> new SucculentCropBlock(BlockBehaviour.Properties.copy(Blocks.WHEAT).sound(SoundType.GRASS), this::seeds, climate);
+            case VINE -> new TrellisVineBlock(p, new TrellisVineBlock.Harvest(this::seeds, this::produce, minYield, maxYield, prunings), climate);
+            case SUCCULENT -> new SucculentCropBlock(p, this::seeds, climate);
+        }, () -> switch (style) {
+            case ROW, TALL, PADDY -> BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT);
+            case BUSH, HERB -> BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH);
+            case VINE -> ModBlocks.trellis().randomTicks();
+            case SUCCULENT -> BlockBehaviour.Properties.ofFullCopy(Blocks.WHEAT).sound(SoundType.GRASS);
         });
+        // The vanilla composter takes our plants (values match similar vanilla items).
         if (style == Style.VINE) {
-            seeds = ModItems.ITEMS.register(seedId, () -> new TrellisPlantItem(block, new Item.Properties()));
-            produce = ModItems.ITEMS.register(produceId, () -> new Item(produceProperties()));
+            seeds = ModItems.ITEMS.registerItem(seedId, p -> new TrellisPlantItem(block, p), () -> compostable(LOW));
+            produce = ModItems.ITEMS.registerItem(produceId, Item::new, this::produceProperties);
         } else if (selfPlanting) {
-            produce = ModItems.ITEMS.register(produceId, () -> new ItemNameBlockItem(block.get(), produceProperties()));
+            produce = ModItems.ITEMS.registerItem(produceId, p -> new BlockItem(block.get(), p), this::produceProperties);
             seeds = produce;
         } else {
-            seeds = ModItems.ITEMS.register(seedId, () -> new ItemNameBlockItem(block.get(), new Item.Properties()));
-            produce = ModItems.ITEMS.register(produceId, () -> new Item(produceProperties()));
+            seeds = ModItems.ITEMS.registerItem(seedId, p -> new BlockItem(block.get(), p), () -> compostable(LOW));
+            produce = ModItems.ITEMS.registerItem(produceId, Item::new, this::produceProperties);
         }
-        flowers = flowersId == null ? null : ModItems.ITEMS.register(flowersId, () -> new Item(new Item.Properties()));
+        flowers = flowersId == null ? null : ModItems.ITEMS.registerItem(flowersId, Item::new, () -> compostable(LOW));
         if (wild != null && !wildAsItself()) {
-            wildBlock = ModBlocks.BLOCKS.register("wild_" + name, () -> style == Style.PADDY
-                    ? new WildPaddyPlantBlock(wildPlantProperties()) : new WildPlantBlock(wildPlantProperties(), wild.onSand()));
-            wildItem = ModItems.ITEMS.register("wild_" + name, () -> new BlockItem(wildBlock.get(), new Item.Properties()));
+            wildBlock = ModBlocks.BLOCKS.registerBlock("wild_" + name, p -> style == Style.PADDY
+                    ? new WildPaddyPlantBlock(p) : new WildPlantBlock(p, wild.onSand()), Crop::wildPlantProperties);
+            wildItem = ModItems.ITEMS.registerItem("wild_" + name, p -> new BlockItem(wildBlock.get(), p),
+                    () -> compostable(MEDIUM).useBlockDescriptionPrefix());
         } else {
             wildBlock = null;
             wildItem = null;
         }
     }
 
+    private static final ResourceKey<ContextIntProvider> LOW = ContextIntProviders.COMPOSTABLE_LOW;          // 30%
+    private static final ResourceKey<ContextIntProvider> MEDIUM = ContextIntProviders.COMPOSTABLE_MEDIUM;    // 65%
+
+    private static Item.Properties compostable(ResourceKey<ContextIntProvider> chance) {
+        return new Item.Properties().compostable(chance);
+    }
+
+    /** Fruit and perennials' harvests compost like sweet berries; the rest like wheat. */
     private Item.Properties produceProperties() {
-        return food == null ? new Item.Properties() : new Item.Properties().food(food);
+        Item.Properties properties = compostable(isPerennial() || kind == Kind.FRUIT ? LOW : MEDIUM);
+        return food == null ? properties : properties.food(food);
     }
 
     public static BlockBehaviour.Properties wildPlantProperties() {
-        return BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollission().instabreak()
-                .sound(SoundType.GRASS).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.DESTROY);
+        return BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).noCollision().instabreak()
+                .sound(SoundType.GRASS).offsetType(BlockBehaviour.OffsetType.XZ).pushReaction(PushReaction.POPPED);
     }
 
     public Block block() {
@@ -402,7 +421,7 @@ public final class Crop {
 
         /** Can be eaten raw: hunger points and saturation (sweet berries are 2 and 0.1). */
         Builder food(int nutrition, float saturation) {
-            this.food = new FoodProperties.Builder().nutrition(nutrition).saturationMod(saturation).build();
+            this.food = new FoodProperties.Builder().nutrition(nutrition).saturationModifier(saturation).build();
             return this;
         }
 

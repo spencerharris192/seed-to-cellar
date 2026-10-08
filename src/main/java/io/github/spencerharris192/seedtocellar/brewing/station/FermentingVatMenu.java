@@ -3,7 +3,7 @@ package io.github.spencerharris192.seedtocellar.brewing.station;
 import io.github.spencerharris192.seedtocellar.brewing.Temperature;
 import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModMenus;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -12,9 +12,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 /** Vat screen contents: yeast slot, lees slot, and a lid button (menu button id 0). */
 public class FermentingVatMenu extends AbstractContainerMenu {
@@ -23,18 +21,18 @@ public class FermentingVatMenu extends AbstractContainerMenu {
     private final ContainerLevelAccess access;
     private final FermentingVatBlockEntity vat;
 
-    public FermentingVatMenu(int id, Inventory inventory, FriendlyByteBuf buf) {
+    public FermentingVatMenu(int id, Inventory inventory, RegistryFriendlyByteBuf buf) {
         this(id, inventory, inventory.player.level().getBlockEntity(buf.readBlockPos()) instanceof FermentingVatBlockEntity v ? v : null,
-                new ItemStackHandler(2), new SimpleContainerData(5));
+                new StationItems(2), new SimpleContainerData(5));
     }
 
-    public FermentingVatMenu(int id, Inventory inventory, FermentingVatBlockEntity vat, IItemHandler items, ContainerData data) {
+    public FermentingVatMenu(int id, Inventory inventory, FermentingVatBlockEntity vat, StationItems items, ContainerData data) {
         super(ModMenus.FERMENTING_VAT.get(), id);
         this.vat = vat;
         this.data = data;
         this.access = vat != null ? ContainerLevelAccess.create(vat.getLevel(), vat.getBlockPos()) : ContainerLevelAccess.NULL;
-        addSlot(new SlotItemHandler(items, FermentingVatBlockEntity.YEAST, 44, 17));
-        addSlot(new SlotItemHandler(items, FermentingVatBlockEntity.LEES, 44, 53) {
+        addSlot(new ResourceHandlerSlot(items, items::set, FermentingVatBlockEntity.YEAST, 44, 17));
+        addSlot(new ResourceHandlerSlot(items, items::set, FermentingVatBlockEntity.LEES, 44, 53) {
             @Override
             public boolean mayPlace(ItemStack stack) {
                 return false;

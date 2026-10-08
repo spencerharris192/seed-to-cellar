@@ -2,7 +2,7 @@ package io.github.spencerharris192.seedtocellar.brewing;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -58,14 +58,14 @@ public record WortData(Map<MaltType, Float> shares, Strength strength) {
 
     public static WortData load(CompoundTag tag) {
         Map<MaltType, Float> shares = new EnumMap<>(MaltType.class);
-        CompoundTag malts = tag.getCompound("Malts");
-        for (String key : malts.getAllKeys()) {
+        CompoundTag malts = tag.getCompoundOrEmpty("Malts");
+        for (String key : malts.keySet()) {
             MaltType type = MaltType.byKey(key);
-            if (type != null) shares.put(type, malts.getFloat(key));
+            if (type != null) shares.put(type, malts.getFloatOr(key, 0F));
         }
         Strength strength;
         try {
-            strength = Strength.valueOf(tag.getString("Strength"));
+            strength = Strength.valueOf(tag.getStringOr("Strength", ""));
         } catch (IllegalArgumentException e) {
             strength = Strength.NORMAL;
         }
@@ -73,12 +73,12 @@ public record WortData(Map<MaltType, Float> shares, Strength strength) {
     }
 
     public static WortData of(FluidStack stack) {
-        CompoundTag tag = stack.getTag();
-        return tag != null && tag.contains(TAG) ? load(tag.getCompound(TAG)) : new WortData(Map.of(MaltType.PALE, 1F), Strength.NORMAL);
+        CompoundTag tag = BrewData.get(stack);
+        return tag.contains(TAG) ? load(tag.getCompoundOrEmpty(TAG)) : new WortData(Map.of(MaltType.PALE, 1F), Strength.NORMAL);
     }
 
     public FluidStack applyTo(FluidStack stack) {
-        stack.getOrCreateTag().put(TAG, save());
+        BrewData.update(stack, tag -> tag.put(TAG, save()));
         return stack;
     }
 }

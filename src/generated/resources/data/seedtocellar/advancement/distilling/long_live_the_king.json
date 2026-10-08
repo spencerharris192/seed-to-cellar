@@ -1,0 +1,37 @@
+{
+  "parent": "seedtocellar:distilling/top_shelf",
+  "criteria": {
+    "crowned": {
+      "conditions": {
+        "items": [
+          {
+            "components": {
+              "seedtocellar:quality_crowned": {}
+            },
+            "items": "seedtocellar:apple_crown_whiskey"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.seedtocellar.long_live_the_king.description"
+    },
+    "frame": "challenge",
+    "hidden": true,
+    "icon": {
+      "id": "seedtocellar:apple_crown_whiskey"
+    },
+    "title": {
+      "translate": "advancements.seedtocellar.long_live_the_king.title"
+    }
+  },
+  "requirements": [
+    [
+      "crowned"
+    ]
+  ],
+  "sends_telemetry_event": true
+}

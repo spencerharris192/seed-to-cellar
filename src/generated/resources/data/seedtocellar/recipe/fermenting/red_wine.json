@@ -1,0 +1,7 @@
+{
+  "type": "seedtocellar:fermenting",
+  "input": "seedtocellar:red_grape_must",
+  "result": "seedtocellar:red_wine",
+  "time": 36000,
+  "yeast": "wine"
+}

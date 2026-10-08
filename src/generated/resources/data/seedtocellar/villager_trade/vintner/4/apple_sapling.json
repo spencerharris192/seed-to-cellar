@@ -1,0 +1,12 @@
+{
+  "gives": {
+    "id": "seedtocellar:apple_sapling"
+  },
+  "max_uses": 8,
+  "reputation_discount": 0.05,
+  "wants": {
+    "count": 4,
+    "id": "minecraft:emerald"
+  },
+  "xp": 15
+}

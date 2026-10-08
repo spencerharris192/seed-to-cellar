@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -35,7 +35,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
  * Hoppers put dryable items in and take dried ones out from below.
  */
 public class DryingRackBlock extends BaseEntityBlock {
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
+    public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
     // The frame as drawn: two posts, their feet, and the two rails with the space between them filled in
     // (a 1-pixel pane, so the outline matches the rails and the rack is easy to click). Facing north, the
     // rails run east-west; facing east or west, the same shape turned a quarter.
@@ -70,7 +70,7 @@ public class DryingRackBlock extends BaseEntityBlock {
     }
 
     @Override
-    public RenderShape getRenderShape(BlockState state) {
+    protected RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -80,12 +80,12 @@ public class DryingRackBlock extends BaseEntityBlock {
     }
 
     @Override
-    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack heldStack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (!(level.getBlockEntity(pos) instanceof DryingRackBlockEntity rack)) return InteractionResult.PASS;
         ItemStack held = player.getItemInHand(hand);
         if (!held.isEmpty() && DryingRackBlockEntity.recipeFor(level, held).isPresent()) {
             if (rack.firstFree() < 0) return InteractionResult.PASS;
-            if (!level.isClientSide) {
+            if (!level.isClientSide()) {
                 int hung = 0;
                 do {
                     if (!rack.hang(held)) break;
@@ -94,16 +94,16 @@ public class DryingRackBlock extends BaseEntityBlock {
                 } while (player.isSecondaryUseActive() && !held.isEmpty());
                 if (hung > 0) level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
             }
-            return InteractionResult.sidedSuccess(level.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         if (!held.isEmpty() || hand != InteractionHand.MAIN_HAND) return InteractionResult.PASS;
-        if (!level.isClientSide) {
+        if (!level.isClientSide()) {
             ItemStack taken = rack.take(player.isSecondaryUseActive());
             if (taken.isEmpty()) return InteractionResult.PASS;
             if (!player.getInventory().add(taken)) popResource(level, pos, taken);
             level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
-        return InteractionResult.sidedSuccess(level.isClientSide);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
@@ -111,22 +111,15 @@ public class DryingRackBlock extends BaseEntityBlock {
         if (level.getBlockEntity(pos) instanceof DryingRackBlockEntity rack) rack.check();
     }
 
-    @Override
-    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof DryingRackBlockEntity rack) {
-            for (ItemStack stack : rack.contents()) Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), stack);
-        }
-        super.onRemove(state, level, pos, newState, moved);
-    }
 
     @Override
-    public boolean hasAnalogOutputSignal(BlockState state) {
+    protected boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
     /** Comparators read how many dried items are waiting (0-4, as 0-15). */
     @Override
-    public int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos) {
+    protected int getAnalogOutputSignal(BlockState state, Level level, BlockPos pos, Direction direction) {
         if (!(level.getBlockEntity(pos) instanceof DryingRackBlockEntity rack)) return 0;
         int done = 0;
         for (int slot = 0; slot < DryingRackBlockEntity.SLOTS; slot++) if (rack.isDone(slot)) done++;

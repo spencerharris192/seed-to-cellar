@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "M": "#minecraft:planks",
+    "S": "#c:rods/wooden"
+  },
+  "pattern": [
+    " MM",
+    "  M",
+    " S "
+  ],
+  "result": {
+    "id": "seedtocellar:wooden_sickle"
+  }
+}

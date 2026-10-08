@@ -258,7 +258,6 @@
       ]
     }
   ],
-  "render_type": "minecraft:cutout",
   "textures": {
     "copper": "seedtocellar:block/pot_still_copper",
     "neck": "seedtocellar:block/pot_still_neck",

@@ -1,5 +1,6 @@
 package io.github.spencerharris192.seedtocellar.gametest;
 
+import io.github.spencerharris192.seedtocellar.brewing.station.StationTank;
 import io.github.spencerharris192.seedtocellar.farming.Crops;
 import io.github.spencerharris192.seedtocellar.SeedToCellar;
 import io.github.spencerharris192.seedtocellar.brewing.RoastLevel;
@@ -12,21 +13,13 @@ import io.github.spencerharris192.seedtocellar.registry.ModBlocks;
 import io.github.spencerharris192.seedtocellar.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.gametest.GameTestHolder;
-import net.minecraftforge.gametest.PrefixGameTestTemplate;
-import net.minecraftforge.items.IItemHandler;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 /** Malt house stations, run 100x faster via the processing-time multiplier. */
-@GameTestHolder(SeedToCellar.MOD_ID)
-@PrefixGameTestTemplate(false)
 public final class StationTests {
     private static final String EMPTY = "empty";
     private static final BlockPos POS = new BlockPos(1, 1, 1);
@@ -39,13 +32,13 @@ public final class StationTests {
     public static void maltingTubTurnsBarleyIntoGreenMalt(GameTestHelper helper) {
         fast();
         helper.setBlock(POS, ModBlocks.MALTING_TUB.get());
-        MaltingTubBlockEntity tub = (MaltingTubBlockEntity) helper.getBlockEntity(POS);
-        IItemHandler items = tub.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElseThrow(IllegalStateException::new);
-        IFluidHandler fluids = tub.getCapability(ForgeCapabilities.FLUID_HANDLER, Direction.UP).orElseThrow(IllegalStateException::new);
+        MaltingTubBlockEntity tub = (MaltingTubBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Handlers.Items items = Handlers.items(tub, Direction.UP);
+        Handlers.Fluids fluids = Handlers.fluids(tub, Direction.UP);
 
         items.insertItem(0, new ItemStack(Crops.BARLEY.produce(), 4), false);
         helper.assertBlockProperty(POS, MaltingTubBlock.CONTENTS, MaltingTubBlock.Contents.GRAIN);
-        fluids.fill(new FluidStack(Fluids.WATER, 1000), IFluidHandler.FluidAction.EXECUTE);
+        fluids.fill(new FluidStack(Fluids.WATER, 1000), StationTank.Action.EXECUTE);
         helper.assertTrue(tub.phase() == MaltingTubBlockEntity.Phase.STEEPING, "water + grain should start steeping");
         helper.assertTrue(items.insertItem(0, new ItemStack(Crops.BARLEY.produce()), true).getCount() == 1,
                 "no more grain while steeping");
@@ -62,7 +55,7 @@ public final class StationTests {
     public static void kilnRoastsWholeBatchAtChosenSetting(GameTestHelper helper) {
         fast();
         helper.setBlock(POS, ModBlocks.KILN.get());
-        KilnBlockEntity kiln = (KilnBlockEntity) helper.getBlockEntity(POS);
+        KilnBlockEntity kiln = (KilnBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
         kiln.setRoast(RoastLevel.DARK);
         kiln.items().setStackInSlot(KilnBlockEntity.INPUT, new ItemStack(ModItems.GREEN_BARLEY_MALT.get(), 4));
         kiln.items().setStackInSlot(KilnBlockEntity.FUEL, new ItemStack(Items.COAL));
@@ -75,8 +68,8 @@ public final class StationTests {
     @GameTest(template = EMPTY, timeoutTicks = 100)
     public static void millstoneGrindsOneItemPerCrank(GameTestHelper helper) {
         helper.setBlock(POS, ModBlocks.MILLSTONE.get());
-        MillstoneBlockEntity mill = (MillstoneBlockEntity) helper.getBlockEntity(POS);
-        IItemHandler items = mill.getCapability(ForgeCapabilities.ITEM_HANDLER, Direction.UP).orElseThrow(IllegalStateException::new);
+        MillstoneBlockEntity mill = (MillstoneBlockEntity) helper.getBlockEntity(POS, net.minecraft.world.level.block.entity.BlockEntity.class);
+        Handlers.Items items = Handlers.items(mill, Direction.UP);
         items.insertItem(0, new ItemStack(ModItems.PALE_MALT.get(), 3), false);
 
         helper.assertTrue(mill.crank(), "first crank should turn");
